@@ -1,6 +1,7 @@
 # Real Time Pose Estimation Capstone 2020
 
 Repository to store files for the 2020 Capstone Real Time Pose Estimation project. 
+* [Project EMI Link](https://apps2.eng.unimelb.edu.au/emi-capstone-projects/index.php?r=project%2Fview&id=194&ajaxView=yes)
 
 Members:
 
