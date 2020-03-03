@@ -23,6 +23,7 @@ Tutorial/Reading resources links :
 ## To-do List
 
 - [ ] Meet up to discuss for first meetup with Jonathan (on [doodle](https://doodle.com/poll/zz4nwysca4szcryd6u96y9ns/private?utm_campaign=poll_invitecontact_participant_invitation_with_message&utm_medium=email&utm_source=poll_transactional&utm_content=participatenow-cta)).  
+    -   Update: Meeting is on Friday (06 Mar) at 17:30
 - [ ] Set on a communication platform (FB/Slack etc..)  
 - [ ] Set a weekly meetup day and time with Jonathan.  
 - [ ] Set individual tasks. 
