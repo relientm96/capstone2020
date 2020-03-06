@@ -28,12 +28,14 @@ Tutorial/Reading resources links :
 - [ ] Set a weekly meetup day and time with Jonathan.  
 - [ ] Set individual tasks. 
 
-## How to get repository on pc ( do this once )
+## Installation and Workflow
+
+### How to get repository on pc ( do this once )
 1. Install [git bash](https://gitforwindows.org/) if you do not have git command prompt.  
 2. Clone this repository by running 
 `git clone "https://github.com/relientm96/capstone2020.git"`
 
-## How to change/add/remove files on repository
+### How to change/add/remove files on repository
 Can only do after installing git bash and cloning. Changes should be made on a local branch first before merging to main "master".     
 
 1. Pull latest changes from repository   
