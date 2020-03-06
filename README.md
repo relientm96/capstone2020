@@ -28,7 +28,7 @@ Members:
 
 ## Links
 Project links :    
-
+* [Slack Link](https://nebula-m78.slack.com/)
 * [Project EMI Link](https://apps2.eng.unimelb.edu.au/emi-capstone-projects/index.php?r=project%2Fview&id=194&ajaxView=yes)
 * [Project Proposals + Discussion Google Sheets](https://docs.google.com/spreadsheets/d/15XxvRazeiOha9PAxoPqFTfDsIj7EWxJ6Ipewfeq0vCw/edit?fbclid=IwAR26_xDexQU5j8ucYRdEgOGRn9WnBZEb_gNmb5hwk7R50zRKGe-IrorVelA#gid=1278852641)
 
@@ -58,8 +58,8 @@ Can only do after installing git bash and cloning. Changes should be made on a l
 `git commit -m "description of what you changed"`
 6. Upload new changes to main repository using:
 `git push origin MyNewBranchName`  
-7. Go to the main repo on GitHub where you should now see your new branch under branch dropdown tab.    
-8. (Only do this when we want to merge to master) Click on to your branch and click Pull Request and Send Pull Request.  
+7. Go to the main repo on GitHub where you should now see your new branch under branch dropdown tab.     
+8. (WARNING, ONLY DO THIS WHEN READY TO MERGE TO MASTER) Click on to your branch and click Pull Request and Send Pull Request.  
 9. After merging, delete the branch by running
 ```
 git branch -d MyNewBranchName
