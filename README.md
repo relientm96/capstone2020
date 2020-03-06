@@ -59,8 +59,8 @@ Can only do after installing git bash and cloning. Changes should be made on a l
 6. Upload new changes to main repository using:
 `git push origin MyNewBranchName`  
 7. Go to the main repo on GitHub where you should now see your new branch under branch dropdown tab.     
-8. (WARNING, ONLY DO THIS WHEN READY TO MERGE TO MASTER) Click on to your branch and click Pull Request and Send Pull Request.  
-9. After merging, delete the branch by running
+8. (WARNING, ONLY DO THIS WHEN READY TO MERGE TO MASTER) Click on to your branch and click Pull Request and Send Pull Request to be reviewed by others before merging.  
+9. Once pull request is sent, delete the branch by running
 ```
 git branch -d MyNewBranchName
 
