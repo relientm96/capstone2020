@@ -1,7 +1,6 @@
 # Real Time Pose Estimation Capstone 2020
 
-Repository to store files for the 2020 Capstone Real Time Pose Estimation project. 
-* [Project EMI Link](https://apps2.eng.unimelb.edu.au/emi-capstone-projects/index.php?r=project%2Fview&id=194&ajaxView=yes)
+Repository for the 2020 Capstone Real Time Pose Estimation project.   
 
 Members:
 
@@ -9,26 +8,36 @@ Members:
 * Tsz Kiu Pang
 * Yong Yick Wong
 
-## Links
-Project links :  
+## Repository Structure
+```
+|--- README.md - Main markdown for this repository
+|
++--- documents - Folder containing project documents
+|
++--- media - Folder containing all images, videos or other forms of media
+|       
++--- meeting-logs - Folder containing all meeting logs
+|       |
+|       \---jon-01.md - Logs tagged with jon are meetings with Jonathan
+|       |
+|       \---log-01.md - Logs with no tag are team only meeting logs
+|       ...
+|
+\--- src - Folder containing source code of project
+```
 
+## Links
+Project links :    
+
+* [Project EMI Link](https://apps2.eng.unimelb.edu.au/emi-capstone-projects/index.php?r=project%2Fview&id=194&ajaxView=yes)
 * [Project Proposals + Discussion Google Sheets](https://docs.google.com/spreadsheets/d/15XxvRazeiOha9PAxoPqFTfDsIj7EWxJ6Ipewfeq0vCw/edit?fbclid=IwAR26_xDexQU5j8ucYRdEgOGRn9WnBZEb_gNmb5hwk7R50zRKGe-IrorVelA#gid=1278852641)
 
 Tutorial/Reading resources links :  
 
 * [Useful cheat sheet to format README.md files](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
-
 * [Great Git command line tutorial](http://gitimmersion.com/)
 
-## To-do List
-
-- [ ] Meet up to discuss for first meetup with Jonathan (on [doodle](https://doodle.com/poll/zz4nwysca4szcryd6u96y9ns/private?utm_campaign=poll_invitecontact_participant_invitation_with_message&utm_medium=email&utm_source=poll_transactional&utm_content=participatenow-cta)).  
-    -   Update: Meeting is on Friday (06 Mar) at 17:30
-- [ ] Set on a communication platform (FB/Slack etc..)  
-- [ ] Set a weekly meetup day and time with Jonathan.  
-- [ ] Set individual tasks. 
-
-## Installation and Workflow
+## Info On Workflow
 
 ### How to get repository on pc ( do this once )
 1. Install [git bash](https://gitforwindows.org/) if you do not have git command prompt.  
