@@ -13,15 +13,16 @@ Members:
 |--- README.md - Main markdown for this repository
 |
 +--- documents - Folder containing project documents
-|
+|       |
+|       +--- Resources - Folder containing helpful project document resources
+|       
 +--- media - Folder containing all images, videos or other forms of media
 |       
 +--- meeting-logs - Folder containing all meeting logs
 |       |
-|       \---jon-01.md - Logs tagged with jon are meetings with Jonathan
-|       |
-|       \---log-01.md - Logs with no tag are team only meeting logs
-|       ...
+|       +--- JonathanLogs - Folder containing all meeting logs with Jonathan
+|       |  
+|       +--- GroupLogs - Folder containing all group logs
 |
 \--- src - Folder containing source code of project
 ```
