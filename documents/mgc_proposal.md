@@ -1,4 +1,18 @@
-# Real-time Gesture Mapping with Pose Estimation
+# Project Proposal - Music Gesture Interaction with Real Time Pose Estimation
+
+## Problem Statement
+-   No widely accessible platform to incorporate gesture into digital music
+-   Especially for musicians as they are not technical
+
+## Project Summary + Objectives
+-   We want to build a system revolving music control around human actions
+-   We want to make it accessible and simple for the wider music community
+
+## Pros
+
+## Cons
+
+__Below is more resources and Tsz Kiu's previous draft__
 
 ## Criteria to focus on
 ### Background problem
