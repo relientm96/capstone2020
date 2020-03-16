@@ -22,9 +22,23 @@
 * Creating a system that translates sign language poses into speech.  
 * Can be realized as an application that people can use freely.  
 * Created document on formalizing project proposal.  
+* Feedback on this project:
+    - Steep learning curve in learning machine learning + sign language.    
+    - Gesture recognition is achievable but sign language part could be not as clear cut.   
+    - Something relatable to people.  
+    - Not sure if we have enough time to do both machine learning + sign language recognitions.  
+    - Not sure if we have enough datasets for sign language.  
+    - Focus more on software, which can be easily redesigned or reimplemented as compared to a hardware focussed solution.   
+    - Can further implement or extend software implementation using hardware and building GUI/application.  
+    - Can run in parallel, each group memeber does different task.  
 #### Music Gesture Control via Real Time Pose Estimation
 * Creating a system that uses body gesture recognition to control musical paramerters.  
 * Parameters such as volume, tone, pitch and more.   
+* Feedback given somewhat similar to Auslan project. 
+* Differences:
+    - Music gesture control can be relative, no objective gestures to control music.  
+    - Easier on the results end, using open source software to create musical tones or to change muscical parameters.  
+    ( no need for machine learning here ).  
 
 ## Responsibilities/Action Items
 * Formalizing project proposals via Google Docs to markdown files ( due Tuesday 17 March ). 
