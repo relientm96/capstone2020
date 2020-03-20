@@ -1,6 +1,6 @@
-# Real Time Pose Estimation Capstone 2020
+# Music Gesture Control with Real Time Pose Estimation
 
-Repository for the 2020 Capstone Real Time Pose Estimation project.   
+Repository for the 2020 Capstone Real Time Pose Estimation project. Link to project description [here](./documents/projectOutline.md).   
 
 Members:
 
@@ -32,6 +32,7 @@ Members:
 ## Links
 Project links :    
 * [Slack Link](https://nebula-m78.slack.com/)
+* [Project Timeline](https://docs.google.com/document/d/1RuPlROiwp9qh14LQtcvLYuOO0s0pgH-rktbnG3PjgCE/edit)
 * [Project EMI Link](https://apps2.eng.unimelb.edu.au/emi-capstone-projects/index.php?r=project%2Fview&id=194&ajaxView=yes)
 * [Project Proposals + Discussion Google Sheets](https://docs.google.com/spreadsheets/d/15XxvRazeiOha9PAxoPqFTfDsIj7EWxJ6Ipewfeq0vCw/edit?fbclid=IwAR26_xDexQU5j8ucYRdEgOGRn9WnBZEb_gNmb5hwk7R50zRKGe-IrorVelA#gid=1278852641)
 
