@@ -1,27 +1,46 @@
-# Music Gesture Interaction with Real Time Pose Estimation
+# Music Gesture Control with Real Time Pose Estimation
 
 ## Problem Statement
-* No widely accessible platform to incorporate gesture into digital music
+* Musicians are often limited by traditional instruments and are limited by its physical capabilities.
+* No widely accessible platform to incorporate gesture into music.
 * Especially for musicians as they are not technical
 
 ## Project Summary
-* We want to build a system revolving music control around human actions
-* We want to make it accessible and simple for the wider music community
+*  We aim to build an interactive music system that liberates musicians from physical limitations. 
+* To build a system revolving music control around human actions.
+* To make it accessible and simple for the wider music community.
+* To showcase the application possibilities using pose estimation.
 
-## Pros + Cons
+## Objectives
+* __TODO__: look at the assignment requirements and maybe revisit the headings later.
+* To develop an effective mapping strategy: To map the gestures to musical parameters.
+* To resolve the ambiguities in how we map the gestures in a way that is musically meaningful.
+* __SOURCE__
+    - Some mapping strategies: https://research.gold.ac.uk/6834/1/P88_Tanaka.pdf
+    - Another mapping strategy:
+https://www.researchgate.net/publication/2765549_Instrumental_Gestural_Mapping_Strategies_as_Expressivity_Determinants_in_Computer_Music_Performance
+* To design a user-control platform which allows the users to map their own defined gestures, if possible.
+* __DESIRED_OUTCOMES__:
+    - The videos linked below are something we aim to achieve only through RGB cameras,
+instead of dedicated hardware.
+        - https://vimeo.com/209730610
+        - https://vimeo.com/202118370
+        - https://www.youtube.com/watch?v=CBtKvhNAcCQ
+    
+## Project Milestones
 
-### Pros
-* Difficulty is adjustable in terms of gesture recognition.    
-* Since we can decide how to map the gestures to musical parameters, we can adjust the mapping strategy as we see fit.    
-* Good for showcase (Endeavour) purpose.    
+### Overall system
+* part 01 - pose gesture recognition
+* part 02 - mapping to dsp parameters
+* part 03 - DSP to process input audio
 
-### Cons
-* Project goal is (well-)defined, but ambiguity lies in how we map gestures in a way that is musically meaningful.  
-* Some mapping strategies: https://research.gold.ac.uk/6834/1/P88_Tanaka.pdf.    
-* Another mapping strategy: https://www.researchgate.net/publication/2765549_Instrumental_Gestural_Mapping_Strategies_as_Expressivity_Determinants_in_Computer_Music_Performance  
-* The motivation is less noble compared to real-time Auslan translation -- this is more like a “hobby project”.  
+### Block Diagram of System
+* Insert block diagram here
 
-
-## Project Timeline + Deliverables
-Use link to edit table:  
+## Project Timeline 
+Link to google document of our timeline:
 https://docs.google.com/document/d/1RuPlROiwp9qh14LQtcvLYuOO0s0pgH-rktbnG3PjgCE/edit
+
+
+
+
