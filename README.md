@@ -1,6 +1,7 @@
 # Music Gesture Control with Real Time Pose Estimation
 
-Repository for the 2020 Capstone Real Time Pose Estimation project. Link to project description [here](./documents/projectOutline.md).   
+Repository for the 2020 Capstone Real Time Pose Estimation project. 
+Link to project description [here](./documents/projectOutline.md).   
 
 Members:
 
