@@ -16,8 +16,6 @@ Members:
 +--- documents - Folder containing project documents
 |       |
 |       +--- Resources - Folder containing helpful project document resources
-|       |
-|       +--- Gantt - Folder containing the script(s) to generate the Gantt chart
 |       
 +--- media - Folder containing all images, videos or other forms of media
 |       
