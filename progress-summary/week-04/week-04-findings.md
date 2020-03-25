@@ -40,7 +40,7 @@
 
 4. See Figure 02. The pose estimation is not robust to the lighting (environment). This is generally true with other frameworks.
 
-5. See Figure 03. We could see the pose estimation works fairly well for the fast and complex sign movement which may not be the case for music gesture. However, there is a problem:
+5. See Figure 03. We could see the pose estimation works fairly well for the fast and complex sign movement which may not be required for music gesture. However, there is a problem:
     * ***this points out that the relative position (distance and orientation) of the body (hand) to the camera will be an issue for gesture recognition.***
     * We have to squeeze our eyes just to see the keypoints of the hands.
 6. See Figure 04. The clothing fools OpenPose.
