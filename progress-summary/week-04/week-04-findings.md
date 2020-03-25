@@ -1,3 +1,3 @@
 # week 04 - progress
 
-![image](week-04\colab\gifs)
+![image01]ttps://github.com/relientm96/capstone2020/tree/yick/progress-summary/week-04/gifs/openpose-01-asl.gif)
