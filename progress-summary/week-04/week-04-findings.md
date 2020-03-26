@@ -35,7 +35,7 @@
 ### C. (OpenPose) Challenges Discovered so Far
 
 1. With only CPU, the speed is around 0.1 frame per second (fps) which is significantly lower to what GPU could achieve: at least 10 fps ==>  ***No real time pose estimation with CPU given the original architecture of OpenPose.*** (<https://github.com/CMU-Perceptual-Computing-Lab/openpose/issues/566>)
-2. CUDA *(application driver for NVDIA GPU)* as the main implementation.  *(This is generally true for other platforms as CUDA is far superior.)* OpenPose also supports OpenCL *(AMD GPU)*, but it would require manual configuration. Either way, there are certain requirements on both GPU specs. (Check "Requirements and Dependencies"; <https://raw.githubusercontent.com/CMU-Perceptual-Computing-Lab/openpose/master/doc/installation.md>)
+2. CUDA *(application driver for NVDIA GPU)* as the main implementation.  *(This is generally true for other platforms as CUDA is far superior.)* OpenPose also supports OpenCL *(AMD's and other GPU)*, but it would require manual configuration. Either way, there are certain requirements on both GPU specs. (Check "Requirements and Dependencies"; <https://raw.githubusercontent.com/CMU-Perceptual-Computing-Lab/openpose/master/doc/installation.md>)
 3. See Figure 01. The pose estimation for a simple hand gesture fails if only hand is present. For other frameworks *(Detectron, AlphaPose)*, as mentioned, they do not support hand pose so far.
 
 4. See Figure 02. The pose estimation is not robust to the lighting (environment). This is generally true with other frameworks.
