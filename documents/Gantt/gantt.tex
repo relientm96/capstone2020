@@ -1,0 +1,27 @@
+\documentclass{article}
+\usepackage{pgfgantt}
+\usepackage[graphics,tightpage,active]{preview}
+\PreviewEnvironment{tikzpicture}
+\newlength{\imagewidth}
+\newlength{\imagescale}
+\pagestyle{empty}
+\thispagestyle{empty}
+\begin{document}
+\begin{ganttchart}
+[
+    x unit=0.1cm,
+    bar/.style={fill=gray!50},
+    incomplete/.style={fill=white},
+]{1}{271}
+\gantttitle{Month}{271} \\
+\gantttitle{March}{30}
+\gantttitle{April}{30}
+\gantttitle{May}{31}
+\gantttitle{June}{30}
+\gantttitle{July}{31}
+\gantttitle{August}{31}
+\gantttitle{September}{30}
+\gantttitle{October}{31}
+\gantttitle{November}{27}
+\end{ganttchart}
+\end{document}
