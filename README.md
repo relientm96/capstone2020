@@ -34,6 +34,13 @@ Project links :
 * [Project Timeline](https://docs.google.com/document/d/1RuPlROiwp9qh14LQtcvLYuOO0s0pgH-rktbnG3PjgCE/edit)
 * [Project EMI Link](https://apps2.eng.unimelb.edu.au/emi-capstone-projects/index.php?r=project%2Fview&id=194&ajaxView=yes)
 * [Project Proposals + Discussion Google Sheets](https://docs.google.com/spreadsheets/d/15XxvRazeiOha9PAxoPqFTfDsIj7EWxJ6Ipewfeq0vCw/edit?fbclid=IwAR26_xDexQU5j8ucYRdEgOGRn9WnBZEb_gNmb5hwk7R50zRKGe-IrorVelA#gid=1278852641)
+* [Project Assessments](https://drive.google.com/open?id=1vqbPQjNfL9CqeaYIf6xfPV044M-8mn2Q)
+    * Assessment 01
+        * Team Charter
+        * Ganntt Chart
+        * RACIX Matrix
+    * General Risk Assessment 
+
 
 Tutorial/Reading resources links :  
 
