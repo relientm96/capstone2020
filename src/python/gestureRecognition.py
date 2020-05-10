@@ -5,7 +5,7 @@ from sys import platform
 import argparse
 import time
 
-#### KERAS IMPORTS ####
+#### Tensorflow Imports ####
 #import tensorflow as tf
 
 def initOpenPoseLoad():
@@ -70,7 +70,7 @@ def translate(datum):
     # --> Set your output under the "word" string variable
     
     # Run test program to check
-    printKeyPoints(datum)
+    #printKeyPoints(datum)
     # Use Nose Coordinates to change word (for now)
     noseCoordinatesX,noseCoordinatesY,noseConfidence  = datum.poseKeypoints[0][0]
 
