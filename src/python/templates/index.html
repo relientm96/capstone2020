@@ -58,7 +58,7 @@
     }
 
         // Setting up Socket IO Connection to Server
-        var socket = io('http://localhost:5000');
+        var socket = io();
         socket.on('connect', function(){
             console.log("Connected...!", socket.connected)
         });
