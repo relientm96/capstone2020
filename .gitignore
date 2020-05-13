@@ -10,3 +10,10 @@
 
 # ignore raw-data
 src/data/raw-data/*
+
+# ignore openpose models
+src/openpose/models/pose/*
+src/openpose/models/face/*
+src/openpose/models/hand/*
+
+
