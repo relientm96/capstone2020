@@ -22,7 +22,7 @@ src/openpose/models/hand/*
 src/application/bin/*.dll    
 # Ignore Models
 src/application/models
-src/application/__pycache___
+src/application/__pycache__
 # Ignore Remaining DLL's
 src/application*.dll     
 
