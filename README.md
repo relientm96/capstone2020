@@ -1,7 +1,8 @@
-# Music Gesture Control with Real Time Pose Estimation
+# Sign Language Translation with Real Time Pose Estimation
 
 Repository for the 2020 Capstone Real Time Pose Estimation project.    
-Link to project description [here](./documents/projectOutline.md).   
+
+This project is aimed to develop a real time sign language translation system that translates signs from video streams into readable text.
 
 Members:
 
@@ -26,10 +27,13 @@ Members:
 |       +--- GroupLogs - Folder containing all group logs
 |
 \--- src - Folder containing source code of project
+|       |
+|       +--- training - Contains code to process and train our raw datasets
 ```
 
 ## Links
 Project links :    
+* [Project description](./documents/projectOutline.md).   
 * [Slack Link](https://nebula-m78.slack.com/)
 * [Project Timeline](https://docs.google.com/document/d/1RuPlROiwp9qh14LQtcvLYuOO0s0pgH-rktbnG3PjgCE/edit)
 * [Projet HackMD Page](https://hackmd.io/team/capstone2020?nav=overview)
