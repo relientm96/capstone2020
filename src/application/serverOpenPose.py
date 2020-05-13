@@ -15,6 +15,7 @@ import gestureRecognition as gr
 
 # Hold parameters for OpenPose as a dictionary
 params = dict()
+
 ###### SET OPEN POSE FLAGS HERE ############
 # Custom Params 
 # (refer to https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/include/openpose/flags.hpp
