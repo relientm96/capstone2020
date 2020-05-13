@@ -103,7 +103,6 @@ def processFrames(inputImageUri):
         # Encode Image in base64
         retval, buffer = cv2.imencode('.jpg', image)
         jpg_as_text = base64.b64encode(buffer)
-        #print("Processed image in base64",jpg_as_text)
         # Process Image here
         return jpg_as_text
 

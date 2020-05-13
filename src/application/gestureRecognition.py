@@ -7,7 +7,8 @@ import time
 
 #### Tensorflow Imports ####
 # Here, we can import tensorflow + keras + Machine Learning Libraries to load models
-#simport tensorflow as tf
+import tensorflow as tf
+from tensorflow import keras
 
 def initOpenPoseLoad():
     '''

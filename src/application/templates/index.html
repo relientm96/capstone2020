@@ -68,6 +68,8 @@
 
         const FPS = 20;
         setInterval(() => {
+            // This function runs according to FPS rate
+            // Takes image from webcam, sends it to server for processing
             var canvas = document.getElementById('canvasOutput')
             canvas.width = videoWidth
             canvas.height = videoHeight
@@ -76,7 +78,9 @@
             data = data.replace('data:' + "image/png" + ';base64,', ''); 
             socket.emit('imageSend', data);
         }, 1000/FPS);
+
         socket.on('response_back', function(image){
+            // This function is called whenever server finishes processing the frame
             const image_id = document.getElementById('image');
             image_id.src = image;
         });
