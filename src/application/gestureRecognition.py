@@ -14,18 +14,17 @@ def initOpenPoseLoad():
     '''
     Import OpenPose Library to use datum API
     '''
+    dir_path = os.path.dirname(os.path.realpath(__file__))
     try:
-        # Import Openpose (Windows/Ubuntu/OSX)
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        try:
-            if platform == "win32":
-                # Change these variables to point to the correct folder (Release/x64 etc.)
-                sys.path.append(dir_path + '/Release');
-                os.environ['PATH']  = os.environ['PATH']  + ';' + dir_path + "/bin" 
-                import pyopenpose as op
-        except ImportError as e:
-            print('Error: OpenPose library could not be found. Did you enable `BUILD_PYTHON` in CMake and have this Python script in the right folder?')
-            raise e
+        # Windows Import
+        if platform == "win32":
+            # Change these variables to point to the correct folder (Release/x64 etc.)
+            sys.path.append(dir_path + '/../openpose-python/Release')
+            os.environ['PATH']  = os.environ['PATH']  + ';' +  dir_path + "/../openpose-python" + ';' + dir_path + "/../openpose-python/bin" 
+            import pyopenpose as op
+    except ImportError as e:
+        print('Error: OpenPose library could not be found. Did you enable `BUILD_PYTHON` in CMake and have this Python script in the right folder?')
+        raise e
     except Exception as e:
         print(e)
         sys.exit(-1)
