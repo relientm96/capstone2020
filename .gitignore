@@ -21,10 +21,7 @@ src/openpose/models/hand/*
 # Ignore DLL Files
 src/application/bin/*.dll    
 # Ignore Models
-src/application/models/pose/* 
-src/application/models/pose/*
-src/application/models/face/*
-src/application/models/hand/*
+src/application/models
 src/application/__pycache___
 # Ignore Remaining DLL's
 src/application*.dll     
