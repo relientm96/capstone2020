@@ -1,6 +1,5 @@
 # Preprocessing data for training our models
 from pathlib import Path
-import shutil
 
 class DataPreprocessor:
     def __init__(self):
