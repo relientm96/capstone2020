@@ -34,7 +34,6 @@ params['write_json'] = "./output"
 
 # Preprocessing data for training our models
 from pathlib import Path
-import shutil
 
 # ========================= Object Classes ========================= #
 
