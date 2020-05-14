@@ -1,6 +1,90 @@
+# For OpenPose Module
+import sys
+import cv2
+import os
+from sys import platform
+import argparse
+import time
+
+# Initializing OpenPose Python Wrapper Globally
+dir_path = os.path.dirname(os.path.realpath(__file__))
+try:
+    # Windows Import
+    if platform == "win32":
+        sys.path.append(dir_path + '/../openpose-python/Release')
+        os.environ['PATH']  = os.environ['PATH']  + ';' +  dir_path + "/../openpose-python" + ';' + dir_path + "/../openpose-python/bin" 
+        import pyopenpose as op
+except ImportError as e:
+    print('Error: OpenPose library could not be found. Did you enable `BUILD_PYTHON` in CMake and have this Python script in the right folder?')
+    raise e
+except Exception as e:
+    print(e)
+    sys.exit(-1)
+
+#################### Custom Params for OpenPose ######################
+params = dict()
+params["model_folder"] = "../openpose-python/models/"
+
+# ONLY CHANGE BELOW (configure if needed)
+params["net_resolution"] = "96x96"
+params['write_json'] = "./output"
+#params["hand"] = True
+#params["hand_net_resolution"] = "328x328"
+######################################################################
+
 # Preprocessing data for training our models
 from pathlib import Path
 import shutil
+
+# ========================= Object Classes ========================= #
+
+class OpenPoseProcessor:
+    def __init__(self):
+        '''
+        Initializes flags and starts OpenPose Wrapper
+        '''
+        # Flags
+        parser = argparse.ArgumentParser()
+        self.args = parser.parse_known_args()
+        # Add other flags in path (if available)
+        for i in range(0, len(self.args[1])):
+            curr_item = self.args[1][i]
+            if i != len(self.args[1])-1: next_item = self.args[1][i+1]
+            else: next_item = "1"
+            if "--" in curr_item and "--" in next_item:
+                key = curr_item.replace('-','')
+                if key not in params:  params[key] = "1"
+            elif "--" in curr_item and "--" not in next_item:
+                key = curr_item.replace('-','')
+                if key not in params: params[key] = next_item
+
+    def _run_openpose(self, imagepath, outputDirPath):
+        '''
+        Runs OpenPose on an image given imagepath
+        @params: imagepath = image path of file to be processed
+        @params: outputDirPath = directory of output file's keypoints
+        @returns datum: keypoints as a datum object   
+        Access keypoints outside this function as such:
+            datum.poseKeypoints[0] --> Pose Keypoints
+            datum.handKeypoints[0] --> Left Hand Keypoints
+            datum.handKeypoints[1] --> Right Hand Keypoints
+        '''
+        # Adjust output flag
+        params['write_json'] = outputDirPath
+        # Starting OpenPose for each new flag
+        self.opWrapper = op.WrapperPython()
+        self.opWrapper.configure(params)
+        self.opWrapper.start()
+        # Process Image
+        datum = op.Datum()
+        imageToProcess = cv2.imread(imagepath)
+        datum.cvInputData = imageToProcess
+        self.opWrapper.emplaceAndPop([datum])
+
+        # Processes image and sends back keypoints via the datum object
+        return datum
+
+# ======================================================================================== #
 
 class DataPreprocessor:
     def __init__(self):
@@ -12,8 +96,8 @@ class DataPreprocessor:
         # TODO: if we are calling an executable, we shall check if the executable exists or not
         cpath = Path("C:\\")
         print(cpath)
-        self.openpose_path = cpath / 'CAPSTONE' / 'openpose' / 'build' / 'x64' / 'Release' / 'openposedemo'
-        print(self.openpose_path)
+       # self.openpose_path = cpath / 'CAPSTONE' / 'openpose' / 'build' / 'x64' / 'Release' / 'openposedemo'
+       # print(self.openpose_path)
 
     def process_data(self):
         self._make_destination_dir()
@@ -51,8 +135,21 @@ class DataPreprocessor:
         '''
         # TODO: call openpose to run pose estimation on `src`, and the output whould be stored in dst_dir
         print(src)
-        print(dst_dir)
+        print(dst_dir)  
 
 if __name__ == '__main__':
-    pp = DataPreprocessor()
-    pp.process_data()
+    #pp = DataPreprocessor()
+    #pp.process_data()
+
+    #### EXAMPLE PROGRAM ####
+    # Create OpenPoseProcessor Object
+    opProc =  OpenPoseProcessor()
+    # Define a list of image paths for test purposes
+    listOfImages = ["test1.jpg","test2.jpg"]
+    for imagepath in listOfImages:
+        stringOfPath = imagepath.split('.')[0]
+        # Run and print keypoints for each image in listOfImages
+        output = opProc._run_openpose(imagepath, stringOfPath)
+        print("Pose keypoints\n", output.poseKeypoints[0])
+        print("Left hand keypoints\n", output.handKeypoints[0])
+        print("Right hand keypoints\n", output.handKeypoints[1])
