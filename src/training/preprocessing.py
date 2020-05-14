@@ -27,6 +27,7 @@ params["model_folder"] = "../openpose-python/models/"
 
 # ONLY CHANGE BELOW (configure if needed)
 params["net_resolution"] = "96x96"
+params['write_json'] = "./output"
 #params["hand"] = True
 #params["hand_net_resolution"] = "328x328"
 ######################################################################
@@ -56,21 +57,24 @@ class OpenPoseProcessor:
             elif "--" in curr_item and "--" not in next_item:
                 key = curr_item.replace('-','')
                 if key not in params: params[key] = next_item
-        # Starting OpenPose
-        self.opWrapper = op.WrapperPython()
-        self.opWrapper.configure(params)
-        self.opWrapper.start()
 
-    def _run_openpose(self, imagepath):
+    def _run_openpose(self, imagepath, outputDirPath):
         '''
         Runs OpenPose on an image given imagepath
         @params: imagepath = image path of file to be processed
+        @params: outputDirPath = directory of output file's keypoints
         @returns datum: keypoints as a datum object   
         Access keypoints outside this function as such:
             datum.poseKeypoints[0] --> Pose Keypoints
             datum.handKeypoints[0] --> Left Hand Keypoints
             datum.handKeypoints[1] --> Right Hand Keypoints
         '''
+        # Adjust output flag
+        params['write_json'] = outputDirPath
+        # Starting OpenPose for each new flag
+        self.opWrapper = op.WrapperPython()
+        self.opWrapper.configure(params)
+        self.opWrapper.start()
         # Process Image
         datum = op.Datum()
         imageToProcess = cv2.imread(imagepath)
@@ -143,8 +147,9 @@ if __name__ == '__main__':
     # Define a list of image paths for test purposes
     listOfImages = ["test1.jpg","test2.jpg"]
     for imagepath in listOfImages:
+        stringOfPath = imagepath.split('.')[0]
         # Run and print keypoints for each image in listOfImages
-        output = opProc._run_openpose(imagepath)
+        output = opProc._run_openpose(imagepath, stringOfPath)
         print("Pose keypoints\n", output.poseKeypoints[0])
         print("Left hand keypoints\n", output.handKeypoints[0])
         print("Right hand keypoints\n", output.handKeypoints[1])
