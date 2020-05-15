@@ -58,7 +58,7 @@ class OpenPoseProcessor:
                 key = curr_item.replace('-','')
                 if key not in params: params[key] = next_item
 
-    def _run_openpose(self, imagepath, outputDirPath):
+    def run_openpose(self, imagepath, outputDirPath):
         '''
         Runs OpenPose on an image given imagepath
         @params: imagepath = image path of file to be processed
@@ -91,13 +91,7 @@ class DataPreprocessor:
         self.data_path = Path('../data')
         self.keypoints_path = self.data_path / 'keypoints'
         self.raw_data_path = self.data_path / 'raw-data'
-
-        # TODO: please change the path to openpose if it is incorrect
-        # TODO: if we are calling an executable, we shall check if the executable exists or not
-        cpath = Path("C:\\")
-        print(cpath)
-       # self.openpose_path = cpath / 'CAPSTONE' / 'openpose' / 'build' / 'x64' / 'Release' / 'openposedemo'
-       # print(self.openpose_path)
+        self.op_proc = OpenPoseProcessor()
 
     def process_data(self):
         self._make_destination_dir()
@@ -133,23 +127,24 @@ class DataPreprocessor:
         TODO: it maybe more convenient to use absolute path but we will see.
         TODO: maybe we can use mongodb
         '''
-        # TODO: call openpose to run pose estimation on `src`, and the output whould be stored in dst_dir
-        print(src)
-        print(dst_dir)  
+        # TODO: at the moment the name of the json file is not specified (although the location is specified).
+        # We might have to figure out a way to specify the name.
+        print(str(src))
+        self.op_proc.run_openpose(str(src), str(dst_dir))
 
 if __name__ == '__main__':
-    #pp = DataPreprocessor()
-    #pp.process_data()
+    pp = DataPreprocessor()
+    pp.process_data()
 
-    #### EXAMPLE PROGRAM ####
-    # Create OpenPoseProcessor Object
-    opProc =  OpenPoseProcessor()
-    # Define a list of image paths for test purposes
-    listOfImages = ["test1.jpg","test2.jpg"]
-    for imagepath in listOfImages:
-        stringOfPath = imagepath.split('.')[0]
-        # Run and print keypoints for each image in listOfImages
-        output = opProc._run_openpose(imagepath, stringOfPath)
-        print("Pose keypoints\n", output.poseKeypoints[0])
-        print("Left hand keypoints\n", output.handKeypoints[0])
-        print("Right hand keypoints\n", output.handKeypoints[1])
+#    #### EXAMPLE PROGRAM ####
+#    # Create OpenPoseProcessor Object
+#    opProc =  OpenPoseProcessor()
+#    # Define a list of image paths for test purposes
+#    listOfImages = ["test1.jpg","test2.jpg"]
+#    for imagepath in listOfImages:
+#        stringOfPath = imagepath.split('.')[0]
+#        # Run and print keypoints for each image in listOfImages
+#        output = opProc.run_openpose(imagepath, stringOfPath)
+#        print("Pose keypoints\n", output.poseKeypoints[0])
+#        print("Left hand keypoints\n", output.handKeypoints[0])
+#        print("Right hand keypoints\n", output.handKeypoints[1])
