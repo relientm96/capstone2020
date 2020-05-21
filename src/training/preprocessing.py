@@ -70,6 +70,7 @@ class OpenPoseProcessor:
         '''
         # Adjust output flag
         params['write_json'] = outputDirPath
+        params['hand'] = True
         # Starting OpenPose for each new flag
         self.opWrapper = op.WrapperPython()
         self.opWrapper.configure(params)

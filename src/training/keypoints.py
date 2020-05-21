@@ -19,11 +19,21 @@ class KeypointsData:
         return self._json_data
 
     @property
-    def keypoints_ndarray(self):
+    def keypoints_array(self):
         """
-        return the keypoints data in ndarray for training with Keras
+        return the keypoints data in numpy array for training with Keras
         """
-        return None
+        jd = self._json_data
+        fields_to_load = [
+                'pose_keypoints_2d',
+                'hand_left_keypoints_2d',
+                'hand_right_keypoints_2d'
+        ]
+        kps = []
+        for field in fields_to_load:
+            kps.extend(jd['people'][0][field])
+        kps_array = np.array(kps)
+        return kps_array
 
 def _retrieve_keypoints_data():
     """
@@ -47,7 +57,8 @@ def _retrieve_keypoints_data():
 
 def load_data():
     datum = _retrieve_keypoints_data()
-    # the return statement below should be our goal
-    #return (x_train, y_train), (x_test, y_test)
-    # but for now, let's just return the datum as it is
-    return datum
+    x_train = np.array([data.keypoints_array for data in datum])
+    y_train = np.array([data.annotation for data in datum])
+    x_test = np.array([])
+    y_test = np.array([])
+    return (x_train, y_train), (x_test, y_test)
