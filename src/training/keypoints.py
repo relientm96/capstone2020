@@ -12,7 +12,7 @@ class KeypointsData:
 
     @property
     def annotation(self):
-        return self._annotation
+        return ord(self._annotation)
 
     @property
     def json_data(self):
