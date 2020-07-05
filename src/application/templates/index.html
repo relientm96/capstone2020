@@ -34,12 +34,17 @@
     <script>
 
         // Hardcoded Pixel Values
-        var videoWidth = 500;
-        var videoHeight = 400;
+        var videoWidth = 620;
+        var videoHeight = 480;
 
         const video = document.querySelector("#videoElement");
         video.width = videoWidth; 
-        video.height = videoHeight; ;
+        video.height = videoHeight; 
+
+        // Canvas details
+        var canvas = document.getElementById('canvasOutput')
+        canvas.width = videoWidth
+        canvas.height = videoHeight
 
         // Handle User Media
         navigator.getUserMedia = navigator.getUserMedia ||
@@ -70,10 +75,7 @@
         setInterval(() => {
             // This function runs according to FPS rate
             // Takes image from webcam, sends it to server for processing
-            var canvas = document.getElementById('canvasOutput')
-            canvas.width = videoWidth
-            canvas.height = videoHeight
-            canvas.getContext('2d').drawImage(video, 0, 0);
+            canvas.getContext('2d').drawImage(video, 0, 0, video.width, video.height);
             var data = canvas.toDataURL("image/png");
             data = data.replace('data:' + "image/png" + ';base64,', ''); 
             socket.emit('imageSend', data);
