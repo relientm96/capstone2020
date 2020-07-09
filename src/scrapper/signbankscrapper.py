@@ -1,7 +1,15 @@
 import requests
+import urllib.request
 from bs4 import BeautifulSoup
-
 import pprint as pp
+import os
+from pathlib import Path
+
+# Import file holding all urls in lists
+from urls import *
+
+# Current Folder Path
+THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
 
 def getWordTitle(soup):
     """
@@ -16,29 +24,38 @@ def getLink(soup):
     return soup.find("video").find("source").get("src")
 
 def main():
-    urls = [
-    "http://www.auslan.org.au/dictionary/words/one-1.html",
-    "http://www.auslan.org.au/dictionary/words/two-1.html",
-    "http://www.auslan.org.au/dictionary/words/three-1.html",
-    "http://www.auslan.org.au/dictionary/words/four-1.html",
-    "http://www.auslan.org.au/dictionary/words/five-1.html",
-    "http://www.auslan.org.au/dictionary/words/six-1.html",
-    "http://www.auslan.org.au/dictionary/words/seven-1.html",
-    "http://www.auslan.org.au/dictionary/words/eight-1.html",
-    "http://www.auslan.org.au/dictionary/words/nine-1.html",
-    "http://www.auslan.org.au/dictionary/words/ten-1.html",
-    ]
 
-    """
-    for link in urls:
-        # Use Beautiful Soup to get HTML page and extract mp4 links
+    # Before scrapping, make directories first to save videos
+    try:
+        os.makedirs("videos")
+    except FileExistsError:
+        # We skip if directories already exist
+        pass
+    # Get video directory by appending videos to current directory path
+    videoDirectory = os.path.join(THIS_FOLDER,"videos")
+    
+    for link in urlList:
+        # Use Requests and Beautiful Soup to get HTML page
         req = requests.get(link)
         soup = BeautifulSoup(req.content, 'html.parser')
-        pp.pprint(getLink(soup))
-    """
-    req = requests.get("http://www.auslan.org.au/dictionary/words/one-1.html")
-    soup = BeautifulSoup(req.content, 'html.parser')
-    print(getWordTitle(soup),",",getLink(soup))
+
+        ### Extract MP4 Links and Sign Word from links ###
+        # Get word from html and remove white spaces
+        signWord = getWordTitle(soup).strip()
+        # Extract video link
+        vidLink  = getLink(soup)
+
+        print("{},{}".format(signWord,vidLink))
+        
+        ### Download Video from extracted URL into local directory ###
+        # Extract video format
+        vidFormat = "." + vidLink.split('.')[-1] 
+        # Create video file name by joining word + format
+        vidFilename = signWord + vidFormat
+        # File path to save downloading video
+        vidFilePath = os.path.join(videoDirectory, vidFilename)
+        # Download and save video
+        urllib.request.urlretrieve(vidLink, vidFilePath) 
 
 if __name__ == "__main__":
     print("Starting Sign Bank Scrapper Program")

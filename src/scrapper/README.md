@@ -7,3 +7,7 @@ This program is used to extract mp4 videos from Auslan SignBank website. Uses Be
 ```
 pip install -r requirements.txt
 ```
+* To run scrapper just do:
+```
+python signbankscrapper.py
+```
