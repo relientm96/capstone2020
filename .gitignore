@@ -31,4 +31,5 @@ src/openpose-python/models
 src/openpose-python/bin
 src/openpose-python/*.dll
 
-
+# Ignore all pycache stuff
+src/scrapper/__pycache__
