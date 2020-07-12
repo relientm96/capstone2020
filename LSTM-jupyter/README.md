@@ -1,7 +1,7 @@
 # LSTM jupyter notebook
 
 ### acknowledgement
- * the LSTM jupyter notebook is adopted from source: https://github.com/stuarteiffert/RNN-for-Human-Activity-Recognition-using-2D-Pose-Input/blob/master/LSTM.ipynb
+ * the LSTM jupyter notebook is adapted from source: https://github.com/stuarteiffert/RNN-for-Human-Activity-Recognition-using-2D-Pose-Input/blob/master/LSTM.ipynb
  * the environment02.yml is adopted from matthew's work;
  * md style follows matthew's
  
