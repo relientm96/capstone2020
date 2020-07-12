@@ -41,7 +41,7 @@ conda deactivate
 3. i have placed the real dataset in the local c-drive in the VM as the files are too large for github;
 4. check Folder: "LSTM-dataset"; path = "C:\CAPSTONE\capstone2020\LSTM-dataset"
 5. then in the notebook; second Cell: "Preparing dataset", change the "DATASET_PATH" to the location where the txt documents reside in your local workspace;
-6. then you could play around the model in jupyter notebook;
+6. then you could play around the model in jupyter notebook (make sure the kernel starts at a clean state);
 
 ## remark 02
 0. i have attached the expected output when the whole kernel (notebook) is run;
@@ -49,6 +49,10 @@ conda deactivate
 
 ## warning
 0. the inference when run on the VM took approximately 120 minutes;
+1. if impatient or just wanna get the feel, we could just set any positive number of iterations; go to notebook-cell-8-under-"train the network", change "training_iters";
+```
+while step*batch_size <= training_iters:
+```
 
 ## to-do
 0. implement call-back to save and restore the trained (during-training) model as a safeguard when perform the full training;
