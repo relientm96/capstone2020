@@ -3,6 +3,7 @@
 # author - stuarteiffert
 # version - draft;
 # mdified/abstracted/commented by - nebula M78 team; capstone2020;
+# running against time!!
 
 # useful tricks
 # to suppress output of each cell; https://stackoverflow.com/questions/23692950/how-do-you-suppress-output-in-ipython-notebook
