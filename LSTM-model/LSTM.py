@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # source - https://github.com/stuarteiffert/RNN-for-Human-Activity-Recognition-using-2D-Pose-Input
 # author - stuarteiffert
+# version - draft;
 # modified/abstracted/commented by - nebula M78 team; capstone2020
 
 # useful tricks
