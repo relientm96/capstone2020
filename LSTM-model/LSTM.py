@@ -2,7 +2,7 @@
 # source - https://github.com/stuarteiffert/RNN-for-Human-Activity-Recognition-using-2D-Pose-Input
 # author - stuarteiffert
 # version - draft;
-# modified/abstracted/commented by - nebula M78 team; capstone2020
+# modified/abstracted/commented by - nebula M78 team; capstone2020;
 
 # useful tricks
 # to suppress output of each cell; https://stackoverflow.com/questions/23692950/how-do-you-suppress-output-in-ipython-notebook
