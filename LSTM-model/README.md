@@ -33,6 +33,12 @@
     save_path = saver.save(sess, "saved_final_model")
 	print("Model saved in file: %s" % save_path)
 ```
+3.1 by above, note that for each saving, we will have three files generated, for example:
+```
+iter_models.data-xxxx-of-xxxx
+iter_models.index
+iter_models.meta_
+```
 
 ## to-do
 * perform further testing
@@ -40,3 +46,4 @@
 * use tf.SavedModel() API for deploymeny;
     * technically, by above, we already able to run the prediction online if run in the active tensorflow session; but this is not elegant and not suitable for deployment;##
 * to abstract out the functions
+* to share the materials/online sources for these stufffs!
