@@ -3,6 +3,7 @@
 # author - stuarteiffert
 # modified/abstracted (on-hold) /commented by - yick
 
+
 # useful tricks
 # to suppress output of each cell; https://stackoverflow.com/questions/23692950/how-do-you-suppress-output-in-ipython-notebook
 
@@ -28,8 +29,6 @@ warnings.filterwarnings('ignore') # suppress the warning;s
 # a failed wraparound....
 # from IPython import get_ipython 
 
-
-# to abstract the following packages in a subfile;
 import numpy as np
 import matplotlib # not in the environment previously
 import matplotlib.pyplot as plt
@@ -39,114 +38,14 @@ from random import randint
 import time
 import os
 
-
-#================================================ TOOLS  ==================================
 #---------------------------------------------------------------------------------------------
-# importing tools from py files;
+# importing self written modules 
 #---------------------------------------------------------------------------------------------
-# import LSTM_utilities as lstm # doesnt work for now due to NoModuleFound Error!;
-# so shall include the tools here directly;
-#  reminder- to solve the error;
-
-def load_X(X_path):
-	'''
-	args - file path for the X-data;
-	return - formatted X-data content as np.array as the input for the neural network
-	'''
-	file = open(X_path, 'r')
-	X_ = np.array(
-		[elem for elem in [
-			row.split(',') for row in file
-		]], 
-		dtype=np.float32
-	)
-	file.close()
-	blocks = int(len(X_) / n_steps)
-	
-	X_ = np.array(np.split(X_,blocks))
-
-	return X_ 
-
-# Load the networks outputs
-def load_y(y_path):
-	'''
-	args - file path for the Y-data;
-	return - formatted X-data content as np.array as the input for the neural network
-	'''
-	file = open(y_path, 'r')
-	y_ = np.array(
-		[elem for elem in [
-			row.replace('  ', ' ').strip().split(' ') for row in file
-		]], 
-		dtype=np.int32
-	)
-	file.close()
-	
-	# for 0-based indexing 
-	return y_ - 1
-
-#---------------------------------------------------------------------------------------------
-# the core functions to build and train the neural network;
-#---------------------------------------------------------------------------------------------
-
-def LSTM_RNN(_X, _weights, _biases):
-	# model architecture based on "guillaume-chevalier" and "aymericdamien" under the MIT license.
-
-	_X = tf.transpose(_X, [1, 0, 2])  # permute n_steps and batch_size
-	_X = tf.reshape(_X, [-1, n_input])   
-	# Rectifies Linear Unit activation function used
-	_X = tf.nn.relu(tf.matmul(_X, _weights['hidden']) + _biases['hidden'])
-	# Split data because rnn cell needs a list of inputs for the RNN inner loop
-	_X = tf.split(_X, n_steps, 0) 
-
-	# Define two stacked LSTM cells (two recurrent layers deep) with tensorflow
-	lstm_cell_1 = tf.contrib.rnn.BasicLSTMCell(n_hidden, forget_bias=1.0, state_is_tuple=True)
-	lstm_cell_2 = tf.contrib.rnn.BasicLSTMCell(n_hidden, forget_bias=1.0, state_is_tuple=True)
-	lstm_cells = tf.contrib.rnn.MultiRNNCell([lstm_cell_1, lstm_cell_2], state_is_tuple=True)
-	outputs, states = tf.contrib.rnn.static_rnn(lstm_cells, _X, dtype=tf.float32)
-
-	# A single output is produced, in style of "many to one" classifier, refer to http://karpathy.github.io/2015/05/21/rnn-effectiveness/ for details
-	lstm_last_output = outputs[-1]
-	
-	# Linear activation
-	return tf.matmul(lstm_last_output, _weights['out']) + _biases['out']
-
-
-def extract_batch_size(_train, _labels, _unsampled, batch_size):
-	# Fetch a "batch_size" amount of data and labels from "(X|y)_train" data. 
-	# Elements of each batch are chosen randomly, without replacement, from X_train with corresponding label from Y_train
-	# unsampled_indices keeps track of sampled data ensuring non-replacement. Resets when remaining datapoints < batch_size    
-	
-	shape = list(_train.shape)
-	shape[0] = batch_size
-	batch_s = np.empty(shape)
-	batch_labels = np.empty((batch_size,1)) 
-	for i in range(batch_size):
-		# Loop index
-		# index = random sample from _unsampled (indices)
-		index = random.choice(_unsampled)
-		batch_s[i] = _train[index] 
-		batch_labels[i] = _labels[index]
-		# yick-modified;
-		# reference - https://stackoverflow.com/questions/28150965/why-range0-10-remove1-does-not-work
-		#_unsampled.remove(index) # note: '_unsampled' is of class: range; see the reference; 
-		_unsampled = [i for i in _unsampled if i != index]
-		
-	return batch_s, batch_labels, _unsampled
-
-
-def one_hot(y_):
-	# One hot encoding of the network outputs
-	# e.g.: [[5], [0], [3]] --> [[0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0]]
-	
-	y_ = y_.reshape(len(y_))
-	n_values = int(np.max(y_)) + 1
-	return np.eye(n_values)[np.array(y_, dtype=np.int32)]  # Returns FLOATS
-
-# check for gpu access?
-tf.Session(config=tf.ConfigProto(log_device_placement=True))
-print(tf.VERSION)
-#================================================ TOOLS - END ==================================
+import sys
+# temporarily add the self-written module path to the environment;
+# source - https://stackoverflow.com/questions/32509046/importing-self-written-python-module
+sys.path.append("C:\\Users\\yongw4\\Desktop\\yick\\lstm-tutorial")
+import LSTM_tools as lstm
 
 #---------------------------------------------------------------------------------------------
 # Preparing dataset:
@@ -180,17 +79,11 @@ n_steps = 32 # 32 timesteps per series
 #---------------------------------------------------------------------------------------------
 # Load the networks inputs
 #---------------------------------------------------------------------------------------------
-#X_train = lstm.load_X(X_train_path)
-#X_test = lstm.load_X(X_test_path)
+X_train = lstm.load_X(X_train_path)
+X_test = lstm.load_X(X_test_path)
 
-#y_train = lstm.load_y(y_train_path)
-#y_test = lstm.load_y(y_test_path)
-
-X_train = load_X(X_train_path)
-X_test = load_X(X_test_path)
-
-y_train = load_y(y_train_path)
-y_test = load_y(y_test_path)
+y_train = lstm.load_y(y_train_path)
+y_test = lstm.load_y(y_test_path)
 
 #---------------------------------------------------------------------------------------------
 # Set the (Hyper)Parameters:
@@ -245,8 +138,7 @@ biases = {
 	'out': tf.Variable(tf.random_normal([n_classes]))
 }
 
-#pred = lstm.LSTM_RNN(x, weights, biases)
-pred = LSTM_RNN(x, weights, biases)
+pred = lstm.LSTM_RNN(x, weights, biases, n_input)
 
 # Loss, optimizer and evaluation
 l2 = lambda_loss_amount * sum(
@@ -306,12 +198,9 @@ if RETRAIN:
 		if len(unsampled_indices) < batch_size:
 			unsampled_indices = range(0,len(X_train))
 	
-		# batch_xs, raw_labels, unsampled_indicies = lstm.extract_batch_size(X_train, y_train, unsampled_indices, batch_size)
-		batch_xs, raw_labels, unsampled_indicies = extract_batch_size(X_train, y_train, unsampled_indices, batch_size)
-	
-		#batch_ys = lstm.one_hot(raw_labels)
-		batch_ys = one_hot(raw_labels)
-
+		batch_xs, raw_labels, unsampled_indicies = lstm.extract_batch_size(X_train, y_train, unsampled_indices, batch_size)
+		batch_ys = lstm.one_hot(raw_labels)
+		
 		# check that encoded output is same length as num_classes, if not, pad it 
 		if len(batch_ys[0]) < n_classes:
 			temp_ys = np.zeros((batch_size, n_classes))
@@ -340,8 +229,7 @@ if RETRAIN:
 				[cost, accuracy], 
 				feed_dict={
 					x: X_test,
-					# y: lstm.one_hot(y_test)
-					y: one_hot(y_test)
+					y: lstm.one_hot(y_test)
 				}
 			)
 			test_losses.append(loss)
@@ -352,7 +240,7 @@ if RETRAIN:
 		# reference: https://cv-tricks.com/tensorflow-tutorial/save-restore-tensorflow-models-quick-complete-tutorial/
 		# saver.save(sess, 'iter_model', global_step = step, write_meta_graph = False); # since the graph is fixed throughout;
 		if (TRAINING_STEPS % (1000*batch_size)) == 0:
-            # [issue] right now save at the current directory; failed at relative path; 
+			# [issue] right now save at the current directory; failed at relative path; 
 			save_path = saver.save(sess, "iter_model", global_step = step)
 			print("Model saved in file: %s" % save_path)
 		
@@ -385,8 +273,7 @@ one_hot_predictions, accuracy, final_loss = sess.run(
 	[pred, accuracy, cost],
 	feed_dict={
 		x: X_test,
-		#y: lstm.one_hot(y_test)
-		y:one_hot(y_test)
+		y: lstm.one_hot(y_test)
 	}
 )
 test_losses.append(final_loss)
@@ -407,8 +294,8 @@ one_hot_predictions = sess.run(
 )
 # write it to a file for a clearer view (?);
 with open('listfile.txt', 'w') as filehandle:
-    for listitem in one_hot_predictions:
-        filehandle.write('%s\n' % listitem)
+	for listitem in one_hot_predictions:
+		filehandle.write('%s\n' % listitem)
 
 print('type of one_hot_predictions\n', type(one_hot_predictions))
 print('one_hot_predictions\n', one_hot_predictions)
@@ -425,7 +312,7 @@ print('decode the one-hot encoder predictions\n', one_hot_predictions[0].argmax(
 #-----------------------------------------------------------------------
 print('offline prediction\n')
 X_val_path = DATASET_PATH + "X_val.txt"
-X_val = load_X(X_val_path)
+X_val = lstm.load_X(X_val_path)
 print('preview of X_val.txt\n', X_val)
 
 preds = sess.run(
@@ -461,7 +348,7 @@ print("what is the predicted activity?\n", MAP_DICT[offline_pred])
 # 3. pred = [x0,x1,x2,x3,x4,x5] for x_{i} is a floating number; where i = 0,..,5 correspondes to the activitiy as in MAP_DICT above;
 # 4. max{pred} is the predicted activity;
 # 5. so, a buffer of {32 reformatted json files} -> one-hot-vector; where each json file corresponds to ONE frame;
-# 6. given a time series say with 140 frames; we have to divide the 140 frames to 32 each as an input to the buffer to perform the prediction;
+# 6. given a time series say with 140 frames; the 140 frames will be divided to 32 each as an input to the buffer to perform the prediction;
 
 
 # ============================= reverse - engineering; =======================
@@ -473,8 +360,6 @@ print(placeholderss)
 # x = tf.placeholder(tf.float32, [None, n_steps, n_input])
 # y = tf.placeholder(tf.float32, [None, n_classes])
 # ============================================================================
-
-
 
 #sess.close()
 # print('\n test accuracies \n')
