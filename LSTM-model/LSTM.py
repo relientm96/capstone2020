@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # source - https://github.com/stuarteiffert/RNN-for-Human-Activity-Recognition-using-2D-Pose-Input
 # author - stuarteiffert
-# version - draft;
-# mdified/abstracted/commented by - nebula M78 team; capstone2020;
-# running against time!!
+# modified/abstracted/commented by - yick
 
 # useful tricks
 # to suppress output of each cell; https://stackoverflow.com/questions/23692950/how-do-you-suppress-output-in-ipython-notebook
@@ -276,7 +274,7 @@ sess.run(init)
 # this is needed for saving and restoring the model;
 # keep a maximum of ?? models;
 saver = tf.train.Saver(max_to_keep=7)
-RETRAIN = True
+RETRAIN = False
 #_________________________________________________________________
 
 
@@ -348,7 +346,7 @@ if RETRAIN:
 		# safeguarding; back up the model during training after every fixed iterations;
 		# reference: https://cv-tricks.com/tensorflow-tutorial/save-restore-tensorflow-models-quick-complete-tutorial/
 		# saver.save(sess, 'iter_model', global_step = step, write_meta_graph = False); # since the graph is fixed throughout;
-		if (TRAINING_STEPS % (100*batch_size)) == 0:
+		if (TRAINING_STEPS % (1000*batch_size)) == 0:
             # [issue] right now save at the current directory; failed at relative path; 
 			save_path = saver.save(sess, "iter_model", global_step = step)
 			print("Model saved in file: %s" % save_path)
@@ -378,6 +376,7 @@ if RETRAIN:
 #---------------------------------------------------------------------------------------------
 # Accuracy for test data
 #---------------------------------------------------------------------------------------------
+
 one_hot_predictions, accuracy, final_loss = sess.run(
 	[pred, accuracy, cost],
 	feed_dict={
@@ -386,7 +385,6 @@ one_hot_predictions, accuracy, final_loss = sess.run(
 		y:one_hot(y_test)
 	}
 )
-
 test_losses.append(final_loss)
 test_accuracies.append(accuracy)
 
@@ -395,13 +393,39 @@ time_stop = time.time()
 print("TOTAL TIME:  {}".format(time_stop - time_start))
 
 
+# ============================= reverse - engineering; =======================
+# to see what form of the predictions returned from "sess.run()
+# to investigate how to decode it to correspond to which "activity"
+one_hot_predictions = sess.run(
+	[pred],
+	feed_dict={
+		x: X_test,
+			}
+)
+# write it to a file for clearer view (?);
+with open('listfile.txt', 'w') as filehandle:
+    for listitem in one_hot_predictions:
+        filehandle.write('%s\n' % listitem)
+
+print('type of one_hot_predictions\n', type(one_hot_predictions))
+print('one_hot_predictions\n', one_hot_predictions)
+
+print('type of one_hot_predictions[0]\n', type(one_hot_predictions[0]))
+print('one_hot_predictions[0]\n', one_hot_predictions[0])
+print('decode the one-hot encoder predictions\n', one_hot_predictions[0].argmax(1))
+
+# reversed;
+# one_hot_predictions is a list of one multidimensional numpy array;
+# ============================================================================
+
 #-----------------------------------------------------------------------
 # offline prediction;
 #-----------------------------------------------------------------------
 
+print('offline prediction\n')
 X_val_path = DATASET_PATH + "X_val.txt"
 X_val = load_X(X_val_path)
-print(X_val)
+print('preview of X_val.txt\n', X_val)
 
 preds = sess.run(
 	[pred],
@@ -409,9 +433,21 @@ preds = sess.run(
 		x: X_val
    }
 )
-print('offline evaluation\n')
-print(preds)
+print('one-hot encoded prediction\n', preds[0])
+print("decode the one-hot prediction?\n", preds[0].argmax(1))
+
+# ============================= reverse - engineering; =======================
+# to get all of the placeholders in the graph
+# source - https://stackoverflow.com/questions/51253483/undestanding-feed-dict-in-sess-run
+placeholderss = [ op for op in sess.graph.get_operations() if op.type == "Placeholder"]
+print(placeholderss)
+# reversed - it has two placeholders as constructed above; i.e.;
+# x = tf.placeholder(tf.float32, [None, n_steps, n_input])
+# y = tf.placeholder(tf.float32, [None, n_classes])
+# ============================================================================
+
+
 
 #sess.close()
-print('\n test accuracies \n')
-print(test_accuracies)
+# print('\n test accuracies \n')
+# print(test_accuracies)'''
