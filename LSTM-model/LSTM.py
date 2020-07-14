@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # source - https://github.com/stuarteiffert/RNN-for-Human-Activity-Recognition-using-2D-Pose-Input
 # author - stuarteiffert
-# modified/abstracted/commented by - yick
+# modified/abstracted (on-hold) /commented by - yick
 
 # useful tricks
 # to suppress output of each cell; https://stackoverflow.com/questions/23692950/how-do-you-suppress-output-in-ipython-notebook
@@ -13,19 +13,23 @@
 # need to refactor for tf ver > 2 migration eventually;
 import tensorflow as tf 
 
-# suggested wraparound but not a complete solution;
-#import tensorflow as tf  # Version 1.0.0 (some previous versions are used in past commits)
-#import tensorflow.compat.v1 as tf
-#tf.disable_v2_behavior()
-
-# from IPython import get_ipython # a failed wraparound....
 import warnings
 # reference - https://stackoverflow.com/questions/9031783/hide-all-warnings-in-ipython/9031848
-warnings.filterwarnings('ignore') # suppress;
+warnings.filterwarnings('ignore') # suppress the warning;s 
 #warnings.filterwarnings(action='once') # display the warnings once;
 
-# to be abstracted in a subfile;
 
+# suggested wraparound but not a complete solution;
+# import tensorflow as tf  # Version 1.0.0 (some previous versions are used in past commits)
+# import tensorflow.compat.v1 as tf
+# tf.disable_v2_behavior()
+
+# yet, another failed wraparound;
+# a failed wraparound....
+# from IPython import get_ipython 
+
+
+# to abstract the following packages in a subfile;
 import numpy as np
 import matplotlib # not in the environment previously
 import matplotlib.pyplot as plt
@@ -35,11 +39,14 @@ from random import randint
 import time
 import os
 
+
+#================================================ TOOLS  ==================================
 #---------------------------------------------------------------------------------------------
 # importing tools from py files;
 #---------------------------------------------------------------------------------------------
 # import LSTM_utilities as lstm # doesnt work for now due to NoModuleFound Error!;
-# so shall include the tools here directly; reminder- to solve the error;
+# so shall include the tools here directly;
+#  reminder- to solve the error;
 
 def load_X(X_path):
 	'''
@@ -61,7 +68,6 @@ def load_X(X_path):
 	return X_ 
 
 # Load the networks outputs
-
 def load_y(y_path):
 	'''
 	args - file path for the Y-data;
@@ -140,7 +146,7 @@ def one_hot(y_):
 # check for gpu access?
 tf.Session(config=tf.ConfigProto(log_device_placement=True))
 print(tf.VERSION)
-
+#================================================ TOOLS - END ==================================
 
 #---------------------------------------------------------------------------------------------
 # Preparing dataset:
@@ -168,7 +174,7 @@ X_test_path = DATASET_PATH + "X_test.txt"
 y_train_path = DATASET_PATH + "Y_train.txt"
 y_test_path = DATASET_PATH + "Y_test.txt"
 
-# "rolling window"
+# "rolling window"; one could view this as a "buffer" for the input;
 n_steps = 32 # 32 timesteps per series
 
 #---------------------------------------------------------------------------------------------
@@ -260,7 +266,6 @@ accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 #---------------------------------------------------------------------------------------------
 # Train the network:
 #---------------------------------------------------------------------------------------------
-
 test_losses = []
 test_accuracies = []
 train_losses = []
@@ -376,7 +381,6 @@ if RETRAIN:
 #---------------------------------------------------------------------------------------------
 # Accuracy for test data
 #---------------------------------------------------------------------------------------------
-
 one_hot_predictions, accuracy, final_loss = sess.run(
 	[pred, accuracy, cost],
 	feed_dict={
@@ -387,7 +391,6 @@ one_hot_predictions, accuracy, final_loss = sess.run(
 )
 test_losses.append(final_loss)
 test_accuracies.append(accuracy)
-
 print("FINAL RESULT: " +       "Batch Loss = {}".format(final_loss) +       ", Accuracy = {}".format(accuracy))
 time_stop = time.time()
 print("TOTAL TIME:  {}".format(time_stop - time_start))
@@ -402,14 +405,13 @@ one_hot_predictions = sess.run(
 		x: X_test,
 			}
 )
-# write it to a file for clearer view (?);
+# write it to a file for a clearer view (?);
 with open('listfile.txt', 'w') as filehandle:
     for listitem in one_hot_predictions:
         filehandle.write('%s\n' % listitem)
 
 print('type of one_hot_predictions\n', type(one_hot_predictions))
 print('one_hot_predictions\n', one_hot_predictions)
-
 print('type of one_hot_predictions[0]\n', type(one_hot_predictions[0]))
 print('one_hot_predictions[0]\n', one_hot_predictions[0])
 print('decode the one-hot encoder predictions\n', one_hot_predictions[0].argmax(1))
@@ -421,7 +423,6 @@ print('decode the one-hot encoder predictions\n', one_hot_predictions[0].argmax(
 #-----------------------------------------------------------------------
 # offline prediction;
 #-----------------------------------------------------------------------
-
 print('offline prediction\n')
 X_val_path = DATASET_PATH + "X_val.txt"
 X_val = load_X(X_val_path)
@@ -433,8 +434,35 @@ preds = sess.run(
 		x: X_val
    }
 )
-print('one-hot encoded prediction\n', preds[0])
-print("decode the one-hot prediction?\n", preds[0].argmax(1))
+
+# numpy array of the form ONEHOT = [x1,x2,x3,x4,x5,x6]; six floating numbers, x_{i}
+offline_onehot_pred = preds[0]  
+# offline_onehot_pred.argmax(1) = [int(max(ONEHOT))], a numpy array of one element only;
+offline_pred = (offline_onehot_pred.argmax(1))[0]
+print('one-hot encoded prediction\n', offline_onehot_pred) 
+print("decode the one-hot prediction?\n", offline_pred)
+
+# dictionary to map the decoded index to the corresponding activity (label);
+MAP_DICT = {
+	0: "JUMPING",
+	1: "JUMPING_JACKS",
+	2: "BOXING",
+	3: "WAVING_2HANDS",
+	4: "WAVING_1HAND",
+	5: "CLAPPING_HANDS"
+}
+print("what is the predicted activity?\n", MAP_DICT[offline_pred])
+
+#-----------------------------------------------------------------------
+# offline prediction - NOTE;
+#-----------------------------------------------------------------------
+# 1. X_val.txt has 32 lines;
+# 2. pred = sess.run([pred], feed_dict={x: X_val} output a one-hot encoded prediction from the 32-lined input;
+# 3. pred = [x0,x1,x2,x3,x4,x5] for x_{i} is a floating number; where i = 0,..,5 correspondes to the activitiy as in MAP_DICT above;
+# 4. max{pred} is the predicted activity;
+# 5. so, a buffer of {32 reformatted json files} -> one-hot-vector; where each json file corresponds to ONE frame;
+# 6. given a time series say with 140 frames; we have to divide the 140 frames to 32 each as an input to the buffer to perform the prediction;
+
 
 # ============================= reverse - engineering; =======================
 # to get all of the placeholders in the graph
