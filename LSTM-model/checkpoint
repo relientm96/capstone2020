@@ -1,0 +1,8 @@
+model_checkpoint_path: "saved_final_model"
+all_model_checkpoint_paths: "iter_model-8000"
+all_model_checkpoint_paths: "iter_model-9000"
+all_model_checkpoint_paths: "iter_model-10000"
+all_model_checkpoint_paths: "iter_model-11000"
+all_model_checkpoint_paths: "iter_model-12000"
+all_model_checkpoint_paths: "iter_model-13000"
+all_model_checkpoint_paths: "saved_final_model"

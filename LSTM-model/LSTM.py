@@ -44,7 +44,7 @@ import os
 import sys
 # temporarily add the self-written module path to the environment;
 # source - https://stackoverflow.com/questions/32509046/importing-self-written-python-module
-sys.path.append("C:\\Users\\yongw4\\Desktop\\yick\\lstm-tutorial")
+sys.path.append("C:\\CAPSTONE\\capstone2020\\LSTM-model")
 import LSTM_tools as lstm
 
 #---------------------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ LABELS = [
 #**********************************************************
 
 # DATASET_PATH = "dataset/"
-DATASET_PATH = "C:\\Users\\yongw4\\Desktop\\yick\\lstm-tutorial\\dataset\\"
+DATASET_PATH = "C:\\CAPSTONE\\capstone2020\\LSTM-dataset\\"
 X_train_path = DATASET_PATH + "X_train.txt"
 X_test_path = DATASET_PATH + "X_test.txt"
 
