@@ -29,12 +29,13 @@ import sys
 #============================================================
 
 
-def image2json(imagfolder_path, outputfolder_path):
+def image2json(imagfolder_path, outputfolder_path, imageformat):
 	'''
 	args:
 		1. "imagfolder_path"; the folder containing the set of images of one class;
 		2. "outputfolder_path", the corresponding folder containing all the converted json files;
 			- such folder may not necessarily exist;
+		3. imageformat; jpg? png? avi? ...
 	return:
 		nothing;
 	function:
@@ -59,7 +60,8 @@ def image2json(imagfolder_path, outputfolder_path):
 		print('the directory to store the json files has been created\n')
 
 	# append the regex "*.jpg" to the folder path
-	imagfolder_path = imagfolder_path + "*.jpg"
+	imagfolder_path = imagfolder_path + "*." + imageformat
+
 	#----------------------------------------------------------------------
 	# real work starts here;
 	#----------------------------------------------------------------------
@@ -73,4 +75,5 @@ def image2json(imagfolder_path, outputfolder_path):
 if __name__ == '__main__':
 	src_path = "C:\\CAPSTONE\\capstone2020\\src\\training\\test-images\\"
 	write_path = "C:\\CAPSTONE\\capstone2020\\src\\training\\test-json\\"
-	image2json(src_path, write_path)
+	imageformat = "jpg"
+	image2json(src_path, write_path, imageformat)
