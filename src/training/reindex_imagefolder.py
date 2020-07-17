@@ -48,5 +48,4 @@ if __name__ == '__main__':
         tmp = "C:\\Users\\yongw4\\Desktop\\alphabets\\alphabets-{CHANGE}\\"
         imageformat = "png"
         src_path = tmp.format(CHANGE = i)
-        print(src_path)
         reindex_imagefolder(src_path, imageformat)
