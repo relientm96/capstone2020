@@ -29,7 +29,7 @@ import sys
 #============================================================
 
 
-def image2json(imagfolder_path, outputfolder_path, imageformat):
+def images2json(imagfolder_path, outputfolder_path, imageformat):
 	'''
 	args:
 		1. "imagfolder_path"; the folder containing the set of images of one class;
@@ -70,10 +70,12 @@ def image2json(imagfolder_path, outputfolder_path, imageformat):
 	for imagepath in sorted(glob.glob(os.path.join(imagfolder_path))):
 		print(imagepath)
 		opProc.run_openpose(imagepath, outputfolder_path)
+		print("the image has been converted to json\n")
+	print("all images have been converted and saved into the write_path\n")
 
 # test driver;
 if __name__ == '__main__':
-	src_path = "C:\\CAPSTONE\\capstone2020\\src\\training\\test-images\\"
-	write_path = "C:\\CAPSTONE\\capstone2020\\src\\training\\test-json\\"
-	imageformat = "jpg"
-	image2json(src_path, write_path, imageformat)
+	src_path = "C:\\CAPSTONE\\capstone2020\\yick\\test-images\\"
+	write_path = "C:\\CAPSTONE\\capstone2020\\\yick\\test-json"
+	imageformat = "png"
+	images2json(src_path, write_path, imageformat)
