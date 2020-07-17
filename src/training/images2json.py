@@ -1,6 +1,6 @@
 #/usr/bin/env/python
 # to convert all the images of one class to json files
-# created by tsz kiu; 
+# created by tsz kiu; nebulaM78
 
 import preprocessing as pp # tsz kiu's class
 import json
