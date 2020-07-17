@@ -10,6 +10,18 @@ import time
 import tensorflow as tf
 from tensorflow import keras
 
+# Load Model
+print("Loading LSTM model")
+print('restoring the saved trained model\n')
+# reference: https://stackabuse.com/tensorflow-save-and-restore-models/
+sess = tf.InteractiveSession(config=tf.ConfigProto(log_device_placement=True))
+init = tf.global_variables_initializer()
+sess.run(init)
+tf.reset_default_graph()
+imported_meta = tf.train.import_meta_graph("saved_final_model.meta")
+imported_meta.restore(sess, tf.train.latest_checkpoint('./'))
+print("Model restored.")
+
 def initOpenPoseLoad():
     '''
     Import OpenPose Library to use datum API
@@ -28,6 +40,9 @@ def initOpenPoseLoad():
     except Exception as e:
         print(e)
         sys.exit(-1)
+    '''
+    Load in Previously Trained Model
+    '''
 
 ######################## Some Helper Functions #########################
 # @params : datum = OpenPose Datum Object to access keypoints
