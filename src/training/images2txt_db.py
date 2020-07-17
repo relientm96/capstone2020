@@ -54,7 +54,8 @@ def images2txt_db(imagfolder_path, db_path, imageformat):
 			tmpstring = (imagepath.split('\\'))[-1]
 			tmpstring = (tmpstring.split('.'))[0]
 			txtname = (tmpstring.split('_'))[0]
-			save_path = db_path + txtname + '.txt'
+			index = (tmpstring.split('_'))[1]
+			save_path = db_path + txtname + '_' + index +  '.txt'
 			print(save_path)
 			ji2t.json_image2txt(imagepath, save_path, 32)
 			print("individual txt is being created and saved;\n")
