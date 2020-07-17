@@ -30,7 +30,7 @@ def reindex_imagefolder(folder_path, imageformat):
 		#print(imagepath)
 		string = (imagepath.split('.'))[0]
 		string02 = (string.split('\\'))
-		newname = string02[-1] + str(INDEX) +  '.' + imageformat
+		newname = string02[-1] + "_" + str(INDEX) +  '.' + imageformat
 		# remove the last element;
 		string02.pop()
 		string02 = '\\'.join(string02)
@@ -39,8 +39,7 @@ def reindex_imagefolder(folder_path, imageformat):
 		#print(string02)
 		#print(dst)
 		newfilename = os.rename(imagepath, dst)
-		print(newfilename)
-	
+		
 # test driver;
 if __name__ == '__main__':
     N = 7
