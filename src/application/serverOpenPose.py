@@ -20,7 +20,7 @@ params = dict()
 # (refer to https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/include/openpose/flags.hpp
 # for more parameters)
 params["net_resolution"] = "320x320"
-params["hand"] = True
+params["hand"] = False
 params["hand_net_resolution"] = "328x328"
 
 ############################################
