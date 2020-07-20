@@ -6,7 +6,7 @@
 ''' pipeline: preparing video dataset for training; 
 1. one raw video -> tmp*.json --> tmp.txt --> {X.txt, Y.txt}
 note: the filename of the processed raw video will be changed to indicate that
-    it has been processed so that it will not be run again;
+	it has been processed so that it will not be run again;
 '''
 
 '''
@@ -93,6 +93,10 @@ try:
 	params['render_pose']             = 0
 	params['display']                 = 0
 
+	# by definition, openpose will keep the one with highest score (probabiltity)
+	# this will remove the false positives;
+	params['number_people_max']     = 1
+
 	#-----------------------------------------------------
 	# CHANGE HERE!!!
 	# training GLOBAL constants;
@@ -101,54 +105,98 @@ try:
 	path_X = "C:\\Users\\yongw4\\Desktop\\auslan-test-videos\\X.txt"
 	path_Y = "C:\\Users\\yongw4\\Desktop\\auslan-test-videos\\Y.txt"
 	# raw video source;
-	signvideodirectory = "C:\\Users\\yongw4\\Videos\\basic"
+	signvideodirectory = "C:\\Users\\yongw4\\Videos\\basic\\dummy"
 
 	# iterate through all the raw videos;
 	for input_vid_path in sorted(glob.glob(os.path.join(signvideodirectory + '\\*.mp4'))):
-		# current video has not been processed; 
-		if not (ftools.checksubstring(input_vid_path, "checked")):
-			# Input video path 
-			print('Processing:', input_vid_path)
-			# Add to params for open pose to use
-			params["video"] = input_vid_path
+		#------------------------------------------------------
+		# checking if the filename is named correctly;
+		# if not, skip it;
+		# take a note and save it to a txt;
+		# case sensitive; so we have to follow certain form;
+		#------------------------------------------------------
+		# to update this list eventually;
+		CLASSES = ['pain', 'ambulance']
+		print(input_vid_path)
+		tmp = (input_vid_path.split('\\'))[-1]
+		tmp = (tmp.split('.'))[0]
+		checkname = tmp.split('_')[0]
+		#print(checkname)
+	
+		# correctly name; process it;
+		if (checkname in CLASSES):
+			# current video has not been processed; 
+			if not (ftools.checksubstring(input_vid_path, "checked")):
+				# Input video path 
+				print('Processing:', input_vid_path)
+				# Add to params for open pose to use
+				params["video"] = input_vid_path
 		
-			print("creating a temp directory to store the .*json files\n")
-			with tempfile.TemporaryDirectory() as json_path:
-				# Check that path creation is correct
-				print('Writing JSON to a temporary directory:  ', json_path)
+				print("creating a temp directory to store the .*json files\n")
+				with tempfile.TemporaryDirectory() as json_path:
+					# Check that path creation is correct
+					print('Writing JSON to a temporary directory:  ', json_path)
 		
-				# Set them to save json + open pose output video to the following paths
-				params["write_json"]  = json_path
-				# Run Open Pose
-				try:
-					opWrapper = op.WrapperPython(3)
-					opWrapper.configure(params)
-					opWrapper.execute()
-				except Exception as e:
-					print(e)
-					sys.exit(-1)
-				# done processing; we have our video json files now;
-				# convert them to one single txt format;
-				# by using another temporary storage;
-				print("creating a temp directory to store txt\n")
-				with tempfile.TemporaryDirectory() as txt_path:
-					filename = (((input_vid_path.split('\\')[-1])).split('.'))[0]
-					dummy_path = txt_path + "\\" + filename + ".txt"
-					jv2t.json_video2txt(json_path, dummy_path)
-					# now save it to the label file, X.txt; Y.txt
-					genxy.generate_XY(dummy_path, path_X,  path_Y)
-					print("individual {X,Y} has been appended\n")
+					# Set them to save json + open pose output video to the following paths
+					params["write_json"]  = json_path
+					# Run Open Pose
+					try:
+						opWrapper = op.WrapperPython(3)
+						opWrapper.configure(params)
+						opWrapper.execute()
+					except Exception as e:
+						print(e)
+						sys.exit(-1)
+					# done processing; we have our video json files now;
+					# convert them to one single txt format;
+					# by using another temporary storage;
+					print("creating a temp directory to store txt\n")
+					with tempfile.TemporaryDirectory() as txt_path:
+						filename = (((input_vid_path.split('\\')[-1])).split('.'))[0]
+						dummy_path = txt_path + "\\" + filename + ".txt"
+						jv2t.json_video2txt(json_path, dummy_path)
+				
+						# safeguard; ensure the files exist;
+						print("Checking if the X.txt and Y.txt exist ...\n")
+						if not os.path.exists(path_X):
+							try:
+								open(path_X, 'a').close()
+							except Exception as e:
+								print("An error occured", e)
+								sys.exit(-1)
+						if not os.path.exists(path_Y):
+							try:
+								open(path_Y, 'a').close()
+							except Exception as e:
+								print("An error occured", e)
+								sys.exit(-1)
+						# now save it to the label file, X.txt; Y.txt
+						genxy.generate_XY(dummy_path, path_X,  path_Y)
+						print("individual {X,Y} has been appended\n")
 
-			# sign off;
-			# so that the processed video will not be processed again;
-			print('the current video has been processed\n')
-			[classname, dst_checked] = ftools.checkoff_file(input_vid_path, "checked")
-			os.rename(input_vid_path, dst_checked)
+				# updating the number of processed video of this class; 
+				ftools.track_count(src_path, saved_path = "", save_name = 'saved_counter.p')
 			
-		# have processed;
+				# sign off;
+				# so that the processed video will not be processed again;
+				print('the current video has been processed\n')
+				[classname, dst_checked] = ftools.checkoff_file(input_vid_path, "checked")
+				os.rename(input_vid_path, dst_checked)
+			
+			# have processed;
+			else:
+				print("the current video has already been processed, skip\n")
+		
+		# the filename is not proper;
+		# to-do; shall automatically spellcheck and correct it;
 		else:
-			print("the current has already been processed, skip\n")
-			continue
+			# save the note at the current directory
+			path_M = "TAKE_NOTE.txt"
+			with open(path_M, 'a') as file:
+				file.write(input_vid_path)
+				print("the video filename is improper: \n", input_vid_path)
+				print("check the note at: ", os.getcwd()+ "\\" + path_M)
+		break
 
 except Exception as e:
 	print(e)
