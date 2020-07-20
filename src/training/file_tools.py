@@ -11,6 +11,10 @@ def checkoff_file(src, add_vocab):
     return - a list of 
         1. the modified path name
         2. the classname
+    example:
+        src = C:\\capstone\\a_1.txt;
+        vocab = checked;
+        --> return( C:\\capstone\\a_1_checked.txt, a)
     '''
     tmp = src.split('.')
     prefix = tmp[0]

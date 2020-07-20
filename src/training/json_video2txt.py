@@ -12,7 +12,7 @@ def json_video2txt(jsondata_path, output_path):
 	'''
 	arg:
 		1. jsonpath; data path where the set of json files located;
-	   (one set has 32 json files corresponding to one class)
+	   (one set has N-frame json files corresponding to one class)
 	   2. output_path; where to save;
 	return:
 		none;
@@ -25,7 +25,7 @@ def json_video2txt(jsondata_path, output_path):
 	# denote N as the number of frames;
 	# hence, we will have a list of N number of lists;
 	kps = []
-	jsondata_path = jsondata_path + "*.json"
+	jsondata_path = jsondata_path + "\\*.json"
 	for file in sorted(glob.glob(os.path.join(jsondata_path))):
 		with open(file) as data_file: 
 		
@@ -89,6 +89,6 @@ def json_video2txt(jsondata_path, output_path):
 # test driver;
 if __name__ == '__main__':
 	# paths;
-	data_path = "C:\\CAPSTONE\\capstone2020\\yick\\test-videos\\activity-recognition\\json-files\\boxing\\"
+	data_path = "C:\\CAPSTONE\\capstone2020\\yick\\test-videos\\activity-recognition\\json-files\\boxing"
 	output_path = "C:\\CAPSTONE\\capstone2020\\yick\\test-videos\\activity-recognition\\testingoutput.txt"
 	json_video2txt(data_path, output_path)

@@ -64,12 +64,15 @@ def images2txt_db(imagfolder_path, db_path, imageformat):
 	
 # test driver;
 if __name__ == '__main__':
-	N = 5
+	# N = 5
+	N = 2
 	# fixed location for all converted images;
-	write_path = "C:\\Users\\yongw4\\Desktop\\image-database\\"
+	#write_path = "C:\\Users\\yongw4\\Desktop\\train-image-database\\"
+	write_path = "C:\\Users\\yongw4\\Desktop\\output_eval_alpha\\"
 	# run through all alphabet folders;
 	for i in range(1, N):
-		tmp = "C:\\Users\\yongw4\\Desktop\\alphabets\\alphabets-{CHANGE}\\"
+		#tmp = "C:\\Users\\yongw4\\Desktop\\alphabets\\train\\alphabets-{CHANGE}\\"
+		tmp = "C:\\Users\\yongw4\\Desktop\\eval_alpha\\"
 		imageformat = "png"
 		src_path = tmp.format(CHANGE = i)
 		images2txt_db(src_path, write_path, "png")
