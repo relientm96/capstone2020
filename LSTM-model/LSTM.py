@@ -312,6 +312,7 @@ print('decode the one-hot encoder predictions\n', one_hot_predictions[0].argmax(
 #-----------------------------------------------------------------------
 print('offline prediction\n')
 X_val_path = DATASET_PATH + "X_val.txt"
+X_val_path = "C:\\CAPSTONE\\capstone2020\\yick\\test-videos\\activity-recognition\\testingoutput.txt"
 X_val = lstm.load_X(X_val_path)
 print('preview of X_val.txt\n', X_val)
 
@@ -325,7 +326,9 @@ preds = sess.run(
 # numpy array of the form ONEHOT = [x1,x2,x3,x4,x5,x6]; six floating numbers, x_{i}
 offline_onehot_pred = preds[0]  
 # offline_onehot_pred.argmax(1) = [int(max(ONEHOT))], a numpy array of one element only;
-offline_pred = (offline_onehot_pred.argmax(1))[0]
+offline_pred = (offline_onehot_pred.argmax(1))
+# offline_pred = (offline_onehot_pred.argmax(1))[0]
+
 print('one-hot encoded prediction\n', offline_onehot_pred) 
 print("decode the one-hot prediction?\n", offline_pred)
 
@@ -338,7 +341,7 @@ MAP_DICT = {
 	4: "WAVING_1HAND",
 	5: "CLAPPING_HANDS"
 }
-print("what is the predicted activity?\n", MAP_DICT[offline_pred])
+# print("what is the predicted activity?\n", MAP_DICT[offline_pred])
 
 #-----------------------------------------------------------------------
 # offline prediction - NOTE;
