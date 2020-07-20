@@ -48,7 +48,7 @@ def json_video2txt(jsondata_path, output_path):
 			# refer to how they map the keypoints here:
 			# https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md#face-output-format
 			# remember, we have (x,y accuracy) for each keypoints;
-			upperbody_keypoints = body_keypoints[0:27] 
+			upperbody_keypoints = body_keypoints[3:24] 
 			
             # concatenate all the keypoints into one list: pose_keypoints;
 			pose_keypoints = upperbody_keypoints + lefthand_keypoints + righthand_keypoints
@@ -89,6 +89,6 @@ def json_video2txt(jsondata_path, output_path):
 # test driver;
 if __name__ == '__main__':
 	# paths;
-	data_path = "C:\\CAPSTONE\\capstone2020\\yick\\test-videos\\activity-recognition\\json-files\\boxing"
-	output_path = "C:\\CAPSTONE\\capstone2020\\yick\\test-videos\\activity-recognition\\testingoutput.txt"
+	data_path = "C:\\Users\\yongw4\\Desktop\\auslan-test-videos\\weird"
+	output_path = "C:\\Users\\yongw4\\Desktop\\auslan-test-videos\\weird\\test.txt"
 	json_video2txt(data_path, output_path)
