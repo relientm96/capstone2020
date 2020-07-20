@@ -33,3 +33,7 @@ src/openpose-python/*.dll
 
 # Adding in LSTM-Dataset as ignore
 LSTM-dataset/
+src/training/__pycache__
+src/auslan-raw-videos
+src/matthew_vidprocess
+
