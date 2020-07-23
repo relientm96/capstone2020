@@ -4,6 +4,8 @@ import os
 from sys import platform
 import argparse
 import time
+import numpy as np
+import pprint as pp
 
 #### Tensorflow Imports ####
 # Here, we can import tensorflow + keras + Machine Learning Libraries to load models
@@ -28,6 +30,52 @@ def initOpenPoseLoad():
     except Exception as e:
         print(e)
         sys.exit(-1)
+
+'''
+Rolling Window Data Structure
+'''
+
+# Number of Joints
+
+# Note numb joints here means both x,y values, (eg: if BODY_25 we have 25*2 numb joints)
+numbJoints = 50
+window_Width = 5
+
+class RollingWindow:
+    def __init__(self, window_Width, numbJoints):
+        self.window_Width   = window_Width
+        self.numbJoints     = numbJoints
+        # Create a 2D Matrix with dimensions
+        # window_Width X number of joints
+        self.points         = np.zeros(shape=(window_Width,numbJoints))
+    
+    def getPoints(self):
+        # Return the 2D matrix of points
+        return self.points
+    
+    def getWindow_Width(self):
+        return self.window_Width
+
+    def getNumbJoints(self):
+        return self.numbJoints
+
+    def addPoint(self, arr):
+        # Check for same number of joints in input array before we insert
+        if ( len(arr) != self.numbJoints ):
+            print("Error! Number of items not equal to numbJoints = ", self.numbJoints)
+            return
+        # Pop out last row in points first
+        self.points = np.delete(self.points, self.window_Width-1, 0)
+        # Now insert this row to the front of points
+        self.points = np.vstack([arr, self.points])
+
+    def printPoints(self):
+        pp.pprint(self.points)
+
+# Instantiate the rolling window for use later
+print("Creating Rolling Window")
+r = RollingWindow(window_Width,numbJoints)
+print("Finished Created Rolling Window, Window Width = {} & NumbJoints = {}".format(window_Width, numbJoints))
 
 ######################## Some Helper Functions #########################
 # @params : datum = OpenPose Datum Object to access keypoints
@@ -59,21 +107,31 @@ def printKeyPoints(datum):
 def translate(datum):
     # Output String Variable of Translated word (sentence in future)
     word = "Hold Translated Word"
-    #############################
-    # PERFORM TRANSLATION HERE  #
-    # --> Input your datum keypoints to your model 
-    # --> Get output prediction from model
-    # --> Set your output under the "word" string variable
-    
-    # Run test program to check
-    #printKeyPoints(datum)
-    # Use Nose Coordinates to change word (for now)
-    noseCoordinatesX,noseCoordinatesY,noseConfidence  = datum.poseKeypoints[0][0]
 
+    '''
+    Converting Input Keypoints as numpy array in Yick's GitHub dataset format
+    '''
+    # We use 0 index for the first person in frame, ignore the others
+    keypoints = datum.poseKeypoints[0]
+    if len(keypoints) < numbJoints/2:
+        print('No full number of joints, skip this')
+        return 'Not Yet Initializzed'
+    
+    # Flatten puts the whole 2D matrix as one row vector
+    kp = keypoints.flatten()
+    # Delete every 3rd element, the confidence level
+    kp = np.delete(kp, np.arange(2, kp.size, 3))
+
+    # Add to rolling window
+    r.addPoint(kp)
+    print(r.getPoints())
+    print('\n----------------------------------------------------------------------------\n')
+
+    noseCoordinatesX = datum.poseKeypoints[0][0][0]
     if ( noseCoordinatesX < 250 ):
         word = "Capstone"
     else:
         word = "2020"
-
     ############################
     return word
+
