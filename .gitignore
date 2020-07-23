@@ -34,3 +34,5 @@ src/openpose-python/*.dll
 # Ignore all pycache stuff
 src/scrapper/__pycache__
 
+# Ignore DLL in release
+src/openpose-python/Release/*.dll
