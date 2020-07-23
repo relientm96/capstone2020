@@ -24,7 +24,7 @@ src/application/bin/*.dll
 src/application/models
 src/application/__pycache__
 # Ignore Remaining DLL's
-src/application*.dll   
+src/application/*.dll   
 
 # OpenPose Core Large Files
 src/openpose-python/models
@@ -33,3 +33,4 @@ src/openpose-python/*.dll
 
 # Ignore all pycache stuff
 src/scrapper/__pycache__
+
