@@ -24,6 +24,7 @@ import argparse
 import errno
 import tempfile
 import glob, os
+import ffmpeg
 
 # from nebulaM78;
 import file_tools as ftools
@@ -102,102 +103,109 @@ try:
 	# training GLOBAL constants;
 	#-----------------------------------------------------
 	# our training set and its label;
-	path_X = "C:\\Users\\yongw4\\Desktop\\auslan-test-videos\\X.txt"
-	path_Y = "C:\\Users\\yongw4\\Desktop\\auslan-test-videos\\Y.txt"
+	path_X = "C:\\Users\\yongw4\\Desktop\\TREASURE\\X_test.txt"
+	path_Y = "C:\\Users\\yongw4\\Desktop\\TREASURE\\Y_test.txt"
+	
 	# raw video source;
-	signvideodirectory = "C:\\Users\\yongw4\\Videos\\basic\\dummy"
+	signvideodirectory = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE\\"
 
 	# iterate through all the raw videos;
-	for input_vid_path in sorted(glob.glob(os.path.join(signvideodirectory + '\\*.mp4'))):
-		#------------------------------------------------------
-		# checking if the filename is named correctly;
-		# if not, skip it;
-		# take a note and save it to a txt;
-		# case sensitive; so we have to follow certain form;
-		#------------------------------------------------------
-		# to update this list eventually;
-		CLASSES = ['pain', 'ambulance']
-		print(input_vid_path)
-		tmp = (input_vid_path.split('\\'))[-1]
-		tmp = (tmp.split('.'))[0]
-		checkname = tmp.split('_')[0]
-		#print(checkname)
-	
-		# correctly name; process it;
-		if (checkname in CLASSES):
+	#for src_path in sorted(glob.glob(os.path.join(signvideodirectory + '\\*.mp4'))):
+	for root, dirs, files in os.walk(signvideodirectory, topdown=False):
+		for name in files:
+			# make sure the current file is MP4;
+			ext = name.split('.')[-1]
+			if (ext != "mp4"):
+				continue
+			# OK, it's mp4; process it;
+			src_path = os.path.join(root, name)
+			
 			# current video has not been processed; 
-			if not (ftools.checksubstring(input_vid_path, "checked")):
-				# Input video path 
-				print('Processing:', input_vid_path)
-				# Add to params for open pose to use
-				params["video"] = input_vid_path
+			if not (ftools.checksubstring(src_path, "checked")):
+				# get the classname;
+				[classname, _] = ftools.checkoff_file(src_path, "")
+				with tempfile.TemporaryDirectory() as flipped_dummy_path:
+					flipped_path = flipped_dummy_path + '\\' + classname + '_flipped.mp4'
+					(ffmpeg
+						.input(src_path)
+						.hflip()
+						.output(flipped_path)
+						.global_args('-loglevel', 'error')
+						.global_args('-y')
+						.run()
+					)
+					print("the current video has been flipped and save at the temp directory: ", flipped_path + '\n')
+					PATHS = [src_path, flipped_path]
+					input_vid_path = PATHS[0]
+					for input_vid_path in PATHS:
+						# Input video path 
+						print('Processing:', input_vid_path + '\n')
+						params["video"] = input_vid_path
+						print("creating a temp directory to store the .*json files\n")
+						with tempfile.TemporaryDirectory() as json_path:
+					
+							# Check that path creation is correct
+							print('Writing JSON to a temporary directory:  ', json_path + '\n')
 		
-				print("creating a temp directory to store the .*json files\n")
-				with tempfile.TemporaryDirectory() as json_path:
-					# Check that path creation is correct
-					print('Writing JSON to a temporary directory:  ', json_path)
-		
-					# Set them to save json + open pose output video to the following paths
-					params["write_json"]  = json_path
-					# Run Open Pose
-					try:
-						opWrapper = op.WrapperPython(3)
-						opWrapper.configure(params)
-						opWrapper.execute()
-					except Exception as e:
-						print(e)
-						sys.exit(-1)
-					# done processing; we have our video json files now;
-					# convert them to one single txt format;
-					# by using another temporary storage;
-					print("creating a temp directory to store txt\n")
-					with tempfile.TemporaryDirectory() as txt_path:
-						filename = (((input_vid_path.split('\\')[-1])).split('.'))[0]
-						dummy_path = txt_path + "\\" + filename + ".txt"
-						jv2t.json_video2txt(json_path, dummy_path)
+							# Set them to save json + open pose output video to the following paths
+							params["write_json"]  = json_path
+							# Run Open Pose
+							try:
+								opWrapper = op.WrapperPython(3)
+								opWrapper.configure(params)
+								opWrapper.execute()
+							except Exception as e:
+								print(e)
+								sys.exit(-1)
+							# done processing; we have our video json files now;
+							# convert them to one single txt format;
+							# by using another temporary storage;
+							print("creating a temp directory to store txt\n")
+							with tempfile.TemporaryDirectory() as txt_path:
+								#print("DEBUGGING\n")
+								filename = (((input_vid_path.split('\\')[-1])).split('.'))[0]
+								dummy_path = txt_path + "\\" + filename + ".txt"
 				
-						# safeguard; ensure the files exist;
-						print("Checking if the X.txt and Y.txt exist ...\n")
-						if not os.path.exists(path_X):
-							try:
-								open(path_X, 'a').close()
-							except Exception as e:
-								print("An error occured", e)
-								sys.exit(-1)
-						if not os.path.exists(path_Y):
-							try:
-								open(path_Y, 'a').close()
-							except Exception as e:
-								print("An error occured", e)
-								sys.exit(-1)
-						# now save it to the label file, X.txt; Y.txt
-						genxy.generate_XY(dummy_path, path_X,  path_Y)
-						print("individual {X,Y} has been appended\n")
+								#print("DEBUGGING-01\n")
+				
+								jv2t.json_video2txt(json_path, dummy_path)
+								#print("DEBUGGING-02\n")
+				
+								# safeguard; ensure the files exist;
+								print("Checking if the X.txt and Y.txt exist ...\n")
+								if not os.path.exists(path_X):
+									try:
+										open(path_X, 'a').close()
+									except Exception as e:
+										print("An error occured", e)
+										sys.exit(-1)
+								if not os.path.exists(path_Y):
+									try:
+										open(path_Y, 'a').close()
+									except Exception as e:
+										print("An error occured", e)
+										sys.exit(-1)
+								# now save it to the label file, X.txt; Y.txt
+								genxy.generate_XY(dummy_path, path_X,  path_Y)
+								print("individual {X,Y} has been appended\n")
 
 				# updating the number of processed video of this class; 
-				ftools.track_count(src_path, saved_path = "", save_name = 'saved_counter.p')
-			
+				print('here, the current video and its corresponding flipped video have been processed\n')
+				print('now, updating the number of processed video of this class;\n')
+				saved_counter = ftools.track_count(src_path, saved_path = "", save_name = 'saved_counter_train.p')
+				print(saved_counter + '\n')
 				# sign off;
 				# so that the processed video will not be processed again;
 				print('the current video has been processed\n')
-				[classname, dst_checked] = ftools.checkoff_file(input_vid_path, "checked")
-				os.rename(input_vid_path, dst_checked)
+				[classname, dst_checked] = ftools.checkoff_file(src_path, "checked")
+				os.rename(src_path, dst_checked)
 			
 			# have processed;
-			else:
+			else:       
 				print("the current video has already been processed, skip\n")
 		
-		# the filename is not proper;
-		# to-do; shall automatically spellcheck and correct it;
-		else:
-			# save the note at the current directory
-			path_M = "TAKE_NOTE.txt"
-			with open(path_M, 'a') as file:
-				file.write(input_vid_path)
-				print("the video filename is improper: \n", input_vid_path)
-				print("check the note at: ", os.getcwd()+ "\\" + path_M)
-		break
-
+	# outside of the outermost loop;		
+	print('all videos in the folder have been processed at\n', signvideodirectory)
 except Exception as e:
 	print(e)
 	sys.exit(-1)
