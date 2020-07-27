@@ -193,7 +193,8 @@ try:
 				print('here, the current video and its corresponding flipped video have been processed\n')
 				print('now, updating the number of processed video of this class;\n')
 				saved_counter = ftools.track_count(src_path, saved_path = "", save_name = 'saved_counter_train.p')
-				print(saved_counter + '\n')
+				print(saved_counter)
+				print('\n')
 				# sign off;
 				# so that the processed video will not be processed again;
 				print('the current video has been processed\n')
