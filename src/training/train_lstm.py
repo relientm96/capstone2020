@@ -7,7 +7,8 @@ from tensorflow import keras
 import matplotlib.pyplot as plt
 import math
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, LSTM, CuDNNLSTM
+#from keras.layers import Dense, Dropout, LSTM, CuDNNLSTM
+from keras.layers import Dense, Dropout, LSTM
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 import numpy as np
@@ -20,21 +21,21 @@ except ImportError:  # python 3.x
 
 # own modules;
 import LSTM_tools as lstm_tools
-import nebulaM78 as ultraman
-'''
+#import nebulaM78 as ultraman
+
 #----------------------------------------------------------------------
 # SET-UP
-# - showing some information
+# # - showing some information
 # - Constants for data processing and model training
-#----------------------------------------------------------------------
-
+# #----------------------------------------------------------------------
+''''
 with open('saved_counter_train.p', 'r') as fp:
 		   counter = pickle.load(fp)
 		   print('the counter has been loaded\n', dict)  
 	except OSError as e:
 		 print("error in loading the counter: ", e)
          print("\n")
-
+'''
 	
 
 # Total number of videos
@@ -50,8 +51,13 @@ numb_keypoints = 98
 # - Y.txt; the corresponding labels;
 #----------------------------------------------------------------------
 
-PATH = "C:\\Users\\yongw4\\Desktop\\MATTHEW\\dataset_new.txt"
+X_PATH = "C:\\Users\\yongw4\\Desktop\\TREASURE\\X_test.txt"
+Y_PATH = "C:\\Users\\yongw4\\Desktop\\TREASURE\\Y_test.txt"
 
+x_train = lstm_tools.load_X(X_PATH)
+y_train = lstm_tools.load_Y(Y_PATH)
+print('shape of X_train: ', x_train.shape)
+print('shape of Y_train: ', y_train.shape)
 
 #----------------------------------------------------------------------
 # BUILDING THE MODEL;
@@ -65,17 +71,18 @@ PATH = "C:\\Users\\yongw4\\Desktop\\MATTHEW\\dataset_new.txt"
 #----------------------------------------------------------------------
 
 n_hidden = 36 # hidden layer number of features;
-n_classes = 3   # number of sign classes;
-batch_size = 256
+n_classes = 4  # number of sign classes;
+batch_size =256
 
 print('------ Building/Training Model ---------')
 # 1. Define Model
 model = Sequential()
-model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True, unit_forget_bias=1.0))
+#model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True, unit_forget_bias=1.0))
+model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True))
 model.add(Dropout(0.2))
 model.add(LSTM(n_hidden, activation='relu'))
 model.add(Dropout(0.2))
-model.add(LSTM(n_hidden,  unit_forget_bias=1.0))
+#model.add(LSTM(n_hidden,  unit_forget_bias=1.0))
 model.add(Dropout(0.2))
 model.add(Dense(n_classes, activation='softmax'))
 
@@ -97,7 +104,7 @@ callbacks_list = [checkpoint]
 model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
 # 5. Training the model
-model.fit(x_train, y_train, epochs=30, batch_size = batch_size, callbacks = callbacks_list)
+model.fit(x_train, y_train, epochs=80, batch_size = batch_size, callbacks = callbacks_list)
 
 # Print summary
 model.summary()
@@ -106,7 +113,7 @@ model.summary()
 # EVALUATION;
 # - offline prediction;
 #----------------------------------------------------------------------
-
+'''
 # Do some predictions on test data
 predictions = model.predict(x_test)
 
