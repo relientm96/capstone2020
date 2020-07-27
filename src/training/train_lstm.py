@@ -1,205 +1,133 @@
-# Tensorflow import
+#/usr/bin/env/python
+# created by matthew; nebulaM78 team; capstone 2020;
+
+# built-in modules;
 import tensorflow as tf
 from tensorflow import keras
-
-# Building LSTM
 import matplotlib.pyplot as plt
-#import pandas
 import math
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, LSTM, CuDNNLSTM
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 import numpy as np
+from keras.callbacks import ModelCheckpoint
 
-###################################################
-# Constants for data processing and model training
+try:
+	import cPickle as pickle
+except ImportError:  # python 3.x
+	import pickle
+
+# own modules;
+import LSTM_tools as lstm_tools
+import nebulaM78 as ultraman
+'''
+#----------------------------------------------------------------------
+# SET-UP
+# - showing some information
+# - Constants for data processing and model training
+#----------------------------------------------------------------------
+
+with open('saved_counter_train.p', 'r') as fp:
+		   counter = pickle.load(fp)
+		   print('the counter has been loaded\n', dict)  
+	except OSError as e:
+		 print("error in loading the counter: ", e)
+         print("\n")
+
+	
 
 # Total number of videos
-number_videos = 102
+#number_videos = 102
 # Each video has 70 frames for a gesture
-frame_set_length = 70
+frame_set_length = 75
 # Total number of x,y coordinates of joints
 numb_keypoints = 98 
-# Number to split between training and test set
-train_test_len = math.ceil(number_videos * 0.8)
 
-####################################################
-# Get data from dataset
-
-x_train = []
-y_train = []
-x_test  = []
-y_test  = []
-
-def getKeypoints(line):
-    '''
-    Looks through a comma seperated line and gets the keypoints
-    Avoid adding non numeric values (in case of corrupted data)
-    '''
-    # Keypoint list
-    keypoints = []
-    # Create out of all comma seperated values
-    listOfSplit = line.split(',')
-    for i in range(1,len(listOfSplit)):
-        try: 
-            # Only append to keypoints array if it is a numeric value
-            key_pt = float(listOfSplit[i]) 
-            keypoints.append(key_pt)
-        except ValueError:
-            pass
-            #print("Not a float")
-    return keypoints
-
-'''
-Some variables used in data processing
-- currentID      = current ID of video being read
-- current_frames = temporary list to hold the 70 frames before appending to x_train/x_test
-- vidCount       = Keeps track of number of videos
-- help_counter   = Keeps track of number of help videos
-- pain_counter   = Keeps track of number of pain videos
-'''
-currentID = None   
-current_frames = [] 
-vidCount = 0      
-help_counter = 0
-pain_counter = 0 
-
-# Dictionary used to assign signs as numeric classes
-dictOfSigns = {
-    'help': 0,
-    'pain': 1
-}
+#----------------------------------------------------------------------
+# LOADING THE DATA:
+# - X.txt; the keypoints;
+# - Y.txt; the corresponding labels;
+#----------------------------------------------------------------------
 
 PATH = "C:\\Users\\yongw4\\Desktop\\MATTHEW\\dataset_new.txt"
-# Start reading dataset file
-with open(PATH) as data_file:
-    line = data_file.readline()
-    while line:
-        # Read in line
-        line = data_file.readline().rstrip('\n')
-
-        # Extract sign and id of this frame
-        sign = line.split(',')[0].split('_')[0]
-        id   = line.split(',')[0]
-
-        # Read in the keypoints using utility function
-        keypoints = getKeypoints(line)
-
-        # For initial case, get the currentID first (only run once in dataset processing)
-        if currentID is None:
-            currentID = id
-
-        # We append to the current_frames as we havent seen a new sign tag yet
-        if currentID == id:
-            current_frames.append(keypoints)
-        else:
-            # We know we finished reading all frames for this video, append to x_train/x_test
-
-            if 'help' in id:
-                # Keep track of how many help/pain videos in dataset
-                help_counter += 1 
-            else: 
-                pain_counter += 1
-
-            if len(current_frames) < frame_set_length:
-                # Zero pad if < 70 frames
-                #print('Less than', frame_set_length ,'detected! at video:', id)
-                #print('Difference: ', frame_set_length - len(current_frames) )
-                for i in range(len(current_frames), frame_set_length):
-                    # Zero pad in remainder frames as zero array of 98 elements
-                    current_frames.append([0] * numb_keypoints)
-                #print('Now len is :', len(current_frames))
-
-            # Finally found a new sign, assign to datasets
-            if sign in dictOfSigns:
-                # Assign according to train/text split
-                if vidCount <= train_test_len:
-                    y_train.append(dictOfSigns[sign])
-                    x_train.append(current_frames)
-                else:
-                    y_test.append(dictOfSigns[sign])
-                    x_test.append(current_frames)
-
-            # Set a new ID to read
-            currentID = id
-            current_frames = []
-            vidCount += 1
-
-#print('x\n',len(x_train[0][0]))
-#print('y\n',len(y_train))
-
-# Printing some info on dataset processing
-print('---------- Dataset Info -------------')
-print(vidCount, "videos processed")
-print(help_counter, "help videos processed")
-print(pain_counter, "pain videos processed")
 
 
-# Currently it is a list of lists of lists,
-# Outer List: Number of data (x_train or x_test length)
-# Inner List: Number of frames per gesture (for this case, it is 70)
-# Inner Most List: Number of keypoint x,y coordinates (for this case, it is 98)
-print('Shape of x_train', len(x_train),len(x_train[0]),len(x_train[0][0]))
-print('Shape of x_train', len(x_test),len(x_test[0]),len(x_test[0][0]))
+#----------------------------------------------------------------------
+# BUILDING THE MODEL;
+# 1. defining the model;
+# 2. setting up the optimizer;
+# 3. setting checkpoints to save the model during training;
+# 4. initialze and build the model
+# 5. training the model;
+# note(s) - https://stackoverflow.com/questions/46308374/what-is-validation-data-used-for-in-a-keras-sequential-model?fbclid=IwAR0q5jS4KZqGl36b-G64dwrr51ebZ1hAv4fFyjyjGjnvwA5sMkNhRCiX7IE
+# source - https://github.com/SmitSheth/Human-Activity-Recognition/blob/master/train.ipynb
+#----------------------------------------------------------------------
 
-# Convert them to np arrays (3D Matrices)
-# into : X_train/X_test length X 70(frames per gesture) X 98(keypoints number)
-y_train = np.array(y_train)
-x_train = np.array(x_train).reshape((len(x_train),len(x_train[0]),len(x_train[0][0])))
-y_test  = np.array(y_test)
-x_test  = np.array(x_test).reshape((len(x_test),len(x_test[0]),len(x_test[0][0])))
+n_hidden = 36 # hidden layer number of features;
+n_classes = 3   # number of sign classes;
+batch_size = 256
 
-print('y_train\n')
-print(y_train)
-
-# Now, we look into each shape
-print('After Reshaping into Numpy Arrays:')
-print('(y,x)train_shape =', y_train.shape, x_train.shape)
-print('(y,x)test_shape =', y_test.shape,  x_test.shape)
-#############################################################
-'''
 print('------ Building/Training Model ---------')
-# Define Model
+# 1. Define Model
 model = Sequential()
-model.add(LSTM(128, input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True))
+model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True, unit_forget_bias=1.0))
 model.add(Dropout(0.2))
-model.add(LSTM(128, activation='relu'))
+model.add(LSTM(n_hidden, activation='relu'))
 model.add(Dropout(0.2))
-model.add(Dense(32, activation='relu'))
+model.add(LSTM(n_hidden,  unit_forget_bias=1.0))
 model.add(Dropout(0.2))
-model.add(Dense(2, activation='softmax'))
+model.add(Dense(n_classes, activation='softmax'))
 
-# Optimizer
+# 2. Optimizer
 opt = tf.keras.optimizers.Adam(lr=1e-3, decay=1e-5)
 
-# Compile model
+# 3. defining checkpoints to save the model during training;
+# reminder - shall study the source below;
+# src - https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/ModelCheckpoint
+# src - https://stackoverflow.com/questions/45393429/keras-how-to-save-model-and-continue-training
+
+filepath = "saved_model.h5"
+
+# defining the checkpoint using the "loss"
+checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min', save_freq = 'epoch')
+callbacks_list = [checkpoint]
+
+# 4. Compile model
 model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
-# Train model
-model.fit(x_train, y_train, epochs=30, validation_data=(x_test,y_test))
+# 5. Training the model
+model.fit(x_train, y_train, epochs=30, batch_size = batch_size, callbacks = callbacks_list)
 
 # Print summary
 model.summary()
 
-#############################################################
+#----------------------------------------------------------------------
+# EVALUATION;
+# - offline prediction;
+#----------------------------------------------------------------------
 
 # Do some predictions on test data
 predictions = model.predict(x_test)
 
-print('----- Guesses ----- ')
-for i in predictions:
-    guess = np.argmax(i)
-    for key,value in dictOfSigns.items():
-        if value == guess:
-            print(key)
+# loading the (mapping) dictionary stored at the current directory;
+with open('saved_dict.p', 'r') as fp:
+		   dict = pickle.load(fp)
+		   print('the existing dictionary has been loaded\n', dict)  
+	except OSError as e:
+		 print("error in loading the dictionary: ", e)
+         print("\n")
 
-print('----- Test Data ----- ')
-for k in y_test:
-    for key,value in dictOfSigns.items():
-        if value == k:
-            print(key)
+    print('----- Guesses ----- ')
+    for i in predictions:
+        guess = np.argmax(i)
+        print("predicted sign: ", MAP_DICT[guess])
 
-# Save the model
-model.save('first_lstm.h5')
+    print('----- Test Data ----- ')
+    for k in y_test:
+        print("actual sign: ", MAP_DICT[k])
+
+# Save the final model with a more fitting name
+model.save('final_lstm.h5')
+
 '''
