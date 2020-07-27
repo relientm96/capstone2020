@@ -35,30 +35,51 @@ def json_video2txt(jsondata_path, output_path):
 			# we are using BODY_25 model instead of COCO models; ==> 25 keypoints for the body;
 			# 21 keypoints for each hand
 			# get body + both hands;
-			body_keypoints = data["people"][0]["pose_keypoints_2d"]
-			lefthand_keypoints = data["people"][0]["hand_left_keypoints_2d"] 
-			righthand_keypoints = data["people"][0]["hand_right_keypoints_2d"] 
-			# safeguard;
-			# empty set? for the hand keypoints?
-			if (len(lefthand_keypoints) == 0):
-				print("OpenPose flag for hand keypoints is OFF\n")
-				print("This is not good; exit the system and check the flags;")
-				sys.exit(0)
-			# only need the upper body and possibly the face (?)
-			# refer to how they map the keypoints here:
-			# https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md#face-output-format
-			# remember, we have (x,y accuracy) for each keypoints;
-			upperbody_keypoints = body_keypoints[3:24] 
 			
-            # concatenate all the keypoints into one list: pose_keypoints;
-			pose_keypoints = upperbody_keypoints + lefthand_keypoints + righthand_keypoints
+			# debugging ...
+			#print("json_video2txt-debug\n")
+			#print('data\n', data)
+			#assert(len(data["people"]) != 0)
 			
-            # uncomment the following for testing;
-            # testing by forcefully remove the rest of the keypoints so that it conforms to COCO format;
-            #pose_keypoints = body_keypoints[:54]
-			#print(len(pose_keypoints))
+			# in case of no people detected, 
+			# hence, we will have empty sets; 
+			# skip
+			if(len(data['people']) == 0):
+				print("at current frame, no people are detected, so skipped\n")
+				# a total of 147 keypoints;
+				# initialized to zero;
+				pose_keypoints = [0]*147
+			# normal circumstance;
+			else:
+				body_keypoints = data["people"][0]["pose_keypoints_2d"]
+				lefthand_keypoints = data["people"][0]["hand_left_keypoints_2d"] 
+				righthand_keypoints = data["people"][0]["hand_right_keypoints_2d"] 
+				# safeguard;
+				# empty set? for the hand keypoints?
+				if (len(lefthand_keypoints) == 0):
+					print("OpenPose flag for hand keypoints is OFF\n")
+					print("This is not good; exit the system and check the flags;")
+					sys.exit(0)
+				# only need the upper body and possibly the face (?)
+				# refer to how they map the keypoints here:
+				# https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md#face-output-format
+				# remember, we have (x,y accuracy) for each keypoints;
+				
+				# debugging ...
+				#print("json_video2txt-1\n")
 			
-            # ignore the confidence level;
+				upperbody_keypoints = body_keypoints[3:24] 
+			
+				# debugging ..
+				#print("json_video2txt-2\n")
+
+				# concatenate all the keypoints into one list: pose_keypoints;
+				pose_keypoints = upperbody_keypoints + lefthand_keypoints + righthand_keypoints
+			
+				#print(len(pose_keypoints))
+			
+			# pose keypoints are done processed;
+			# ignore the confidence level;
 			number_xy_coor = int((len(pose_keypoints)/3)*2)
 			frame_kps = []
 			j = 0
@@ -89,6 +110,8 @@ def json_video2txt(jsondata_path, output_path):
 # test driver;
 if __name__ == '__main__':
 	# paths;
-	data_path = "C:\\Users\\yongw4\\Desktop\\auslan-test-videos\\weird"
-	output_path = "C:\\Users\\yongw4\\Desktop\\auslan-test-videos\\weird\\test.txt"
+	
+	data_path = "C:\\Users\\yongw4\\Videos\\basic\\testing" + "\\dummy_02"
+
+	output_path = "C:\\Users\\yongw4\\Videos\\basic\\testing" + "\\dummy_02.txt"
 	json_video2txt(data_path, output_path)
