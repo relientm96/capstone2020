@@ -23,7 +23,7 @@ n_classes = 4
 
 def load_X(X_path):
 	'''
-	args - file path for the X-data;
+	args - file path sfor the X-data;
 	return - formatted X-data content as np.array as the input for the neural network
 	'''
 	file = open(X_path, 'r')
@@ -47,7 +47,7 @@ def load_X(X_path):
 
 # Load the networks outputs
 
-def load_y(y_path):
+def load_Y(y_path):
 	'''
 	args - file path for the Y-data;
 	return - formatted X-data content as np.array as the input for the neural network
