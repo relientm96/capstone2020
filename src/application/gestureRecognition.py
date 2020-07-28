@@ -63,9 +63,8 @@ dictOfSigns = {
     'help': 0,
     'pain': 1
 }
-
-lstm = keras.models.load_model('first_lstm.h5')
-lstm.summary()
+# Reference object for LSTM Model
+lstm     = None
 
 def initOpenPoseLoad():
     '''
@@ -79,6 +78,7 @@ def initOpenPoseLoad():
             sys.path.append(dir_path + '/../openpose-python/Release')
             os.environ['PATH']  = os.environ['PATH']  + ';' +  dir_path + "/../openpose-python" + ';' + dir_path + "/../openpose-python/bin" 
             import pyopenpose as op
+
     except ImportError as e:
         print('Error: OpenPose library could not be found. Did you enable `BUILD_PYTHON` in CMake and have this Python script in the right folder?')
         raise e
@@ -86,11 +86,24 @@ def initOpenPoseLoad():
         print(e)
         sys.exit(-1)
 
-def removeConfidenceLevels(data, limit, outputlist):
+def loadModel():
+    global lstm
+    try:
+        lstm = keras.models.load_model('first_lstm.h5', compile=False)
+        lstm.summary()
+    except Exception as e:
+        print("Error In Loading Model", e)
+        raise e
+
+def removeConfidenceLevels(data, limit, outputlist, currentNoseX, currentNoseY):
     xycounter = 0
     for i in range(0,limit):
         if xycounter < 2:
-            outputlist.append(str(data[i]))
+            if xycounter == 0:
+                value = round(float(data[i] - currentNoseX), 3)
+            else:
+                value = round(float(data[i] - currentNoseY), 3)
+            outputlist.append(str(value))
             xycounter += 1
         else:
             xycounter = 0
@@ -108,29 +121,37 @@ def translate(datum):
     # We use 0 index for the first person in frame, ignore the others
     kp = []
     
-    # Flatten as one row vector and remove confidence levels
-    pose      = removeConfidenceLevels(datum.poseKeypoints[0].flatten(), 24, kp) 
-    # Delete every 3rd element, (remove confidence level)
+    # Read in nose X and Y positions:
+    currentNoseX = datum.poseKeypoints[0][0][0]
+    currentNoseY = datum.poseKeypoints[0][0][1]
+    #print('Current Nose XY:',currentNoseX, currentNoseY)
 
     # Flatten as one row vector and remove confidence levels
-    lefthand  = removeConfidenceLevels(datum.handKeypoints[0][0].flatten(), 61, kp) 
-
+    pose      = removeConfidenceLevels(datum.poseKeypoints[0].flatten(), 24, kp, currentNoseX, currentNoseY) 
     # Flatten as one row vector and remove confidence levels
-    righthand = removeConfidenceLevels(datum.handKeypoints[1][0].flatten(), 61, kp) 
-
+    lefthand  = removeConfidenceLevels(datum.handKeypoints[0][0].flatten(), 61, kp, currentNoseX, currentNoseY) 
+    # Flatten as one row vector and remove confidence levels
+    righthand = removeConfidenceLevels(datum.handKeypoints[1][0].flatten(), 61, kp,  currentNoseX, currentNoseY) 
+    
     # Add to rolling window
     if r.addPoint(kp) == False:
         # Unable to append to keypoints as issue with data shape
         return 'Fail'
-    
-    #print(r.getPoints().shape)
-    #print(r.getPoints())
 
-    predictions = lstm.predict()
+    print(r.getPoints().shape)
+    print(r.getPoints())
+
+    # Reshape for model to read
+    reshaped_keypoints = r.getPoints().reshape((1, window_Width, numbJoints))
+
+    # Load Keras Model
+    global lstm
+    predictions = lstm.predict([reshaped_keypoints])
     guess = np.argmax(i)
     for key,value in dictOfSigns.items():
         if value == guess:
             word = key
+            print("Guessed Sign is:", key)
 
     return word
 
