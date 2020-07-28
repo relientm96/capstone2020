@@ -5,7 +5,7 @@
 # src - https://pythonprogramming.net/tkinter-popup-message-window/
 # src - https://github.com/PySimpleGUI/PySimpleGUI/blob/master/DemoPrograms%20old/Demo_Threaded_Work.py
 
-from Tkinter import *
+from tkinter import *
 
 def alert_popup(title, message, path):
     """Generate a pop-up window for special messages."""
@@ -29,5 +29,5 @@ def alert_popup(title, message, path):
 
 # test driver;
 if __name__ == '__main__':
-    alert_popup("Title goes here..", "Hello World!", "A path or second message can go here..")
+    alert_popup("Title goes here..", "Hello World!", "A path or second message can go here..\n hello workd",)
    

@@ -111,7 +111,8 @@ def json_video2txt(jsondata_path, output_path):
 if __name__ == '__main__':
 	# paths;
 	
-	data_path = "C:\\Users\\yongw4\\Videos\\basic\\testing" + "\\dummy_02"
+	PATH = "C:\\Users\\yongw4\\Desktop\\JSON\\"
+	data_path = PATH 
 
-	output_path = "C:\\Users\\yongw4\\Videos\\basic\\testing" + "\\dummy_02.txt"
+	output_path = PATH + "\\X_test.txt"
 	json_video2txt(data_path, output_path)

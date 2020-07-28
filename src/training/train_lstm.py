@@ -1,6 +1,11 @@
 #/usr/bin/env/python
 # created by matthew; nebulaM78 team; capstone 2020;
 
+#----------------------------------------------
+# note;
+# make sure you install tkinter and matplotlib modules;
+#----------------------------------------------
+
 # built-in modules;
 import tensorflow as tf
 from tensorflow import keras
@@ -9,10 +14,12 @@ import math
 from keras.models import Sequential
 #from keras.layers import Dense, Dropout, LSTM, CuDNNLSTM
 from keras.layers import Dense, Dropout, LSTM
+from keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 import numpy as np
 from keras.callbacks import ModelCheckpoint
+import os
 
 try:
 	import cPickle as pickle
@@ -21,29 +28,38 @@ except ImportError:  # python 3.x
 
 # own modules;
 import LSTM_tools as lstm_tools
-#import nebulaM78 as ultraman
+import nebulaM78 as ultraman
 
+#----------------------------------------------------------------------
+# NEED TO CHANGE THE FOLLOWING TO YOUR OWN REFRENCE;
+# 1. X_train.txt; the training set;
+# 2. Y_train.txt; the labels for the training;
+# 3. X_test.txt; for offline evaluation;
+# #----------------------------------------------------------------------
+PATH = "C:\\CAPSTONE\\capstone2020\\src\\training\\"
+X_TRAIN_PATH = PATH + "X_train.txt"
+Y_TRAIN_PATH = PATH + "Y_train.txt"
+X_TEST_PATH = PATH + "X_test.txt"
+\
 #----------------------------------------------------------------------
 # SET-UP
 # # - showing some information
 # - Constants for data processing and model training
 # #----------------------------------------------------------------------
-''''
-with open('saved_counter_train.p', 'r') as fp:
-		   counter = pickle.load(fp)
-		   print('the counter has been loaded\n', dict)  
-	except OSError as e:
-		 print("error in loading the counter: ", e)
-         print("\n")
-'''
-	
+try:
+	with open('saved_counter_train.p', 'rb') as fp:
+		   counter_track = pickle.load(fp)
+		   print('the counter has been loaded\n', counter_track)  
+except OSError as e:
+		print("error in loading the counter: ", e)
+		print("\n")
 
-# Total number of videos
-#number_videos = 102
-# Each video has 70 frames for a gesture
-frame_set_length = 75
-# Total number of x,y coordinates of joints
-numb_keypoints = 98 
+dummy_str = "{1:<15}{0:^10}{2:>15}\n".format("SIGN(s)","",  'COUNT')
+for key,value in counter_track.items():
+	dummy_str = dummy_str + "{1:<15}{0:^10}{2:>15}\n".format(str(key), "", str(2*value)) 
+
+# wake the user up!!
+ultraman.alert_popup("Capstone's Fate Decider", "our model has been trained on:\n", dummy_str + "*frame length per video = 75\n *total # keypoints per frame = 98")
 
 #----------------------------------------------------------------------
 # LOADING THE DATA:
@@ -51,11 +67,8 @@ numb_keypoints = 98
 # - Y.txt; the corresponding labels;
 #----------------------------------------------------------------------
 
-X_PATH = "C:\\Users\\yongw4\\Desktop\\TREASURE\\X_test.txt"
-Y_PATH = "C:\\Users\\yongw4\\Desktop\\TREASURE\\Y_test.txt"
-
-x_train = lstm_tools.load_X(X_PATH)
-y_train = lstm_tools.load_Y(Y_PATH)
+x_train = lstm_tools.load_X(X_TRAIN_PATH)
+y_train = lstm_tools.load_Y(Y_TRAIN_PATH)
 print('shape of X_train: ', x_train.shape)
 print('shape of Y_train: ', y_train.shape)
 
@@ -72,9 +85,16 @@ print('shape of Y_train: ', y_train.shape)
 
 n_hidden = 36 # hidden layer number of features;
 n_classes = 4  # number of sign classes;
-batch_size =256
+batch_size = 256
 
-print('------ Building/Training Model ---------')
+print('------ LSTM Model ---------')
+#--------------------------------------------------
+# note;
+# somehow, adding a bias stagnant the accuracy around 0.5 ...
+# ... no further improvements;
+# need to study ML literatures;
+#--------------------------------------------------
+print("building the model")
 # 1. Define Model
 model = Sequential()
 #model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True, unit_forget_bias=1.0))
@@ -94,17 +114,28 @@ opt = tf.keras.optimizers.Adam(lr=1e-3, decay=1e-5)
 # src - https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/ModelCheckpoint
 # src - https://stackoverflow.com/questions/45393429/keras-how-to-save-model-and-continue-training
 
-filepath = "saved_model.h5"
+# have we trained the model?
+final_path = "final_lstm.h5"
+if not os.path.exists(final_path):
+	print("training the model")
+	filepath = "saved_model.h5"
+	# defining the checkpoint using the "loss"
+	checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min', save_freq = 'epoch')
+	callbacks_list = [checkpoint]
 
-# defining the checkpoint using the "loss"
-checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min', save_freq = 'epoch')
-callbacks_list = [checkpoint]
+	# 4. Compile model
+	model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
-# 4. Compile model
-model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+	# 5. Training the model
+	model.fit(x_train, y_train, epochs=80, batch_size = batch_size, callbacks = callbacks_list)
 
-# 5. Training the model
-model.fit(x_train, y_train, epochs=80, batch_size = batch_size, callbacks = callbacks_list)
+	# Save the final model with a more fitting name
+	model.save(final_path)
+	print("the final trained model has been saved as: ", final_path)
+else:
+	# load the model
+	print("the model has been trained before, so reload it")
+	model = load_model(final_path)
 
 # Print summary
 model.summary()
@@ -113,28 +144,37 @@ model.summary()
 # EVALUATION;
 # - offline prediction;
 #----------------------------------------------------------------------
-'''
+print('----- offline evaluation ----- ')
+
 # Do some predictions on test data
+x_test = lstm_tools.load_X(X_TEST_PATH)
+
+# hardcoding for now;
+MAP_DICT = {0:"ambulance", 1:"help", 2:"hospital", 3:"pain"}
+
 predictions = model.predict(x_test)
+print("the vector ", predictions)
+print('\n')
 
-# loading the (mapping) dictionary stored at the current directory;
-with open('saved_dict.p', 'r') as fp:
-		   dict = pickle.load(fp)
-		   print('the existing dictionary has been loaded\n', dict)  
-	except OSError as e:
-		 print("error in loading the dictionary: ", e)
-         print("\n")
+j = 1
+for i in predictions:
+	index = np.argmax(i)
+	prob = np.max(i)
+	predicted = MAP_DICT[index]
+	print(j, ': Guessed Sign:', predicted, '; probability:', prob)
+	j = j + 1
 
-    print('----- Guesses ----- ')
-    for i in predictions:
-        guess = np.argmax(i)
-        print("predicted sign: ", MAP_DICT[guess])
+# manual marker;
+print("\n correct outputs corresponding to the test video:")
+print(1, 'pain')
+print(2, 'ambulance')
+print(3, 'dummy 1')
+print(4, 'dummy 2')
+print(5, 'help')
 
-    print('----- Test Data ----- ')
-    for k in y_test:
-        print("actual sign: ", MAP_DICT[k])
+# comment;
+print("\n so, there's one false positive which is (3)\n")
 
-# Save the final model with a more fitting name
-model.save('final_lstm.h5')
 
-'''
+
+

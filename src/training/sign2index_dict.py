@@ -50,7 +50,7 @@ def update_dict(src_path, saved_path = "", save_name = 'saved_dict.p'):
 		   dict = pickle.load(fp)
 		   print('the existing dictionary has been loaded\n', dict)
 		   dict = check_new_key(dict, src_path)
-	except OSError as e:
+    except OSError as e:
 		 print("e\n Need to create new dictionary\n")
 		 dict = create_dict(src_path)
 	
