@@ -12,9 +12,14 @@ from tensorflow import keras
 import matplotlib.pyplot as plt
 import math
 from keras.models import Sequential
-#from keras.layers import Dense, Dropout, LSTM, CuDNNLSTM
-from keras.layers import Dense, Dropout, LSTM
-from keras.models import load_model
+from keras.layers import Dense, Dropout, LSTM, CuDNNLSTM
+
+# known issue: keras version mismatch;
+# solution src - https://stackoverflow.com/questions/53183865/unknown-initializer-glorotuniform-when-loading-keras-model
+
+#from keras.models import load_model
+from tensorflow.keras.models import load_model
+
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 import numpy as np
@@ -89,9 +94,10 @@ print('shape of Y_train: ', y_train.shape)
 # source - https://github.com/SmitSheth/Human-Activity-Recognition/blob/master/train.ipynb
 #----------------------------------------------------------------------
 
-n_hidden = 36 # hidden layer number of features;
+n_hidden = 30 # hidden layer number of features;
 n_classes = 4  # number of sign classes;
 batch_size = 256
+#batch_size = 150
 
 print('------ LSTM Model ---------')
 #--------------------------------------------------
@@ -108,12 +114,13 @@ model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activ
 model.add(Dropout(0.2))
 model.add(LSTM(n_hidden, activation='relu'))
 model.add(Dropout(0.2))
-#model.add(LSTM(n_hidden,  unit_forget_bias=1.0))
+#model.add(LSTM(n_hidden, activation='relu'))
 model.add(Dropout(0.2))
 model.add(Dense(n_classes, activation='softmax'))
 
 # 2. Optimizer
-opt = tf.keras.optimizers.Adam(lr=1e-3, decay=1e-5)
+#opt = tf.keras.optimizers.Adam(lr=1e-3, decay=1e-5)
+opt = tf.keras.optimizers.Adam(lr=1e-4, decay=1e-5)
 
 # 3. defining checkpoints to save the model during training;
 # reminder - shall study the source below;
@@ -122,18 +129,22 @@ opt = tf.keras.optimizers.Adam(lr=1e-3, decay=1e-5)
 
 # have we trained the model?
 final_path = "final_lstm.h5"
-if not os.path.exists(final_path):
+filepath = "saved_model.h5"
+	
+RETRAIN = False
+if ((not os.path.exists(final_path)) or RETRAIN):
 	print("training the model")
 	filepath = "saved_model.h5"
 	# defining the checkpoint using the "loss"
-	checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min', save_freq = 'epoch')
+    # total epochs run = 100
+	checkpoint = ModelCheckpoint(filepath,monitor='acc', verbose=1, save_best_only=True, mode='max')
 	callbacks_list = [checkpoint]
 
 	# 4. Compile model
 	model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
 	# 5. Training the model
-	model.fit(x_train, y_train, epochs=80, batch_size = batch_size, callbacks = callbacks_list)
+	model.fit(x_train, y_train, epochs=100, batch_size = batch_size, callbacks = callbacks_list)
 
 	# Save the final model with a more fitting name
 	model.save(final_path)
@@ -150,6 +161,9 @@ model.summary()
 # EVALUATION;
 # - offline prediction;
 #----------------------------------------------------------------------
+# load the one with the highest accuracy;
+model = load_model(filepath)
+
 print('----- offline evaluation ----- ')
 
 # Do some predictions on test data
