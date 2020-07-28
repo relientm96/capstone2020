@@ -39,8 +39,14 @@ import nebulaM78 as ultraman
 PATH = "C:\\CAPSTONE\\capstone2020\\src\\training\\"
 X_TRAIN_PATH = PATH + "X_train.txt"
 Y_TRAIN_PATH = PATH + "Y_train.txt"
+
+# note this text file is generated manually;
+# make sure the #frames is multiple of 75;
+# the video source is at :
+# C:\CAPSTONE\capstone2020\src\training\auslan-videos\testing.mp4
+# check "edited_testing.mp4" as well
 X_TEST_PATH = PATH + "X_test.txt"
-\
+
 #----------------------------------------------------------------------
 # SET-UP
 # # - showing some information
