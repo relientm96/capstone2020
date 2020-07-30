@@ -19,9 +19,12 @@ params = dict()
 # Custom Params 
 # (refer to https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/include/openpose/flags.hpp
 # for more parameters)
-params["net_resolution"] = "160x80"
+
+params["net_resolution"]  = "336x336"
+#params["net_resolution"] = "160x80"
 params["hand"] = True
 params["hand_net_resolution"] = "328x328"
+params['keypoint_scale']      = 3
 #params["part_candidates"] = True
 
 ############################################

@@ -22,11 +22,13 @@
             <div class='col s12 m12 l6'>
                 <canvas id="canvasOutput"></canvas>
                 <video autoplay="true" id="videoElement" style="display: none;"></video>
+                <p> Your Camera </p>
             </div>
             <div class='col s12 m12 l6'>
                 <div class='video'>
                     <img id="image">
                 </div>
+                <p> Model Output </p>
             </div>
         </div>
     </div>
@@ -71,11 +73,15 @@
             document.getElementById('status').innerHTML = responseText;
         });
 
-        const FPS = 5;
+        setInterval(() =>{
+            canvas.getContext('2d').drawImage(video, 0, 0, video.width, video.height);
+        }, 1000/20)
+
+        const FPS = 2;
         setInterval(() => {
             // This function runs according to FPS rate
             // Takes image from webcam, sends it to server for processing
-            canvas.getContext('2d').drawImage(video, 0, 0, video.width, video.height);
+            //canvas.getContext('2d').drawImage(video, 0, 0, video.width, video.height);
             var data = canvas.toDataURL("image/png");
             data = data.replace('data:' + "image/png" + ';base64,', ''); 
             socket.emit('imageSend', data);

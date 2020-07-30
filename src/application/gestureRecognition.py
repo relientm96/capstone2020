@@ -8,16 +8,31 @@ import numpy as np
 import pprint as pp
 
 #### Tensorflow Imports ####
+
 # Here, we can import tensorflow + keras + Machine Learning Libraries to load models
 import tensorflow as tf
+
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+  try:
+    # Currently, memory growth needs to be the same across GPUs
+    for gpu in gpus:
+      tf.config.experimental.set_memory_growth(gpu, True)
+    logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+    print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+  except RuntimeError as e:
+    # Memory growth must be set before GPUs have been initialized
+    print(e)
+
 from tensorflow import keras
+from keras.models import load_model
 
 '''
 Rolling Window Data Structure
 '''
 # Note numb joints here means both x,y values, (eg: if BODY_25 we have 25*2 numb joints)
 numbJoints   = 98
-window_Width = 70
+window_Width = 75
 
 class RollingWindow:
     def __init__(self, window_Width, numbJoints):
@@ -59,9 +74,17 @@ print("Finished Created Rolling Window, Window Width = {} & NumbJoints = {}".for
 ########## KERAS IMPORT ############
 
 # Signs that define output
+'''
 dictOfSigns = {
-    'help': 0,
-    'pain': 1
+    0: 'help',
+    1: 'pain'
+}
+'''
+dictOfSigns = {
+    0:"ambulance", 
+    1:"help", 
+    2:"hospital", 
+    3:"pain"
 }
 # Reference object for LSTM Model
 lstm     = None
@@ -89,7 +112,7 @@ def initOpenPoseLoad():
 def loadModel():
     global lstm
     try:
-        lstm = keras.models.load_model('first_lstm.h5', compile=False)
+        lstm = keras.models.load_model('saved_model.h5', compile=False)
         lstm.summary()
     except Exception as e:
         print("Error In Loading Model", e)
@@ -99,11 +122,14 @@ def removeConfidenceLevels(data, limit, outputlist, currentNoseX, currentNoseY):
     xycounter = 0
     for i in range(0,limit):
         if xycounter < 2:
+            '''
             if xycounter == 0:
-                value = round(float(data[i] - currentNoseX), 3)
+                value = data[i] - currentNoseX
             else:
-                value = round(float(data[i] - currentNoseY), 3)
-            outputlist.append(str(value))
+                value = data[i] - currentNoseY
+            '''
+            value = data[i]
+            outputlist.append(np.float(value))
             xycounter += 1
         else:
             xycounter = 0
@@ -138,20 +164,18 @@ def translate(datum):
         # Unable to append to keypoints as issue with data shape
         return 'Fail'
 
-    print(r.getPoints().shape)
-    print(r.getPoints())
+    #print(r.getPoints().shape)
+    #print(r.getPoints())
 
     # Reshape for model to read
     reshaped_keypoints = r.getPoints().reshape((1, window_Width, numbJoints))
-
+    
     # Load Keras Model
     global lstm
     predictions = lstm.predict([reshaped_keypoints])
-    guess = np.argmax(i)
-    for key,value in dictOfSigns.items():
-        if value == guess:
-            word = key
-            print("Guessed Sign is:", key)
-
+    print(predictions)
+    guess = np.argmax(predictions)
+    word = dictOfSigns[guess] + "-" + str(round(float(np.max(predictions)),2))
+    #print(word)
     return word
 
