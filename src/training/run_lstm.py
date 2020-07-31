@@ -9,13 +9,32 @@ from sys import platform
 import argparse
 import errno
 import shutil
+import numpy as np
+import json
+import record_video as REC
+import removeConfidenceAndAppend as RCA
+import tempfile
+import RollingWindow as RW
 
-parser = argparse.ArgumentParser()
-parser.add_argument('video_path', help='Recorded Video Path, eg: python run.py <vid_path>')
-args = parser.parse_args()
+#------------------------------------------------------
+# CHANGE TO YOUR OWN REFERENCE PATH
+#------------------------------------------------------
+PREFIX = "C:\\Users\\yongw4\\Desktop\\JSON\\"
+# outputs from openpose: json and its processed video
+json_path = PREFIX
+op_videopath = PREFIX +  "result.avi"
+# where to save your recording?
+raw_videopath = PREFIX + 'hello_world.avi'
 
-print(args.video_path)
+#------------------------------------------------------
+# create a video;
+#------------------------------------------------------
+# start now; note; signtime is the time interval where you perform the sign;
+REC.record_video(raw_videopath,  signtime = 3)
 
+#------------------------------------------------------
+# setting up openpose;
+#------------------------------------------------------
 try:
     # Import Openpose (Windows/Ubuntu/OSX)
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -38,28 +57,31 @@ try:
 
     # Custom Params
     params = dict()
+    params["video"] = raw_videopath
 
     # Static parameters
-
-    # Turn off display for faster rendering
-    params["display"]             = 0   
+    params["display"]             = 2
+    params['render_pose']         = 1
     params["model_folder"]        = "openpose-python/models/"
     params["hand"]                = True
-    ## Configurations for openpose (subject to change) ##
-    # Pose net resolution
     params["net_resolution"]      = "336x336"
-    # Hand Net Resolution
     params["hand_net_resolution"] = "328x328"
-    # Type of pose model
     params["model_pose"]          = "BODY_25"
-    # Indexed 0, so we save 64 frames
-    #params["frame_first"]          = 10
-    # Input video path 
-    params["video"] = args.video_path
+    params['keypoint_scale']      = 3
+    params['number_people_max']   = 1
+
+    #params['frame_flip']            = True
+	params["fps_max"]             = -1
+    
+
+    #------------------------------------------------------
+    # setting up json and video storages;
+    # reminder;
+    # json_path = PREFIX
+    # op_videopath = PREFIX +  "result.avi"
+    #------------------------------------------------------
 
     # JSON save path
-    json_path = os.path.join("result_json", "")
-
     if os.path.exists(json_path):
         print('Removing result_json to clear for new video')
         shutil.rmtree(json_path)
@@ -81,11 +103,17 @@ try:
     params["write_json"]  = json_path
 
     # Render video just incase for sanity check
-    vid_path  = os.path.join("result.avi")
-    params["write_video"] = vid_path
-    print('Writing Video to: ', vid_path) 
+    params["write_video"] = op_videopath
+    print('Writing Video to: ', op_videopath) 
+    
+    # Check that path creation is correct
+    print('Writing JSON to:  ', json_path)
+    # Set them to save json + open pose output video to the following paths
+    params["write_json"]  = json_path
 
-    # Starting OpenPose
+    #------------------------------------------------------
+    # start openpose;
+    #------------------------------------------------------
     try:
         opWrapper = op.WrapperPython(3)
         opWrapper.configure(params)
@@ -98,27 +126,17 @@ except Exception as e:
     print(e)
     sys.exit(-1)
 
-####################################################################################################
+#------------------------------------------------------
 # Processing on this video's data in a way that the model understands
+#------------------------------------------------------
+    
+window_Width = 75
+numbJoints = 98
+matt_window = RW.RollingWindow(window_Width,numbJoints)
+matt_window.addPoint(kp)
+reshaped_keypoints = matth_window.getPoints().reshape((1, window_Width, numbJoints))
+	
 
-import json
-
-# Helper function to remove confidence levels and append to keypoint list
-def removeConfidenceAndAppend(data, limit, outputlist):
-    xycounter = 0
-    for i in range(0,limit):
-        if xycounter < 2:
-            outputlist.append(str(data[i]))
-            xycounter += 1
-        else:
-            xycounter = 0
-    return outputlist
-
-# Number of keypoints
-numb_keypoints = 98
-# Number of frames per gesture reformat
-frames_length = 70
-extracted_kp = []
 
 n = 0
 for j in os.listdir(json_path):
@@ -137,22 +155,7 @@ for j in os.listdir(json_path):
             extracted_kp.append(kp)
     n += 1
 
-import numpy as np
 
-# Convert to numpy array
-extracted_kp = np.array(extracted_kp)
-print('Input Keypoints Shape', extracted_kp.shape)
-print('N result = ', n)
-
-if (extracted_kp.shape[0] < frames_length):
-    # Zero pad if < 70 frames
-    print('Less than', frames_length ,'frames detected!')
-    print('Difference: ', frames_length - len(extracted_kp) )
-    for i in range(len(extracted_kp), frames_length):
-        extracted_kp = np.vstack( (extracted_kp, np.zeros(numb_keypoints)) )
-    print('Now shape is:', extracted_kp.shape)
-
-print(extracted_kp)
 ####################################################################################################
 
 # Tensorflow, Keras imports
