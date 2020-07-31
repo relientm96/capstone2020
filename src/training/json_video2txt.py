@@ -75,8 +75,11 @@ def json_video2txt(jsondata_path, output_path):
 
 				# concatenate all the keypoints into one list: pose_keypoints;
 				pose_keypoints = upperbody_keypoints + lefthand_keypoints + righthand_keypoints
-			
-				#print(len(pose_keypoints))
+				#print('length of body', len(upperbody_keypoints))
+				print('length of left_keypoints', len(lefthand_keypoints))
+				print('length of roght_keypoints', len(righthand_keypoints))
+				#print('length of pose_keypoints', len(pose_keypoints))
+				
 			
 			# pose keypoints are done processed;
 			# ignore the confidence level;
@@ -90,10 +93,11 @@ def json_video2txt(jsondata_path, output_path):
 				# ignore data[2] - confidence level;
 				if ((j+1) % 3 == 0):
 					j += 1
-
+			#print('number of xy',number_xy_coor)
+			#print('leng of frame_kps', len(frame_kps))
 			kps.append(frame_kps)
 			n_elements = len(frame_kps)
-
+			
 
 	#Now we have kps, a list of lists, that includes the x and y positions of all 18 keypoints, for all frames in the frameset
 	# So a list of length frameset.length, with each element being a N-element long list.

@@ -87,13 +87,12 @@ try:
 	params["frame_last"]          = 74  # due to hardware limitation;
 	
 	# Limit to how many FPS to run Openpose on
-	params["fps_max"]             = 8    
+	params["fps_max"]             = -1
 
 	# we just need json as long as the video is within the "limitation" of openpose;
 	# turn off the unnecessary parameters;
 	params['render_pose']             = 0
-	params['display']                 = 0
-
+	
 	# by definition, openpose will keep the one with highest score (probabiltity)
 	# this will remove the false positives;
 	params['number_people_max']     = 1
