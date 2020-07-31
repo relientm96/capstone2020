@@ -1,6 +1,6 @@
 #/usr/bin/env/python
 # created by matthew, nebulaM78 team; capstone 2020;
-# unit testing for the relevant module in gestureRecognition.py and serverOpenPose.py
+# unit testing for the relevant modules in gestureRecognition.py and serverOpenPose.py
 # 1. removeConfidenceAndAppend()
 
 import sys
@@ -24,6 +24,7 @@ def removeConfidenceAndAppend(data):
 	# remember, we have (x,y accuracy) for each keypoints;
 	
 	# safe guard;
+    # it's possible that at this frame, the list is empty;
 	if(len(data['people']) == 0):
 		print("at current frame, no people are detected, so skipped\n")
 		# a total of 147 keypoints;
@@ -78,3 +79,4 @@ if __name__ == '__main__':
 		kp = removeConfidenceAndAppend(keypoints)
 		print('len kp', len(kp))
 		print('output', kp)
+       
