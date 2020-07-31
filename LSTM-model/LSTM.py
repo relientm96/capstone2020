@@ -93,6 +93,7 @@ y_test = lstm.load_y(y_test_path)
 training_data_count = len(X_train)  # 4519 training series (with 50% overlap between each serie)
 test_data_count = len(X_test)  # 1197 test series
 n_input = len(X_train[0][0])  # num input parameters per timestep
+print('N INPUT', n_input)
 
 n_hidden = 34 # Hidden layer num of features
 n_classes = 6 
