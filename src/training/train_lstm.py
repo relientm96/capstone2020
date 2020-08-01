@@ -122,6 +122,7 @@ model.add(Dense(n_classes, activation='softmax'))
 #opt = tf.keras.optimizers.Adam(lr=1e-3, decay=1e-5)
 opt = tf.keras.optimizers.Adam(lr=1e-4, decay=1e-5)
 
+
 # 3. defining checkpoints to save the model during training;
 # reminder - shall study the source below;
 # src - https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/ModelCheckpoint
