@@ -32,7 +32,7 @@ def test_connect():
 def handleImageData(data_image):
     try: 
         # Get starting time
-        start = time.process_time()
+        #start = time.process_time()
 
         # Send to processing OpenCV Side
         data = serverOP.processFrames(data_image).decode('utf-8')
@@ -43,8 +43,8 @@ def handleImageData(data_image):
         emit('response_back', stringData)
 
         # Check time after emitting back (our "fps" check)
-        end = time.process_time()
-        print("Time to process frame", end-start, "seconds")
+        #end = time.process_time()
+        #print("Time to process frame", end-start, "seconds")
         
     except Exception as e:
         print("Could not emit image back to client, error:", e)

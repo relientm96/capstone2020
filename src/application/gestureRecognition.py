@@ -31,8 +31,8 @@ from keras.models import load_model
 Rolling Window Data Structure
 '''
 # Note numb joints here means both x,y values, (eg: if BODY_25 we have 25*2 numb joints)
-numbJoints   = 5
-window_Width = 3
+numbJoints   = 98
+window_Width = 75
 
 class RollingWindow:
     def __init__(self, window_Width, numbJoints):
@@ -61,6 +61,7 @@ class RollingWindow:
         self.points = np.delete(self.points, 0, 0)
         # Now insert this row to the front of points
         self.points = np.vstack([self.points, arr])
+        # Return true when everything is all good
         return True
 
     def printPoints(self):
@@ -74,12 +75,6 @@ print("Finished Created Rolling Window, Window Width = {} & NumbJoints = {}".for
 ########## KERAS IMPORT ############
 
 # Signs that define output
-'''
-dictOfSigns = {
-    0: 'help',
-    1: 'pain'
-}
-'''
 dictOfSigns = {
     0:"ambulance", 
     1:"help", 
@@ -150,7 +145,7 @@ def translate(datum):
     # Add to rolling window
     if r.addPoint(kp) == False:
         # Unable to append to keypoints as issue with data shape
-        return 'Fail'
+        return 'Error'
 
     #print(r.getPoints().shape)
     #print(r.getPoints())
@@ -167,6 +162,7 @@ def translate(datum):
         word = dictOfSigns[guess] + "-" + str(round(float(np.max(predictions)),2))
     except Exception as e:
         print("Error in prediction", e)
+        word = 'Error'
     
     return word
 

@@ -25,7 +25,7 @@ params["net_resolution"]      = "336x336"
 params["hand"]                = True
 params["hand_net_resolution"] = "328x328"
 params['keypoint_scale']      = 3
-params["process_real_time"]   = True
+#params["process_real_time"]   = True
 #params["part_candidates"] = True
 
 ############################################
