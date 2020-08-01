@@ -31,8 +31,8 @@ from keras.models import load_model
 Rolling Window Data Structure
 '''
 # Note numb joints here means both x,y values, (eg: if BODY_25 we have 25*2 numb joints)
-numbJoints   = 98
-window_Width = 75
+numbJoints   = 5
+window_Width = 3
 
 class RollingWindow:
     def __init__(self, window_Width, numbJoints):
@@ -58,9 +58,9 @@ class RollingWindow:
             print("Error! Number of items not equal to numbJoints = ", self.numbJoints)
             return False
         # Pop out last row in points first
-        self.points = np.delete(self.points, self.window_Width-1, 0)
+        self.points = np.delete(self.points, 0, 0)
         # Now insert this row to the front of points
-        self.points = np.vstack([arr, self.points])
+        self.points = np.vstack([self.points, arr])
         return True
 
     def printPoints(self):
