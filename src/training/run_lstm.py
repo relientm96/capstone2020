@@ -31,7 +31,8 @@ raw_videopath = PREFIX + 'hello_world.avi'
 # create a video;
 #------------------------------------------------------
 # start now; note; signtime is the time interval where you perform the sign;
-REC.record_video(raw_videopath,  signtime = 9)
+signtime = 3
+REC.record_video(raw_videopath,  signtime)
 
 #------------------------------------------------------
 # setting up openpose;
@@ -101,7 +102,6 @@ try:
 		pass
 	except Exception as e:
 		print(e)
-	print('HELLO')
 	'''
 	# Check that path creation is correct
 	print('Writing JSON to:  ', json_path)
@@ -148,25 +148,35 @@ matt_window = RW.RollingWindow(window_Width,numbJoints)
 	
 # get a sorted list of all the json files of the recorded videos;
 LIST = sorted(glob.glob(json_path + "*.json"))
-# pass in one chunk of 75 frames at a time;
 
+# store the (prediction + prob) at each stepsize;
+# where FUTURE_LIST[0] stores the predictions; FUTURE_LIST[1] stores the probs;
+FUTURE_LIST = [[],[]]
+PREDS = FUTURE_LIST[0]
+PROBS = FUTURE_LIST[1]
+# pass in one chunk of 75 frames at a time;
 n = 0
 stepsize = 15
 STOP_FLAG = False
+init_len = len(LIST)
 while(STOP_FLAG != True):
 	start_list = stepsize*n
-	end_list = (stepsize*n) + 75
+	end_list = (stepsize*n) + window_Width
 	# if it goes past the end of the List, 
 	# then "extend" by filling up its duplicate (of the last element);
-	if (end_list >= len(LIST)):
-		diff = abs(len(LIST) - end_list)
-		duplicate_elem = LIST[len(LIST)-1]
+	if (end_list >= init_len):
+		diff = abs(init_len - end_list)
+		duplicate_elem = LIST[init_len - 1]
 		for i in range(0, diff):
 			 LIST.append(duplicate_elem)
-		# at this stage, we have reached the end;
-		STOP_FLAG = True
+		# at this stage, we have processed each frame of the video;
+		if(start_list > (init_len - 1)):
+			STOP_FLAG = True
 	# now, extract the 75-size chunk at step = 15;
+    # this could be viewed as a sliding window;
 	chunk = LIST[start_list:end_list]
+	# start at a clean slate; to prevent overlapping;
+	matt_window.clearWindow()
 	# fill up the rolling window ;
 	for i in range(0, window_Width):
 		with open(chunk[i]) as jsonfile:
@@ -181,14 +191,27 @@ while(STOP_FLAG != True):
 	print("All Prediction Probabilities:")
 	print(predictions)
 	print('----- Result ----- ')
-	j = 1
-	for i in predictions:
-		index = np.argmax(i)
-		prob = np.max(i)
-		predicted = dictOfSigns[index]
-		print(j, ': Guessed Sign:', predicted, '; probability:', prob)
-		j += 1
+	index = np.argmax(predictions[0])
+	prob = np.max(predictions[0])
+	predicted = dictOfSigns[index]
+	print('sliding window: ', n, '-- Guessed Sign:', predicted, '; probability:', prob, '\n')
 
+    # storing the information;
+    PREDS.append(predicted)
+    PROBS.append(prob)
+		
 	# increment the step size to check next step 75-frame
 	n +=1
+
+# sanity checks
+print('sanity check - 01')
+CAMERA_FPS = 30
+total_frames = CAMERA_FPS*signtime
+num_slide = total_frames/stepsize
+print("the sliding window should have been slid: ", num_slide)
+print("the sliding window had been slid: ", n -2)
+
+print('sanity check - 02')
+print('all the predictions: ', PREDS)
+print('with its corresponding probability ', PROBS)
 
