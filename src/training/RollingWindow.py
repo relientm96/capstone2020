@@ -39,9 +39,9 @@ class RollingWindow:
 			print("Error! Number of items not equal to numbJoints = ", self.numbJoints)
 			return False
 		
-        # shit register;
-        # remove the oldest from the first index;
-        # add the most recent entry always enters from the "last" index 
+		# shit register;
+		# remove the oldest from the first index;
+		# add the most recent entry always enters from the "last" index 
 		self.points = np.delete(self.points, 0, 0)
 		self.points = np.vstack([self.points, arr])
 		
@@ -49,6 +49,9 @@ class RollingWindow:
 
 	def printPoints(self):
 		pp.pprint(self.points)
+
+	def clearWindow(self):
+		self.points = np.zeros(shape=(self.window_Width,self.numbJoints))
 
 # test driver;
 if __name__ == '__main__':
@@ -68,6 +71,11 @@ if __name__ == '__main__':
 		rolling_window.addPoint(kp)
 		print('added the new frame, \n ', rolling_window.getPoints())
 	
+	# clear the window;
+	print('final window, \n ', rolling_window.getPoints())
+	print('clearing the window:')
+	rolling_window.clearWindow()
+	print('has it been cleared? ', rolling_window.getPoints())
 
 
 	
