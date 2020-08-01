@@ -36,7 +36,6 @@ def record_video(filename, signtime = 3, preptime = 3):
 	capture_duration = preptime + signtime + buffertime
 	start_time = time.time()
 		
-	numframes = 0
 	while( int(time.time() - start_time) < capture_duration ):
 	
 		# reads frame from a camera 
@@ -71,8 +70,7 @@ def record_video(filename, signtime = 3, preptime = 3):
 	# sanity check on the total time taken;
 	print('sanity check:\n total time taken: ', end_recordtime - start_time)
 	print('whole capture duration: ', capture_duration)
-	print("number of frames during the sign capturing: ", numframes)
-
+	
 	# release the camera from video capture
 	cap.release() 
 	
@@ -85,7 +83,7 @@ def record_video(filename, signtime = 3, preptime = 3):
 	
 # test driver;
 if __name__ == '__main__':
-	filename = "C:\\Users\\yongw4\\Desktop\\JSON\\" + 'hello_world.avi'
+	filename = "C:\\Users\\yongw4\\Desktop\\JSON\\" + 'dummy.avi'
 	#fps = 30.0
 	record_video(filename,  signtime = 3)
 

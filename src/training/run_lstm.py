@@ -31,7 +31,7 @@ raw_videopath = PREFIX + 'hello_world.avi'
 # create a video;
 #------------------------------------------------------
 # start now; note; signtime is the time interval where you perform the sign;
-REC.record_video(raw_videopath,  signtime = 3)
+REC.record_video(raw_videopath,  signtime = 9)
 
 #------------------------------------------------------
 # setting up openpose;
@@ -160,7 +160,9 @@ while(STOP_FLAG != True):
 	# then "extend" by filling up its duplicate (of the last element);
 	if (end_list >= len(LIST)):
 		diff = abs(len(LIST) - end_list)
-		LIST = LIST + diff*LIST[len(LIST)-1]
+		duplicate_elem = LIST[len(LIST)-1]
+		for i in range(0, diff):
+			 LIST.append(duplicate_elem)
 		# at this stage, we have reached the end;
 		STOP_FLAG = True
 	# now, extract the 75-size chunk at step = 15;
@@ -179,11 +181,13 @@ while(STOP_FLAG != True):
 	print("All Prediction Probabilities:")
 	print(predictions)
 	print('----- Result ----- ')
+	j = 1
 	for i in predictions:
-		guess = np.argmax(i)
-		for key,value in dictOfSigns.items():
-			if value == guess:
-				print('Guessed Sign:', key, 'with probability:', np.max(i))
+		index = np.argmax(i)
+		prob = np.max(i)
+		predicted = dictOfSigns[index]
+		print(j, ': Guessed Sign:', predicted, '; probability:', prob)
+		j += 1
 
 	# increment the step size to check next step 75-frame
 	n +=1
