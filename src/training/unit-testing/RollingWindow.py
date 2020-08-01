@@ -38,10 +38,12 @@ class RollingWindow:
 		if ( len(arr) != self.numbJoints ):
 			print("Error! Number of items not equal to numbJoints = ", self.numbJoints)
 			return False
-		# Pop out last row in points first
-		self.points = np.delete(self.points, self.window_Width-1, 0)
-		# Now insert this row to the front of points
-		self.points = np.vstack([arr, self.points])
+		# shit register;
+        # remove the oldest from the first index;
+        # add the most recent entry always enters from the "last" index 
+		self.points = np.delete(self.points, 0, 0)
+		self.points = np.vstack([self.points, arr])
+		
 		return True
 
 	def printPoints(self):
@@ -64,6 +66,7 @@ if __name__ == '__main__':
 		kp = [i]*numbJoints
 		rolling_window.addPoint(kp)
 		print('added the new frame, \n ', rolling_window.getPoints())
+	print('type: ', type(rolling_window.getPoints()))
 	
 
 
