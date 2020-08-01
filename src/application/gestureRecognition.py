@@ -118,18 +118,11 @@ def loadModel():
         print("Error In Loading Model", e)
         raise e
 
-def removeConfidenceLevels(data, limit, outputlist, currentNoseX, currentNoseY):
+def removeConfidenceLevels(data, limit, outputlist):
     xycounter = 0
     for i in range(0,limit):
         if xycounter < 2:
-            '''
-            if xycounter == 0:
-                value = data[i] - currentNoseX
-            else:
-                value = data[i] - currentNoseY
-            '''
-            value = data[i]
-            outputlist.append(np.float(value))
+            outputlist.append(np.float(data[i]))
             xycounter += 1
         else:
             xycounter = 0
@@ -137,6 +130,7 @@ def removeConfidenceLevels(data, limit, outputlist, currentNoseX, currentNoseY):
 
 # Translation Module
 def translate(datum):
+
     # Output String Variable of Translated word (sentence in future)
     word = "Test"
 
@@ -146,19 +140,13 @@ def translate(datum):
 
     # We use 0 index for the first person in frame, ignore the others
     kp = []
-    
-    # Read in nose X and Y positions:
-    currentNoseX = datum.poseKeypoints[0][0][0]
-    currentNoseY = datum.poseKeypoints[0][0][1]
-    #print('Current Nose XY:',currentNoseX, currentNoseY)
+    # Flatten as one row vector and remove confidence levels
+    pose      = removeConfidenceLevels(datum.poseKeypoints[0].flatten(), 24, kp) 
+    # Flatten as one row vector and remove confidence levels
+    lefthand  = removeConfidenceLevels(datum.handKeypoints[0][0].flatten(), 61, kp) 
+    # Flatten as one row vector and remove confidence levels
+    righthand = removeConfidenceLevels(datum.handKeypoints[1][0].flatten(), 61, kp) 
 
-    # Flatten as one row vector and remove confidence levels
-    pose      = removeConfidenceLevels(datum.poseKeypoints[0].flatten(), 24, kp, currentNoseX, currentNoseY) 
-    # Flatten as one row vector and remove confidence levels
-    lefthand  = removeConfidenceLevels(datum.handKeypoints[0][0].flatten(), 61, kp, currentNoseX, currentNoseY) 
-    # Flatten as one row vector and remove confidence levels
-    righthand = removeConfidenceLevels(datum.handKeypoints[1][0].flatten(), 61, kp,  currentNoseX, currentNoseY) 
-    
     # Add to rolling window
     if r.addPoint(kp) == False:
         # Unable to append to keypoints as issue with data shape
@@ -172,10 +160,13 @@ def translate(datum):
     
     # Load Keras Model
     global lstm
-    predictions = lstm.predict([reshaped_keypoints])
-    print(predictions)
-    guess = np.argmax(predictions)
-    word = dictOfSigns[guess] + "-" + str(round(float(np.max(predictions)),2))
-    #print(word)
+    try:
+        predictions = lstm.predict([reshaped_keypoints])
+        #print(predictions)
+        guess = np.argmax(predictions)
+        word = dictOfSigns[guess] + "-" + str(round(float(np.max(predictions)),2))
+    except Exception as e:
+        print("Error in prediction", e)
+    
     return word
 
