@@ -50,7 +50,6 @@ try:
 	except ImportError as e:
 		print('Error: OpenPose library could not be found. Did you enable `BUILD_PYTHON` in CMake and have this Python script in the right folder?')
 		raise e
-
 	# Flags
 	parser = argparse.ArgumentParser()
 	args = parser.parse_known_args()
@@ -102,11 +101,11 @@ try:
 	# training GLOBAL constants;
 	#-----------------------------------------------------
 	# our training set and its label;
-	path_X = "C:\\Users\\yongw4\\Desktop\\TREASURE\\X_test.txt"
-	path_Y = "C:\\Users\\yongw4\\Desktop\\TREASURE\\Y_test.txt"
+	path_X = "C:\\Users\\yongw4\\Desktop\\X_dummy.txt"
+	path_Y = "C:\\Users\\yongw4\\Desktop\\Y_dummy.txt"
 	
 	# raw video source;
-	signvideodirectory = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE\\"
+	signvideodirectory = "C:\\Users\\yongw4\\Desktop\\DUMMY\\"
 
 	# iterate through all the raw videos;
 	#for src_path in sorted(glob.glob(os.path.join(signvideodirectory + '\\*.mp4'))):
