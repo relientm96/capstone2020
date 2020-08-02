@@ -30,10 +30,14 @@ from keras.models import load_model
 '''
 Rolling Window Data Structure
 '''
+
 # Note numb joints here means both x,y values, (eg: if BODY_25 we have 25*2 numb joints)
 numbJoints   = 98
 window_Width = 75
 
+import RollingWindow as RW
+
+'''
 class RollingWindow:
     def __init__(self, window_Width, numbJoints):
         self.window_Width   = window_Width
@@ -67,6 +71,8 @@ class RollingWindow:
     def printPoints(self):
         pp.pprint(self.points)
 
+'''
+
 # Instantiate the rolling window for use later
 print("Creating Rolling Window")
 r = RollingWindow(window_Width,numbJoints)
@@ -82,7 +88,7 @@ dictOfSigns = {
     3:"pain"
 }
 # Reference object for LSTM Model
-lstm     = None
+lstm = None
 
 def initOpenPoseLoad():
     '''
