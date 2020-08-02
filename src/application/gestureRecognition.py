@@ -7,6 +7,8 @@ import time
 import numpy as np
 import pprint as pp
 
+############### INITIALIZATIONS ##################
+
 #### Tensorflow Imports ####
 
 # Here, we can import tensorflow + keras + Machine Learning Libraries to load models
@@ -30,52 +32,14 @@ from keras.models import load_model
 '''
 Rolling Window Data Structure
 '''
-
+import RollingWindow as RW
 # Note numb joints here means both x,y values, (eg: if BODY_25 we have 25*2 numb joints)
 numbJoints   = 98
 window_Width = 75
 
-import RollingWindow as RW
-
-'''
-class RollingWindow:
-    def __init__(self, window_Width, numbJoints):
-        self.window_Width   = window_Width
-        self.numbJoints     = numbJoints
-        # Create a 2D Matrix with dimensions
-        # window_Width X number of joints
-        self.points         = np.zeros(shape=(window_Width,numbJoints))
-    
-    def getPoints(self):
-        # Return the 2D matrix of points
-        return self.points
-    
-    def getWindow_Width(self):
-        return self.window_Width
-
-    def getNumbJoints(self):
-        return self.numbJoints
-
-    def addPoint(self, arr):
-        # Check for same number of joints in input array before we insert
-        if ( len(arr) != self.numbJoints ):
-            print("Error! Number of items not equal to numbJoints = ", self.numbJoints)
-            return False
-        # Pop out last row in points first
-        self.points = np.delete(self.points, 0, 0)
-        # Now insert this row to the front of points
-        self.points = np.vstack([self.points, arr])
-        # Return true when everything is all good
-        return True
-
-    def printPoints(self):
-        pp.pprint(self.points)
-
-'''
-
 # Instantiate the rolling window for use later
 print("Creating Rolling Window")
-r = RollingWindow(window_Width,numbJoints)
+r = RW.RollingWindow(window_Width,numbJoints)
 print("Finished Created Rolling Window, Window Width = {} & NumbJoints = {}".format(window_Width, numbJoints))
 
 ########## KERAS IMPORT ############
@@ -89,6 +53,8 @@ dictOfSigns = {
 }
 # Reference object for LSTM Model
 lstm = None
+
+############### Helper Functions ####################
 
 def initOpenPoseLoad():
     '''
@@ -119,42 +85,49 @@ def loadModel():
         print("Error In Loading Model", e)
         raise e
 
-def removeConfidenceLevels(data, limit, outputlist):
-    xycounter = 0
-    for i in range(0,limit):
-        if xycounter < 2:
-            outputlist.append(np.float(data[i]))
-            xycounter += 1
-        else:
-            xycounter = 0
-    return outputlist
+def removeConfidenceNumpy(datum):
+    '''
+    Takes in datum object and get pose, and both hand keypoints
+    '''
+
+    # We want to keep only first two columns for all keypoints (ignore confidence levels)
+    posePoints = datum.poseKeypoints[0][1:8,0:2]  # Slice to only take keypoints 1-7 removing confidence
+    lefthand   = datum.handKeypoints[0][0][:,0:2] # Get all hand points removing confidence
+    righthand  = datum.handKeypoints[1][0][:,0:2] # Get all hand points removing confidence
+
+    # Concatenate all numpy matrices and flatten for rolling window storage (as a row)
+    keypoints = np.vstack([posePoints,lefthand,righthand]).flatten()
+    
+    # Return this as the keypoint to be added to rolling window
+    return keypoints
+
+############### Main Translation Function ####################
 
 # Translation Module
 def translate(datum):
 
     # Output String Variable of Translated word (sentence in future)
-    word = "Test"
+    word = "Init"
 
     '''
     Converting Input Keypoints as numpy array in Yick's GitHub dataset format
     '''
 
-    # We use 0 index for the first person in frame, ignore the others
-    kp = []
-    # Flatten as one row vector and remove confidence levels
-    pose      = removeConfidenceLevels(datum.poseKeypoints[0].flatten(), 24, kp) 
-    # Flatten as one row vector and remove confidence levels
-    lefthand  = removeConfidenceLevels(datum.handKeypoints[0][0].flatten(), 61, kp) 
-    # Flatten as one row vector and remove confidence levels
-    righthand = removeConfidenceLevels(datum.handKeypoints[1][0].flatten(), 61, kp) 
-
+    try:
+        test = len(datum.poseKeypoints[0])
+    except Exception as e:
+        # Test will return an error if no one is seen as index[0] does not exists
+        # Notify user that no one is seen
+        word = "Nobody Here!"
+        return word
+        
+    # Continue to process if we can detect  
+    kp = removeConfidenceNumpy(datum)
+    
     # Add to rolling window
     if r.addPoint(kp) == False:
         # Unable to append to keypoints as issue with data shape
         return 'Error'
-
-    #print(r.getPoints().shape)
-    #print(r.getPoints())
 
     # Reshape for model to read
     reshaped_keypoints = r.getPoints().reshape((1, window_Width, numbJoints))

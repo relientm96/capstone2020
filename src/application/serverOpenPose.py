@@ -20,11 +20,12 @@ params = dict()
 # (refer to https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/include/openpose/flags.hpp
 # for more parameters)
 
-params["net_resolution"]      = "336x336"
-params["hand"]                = True
-params["hand_net_resolution"] = "328x328"
-params['keypoint_scale']      = 3
-
+params["net_resolution"]       = "336x336"
+params["hand"]                 = True
+params["hand_net_resolution"]  = "328x328"
+params['keypoint_scale']       = 3
+params["disable_multi_thread"] = False
+params["number_people_max"]    = 1
 ############################################
 
 # Importing OpenPose 
