@@ -279,7 +279,7 @@ if __name__ == '__main__':
 	write_vname = 'hello_world.avi'
 	
 	# how long do you want to capture the actual sign;
-	signtime = 9
+	signtime = 12
 	# import the pretrained model;
 	saved_model = 'saved_model.h5'
 
