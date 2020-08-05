@@ -11,11 +11,29 @@ try:
 except ImportError:  # python 3.x
 	import pickle
 
+#------------------------------------------------------------------------------------------
+# OVERVIEW: 
+# it has two set of modules:
+# 1. tools for sanity checking;
+# 2. tools to transform videos;
+#
+# ASSUMPTIONS;
+# 1. only mp4 format;
+# 2. the window width for lstm is fixed at 75-size;
+#------------------------------------------------------------------------------------------
 
+#------------------------------------------------------------------------------------------
+# TOOLS FOR SANITY CHECK ON OPENPOSE VIDEOS AND AUSLAN RECOGNITION:
+# 1. record_video(); this is our offline auslan prediction;
+# 2. annotate_video(); to insert text onto the video;
+# acknowledgement;
 # src = https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_gui/py_video_display/py_video_display.html
 # src - https://raspberrypi.stackexchange.com/questions/66976/capture-video-for-a-certain-time-then-quit-and-save-to-a-folder-using-opencv-3
 # src - https://www.geeksforgeeks.org/python-opencv-write-text-on-video/
 # src - https://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html#videocapture-get
+# src - https://github.com/kkroening/ffmpeg-python
+#------------------------------------------------------------------------------------------
+
 
 def record_video(filename, signtime = 3, preptime = 3):
 	'''
@@ -45,7 +63,6 @@ def record_video(filename, signtime = 3, preptime = 3):
 	start_time = time.time()
 		
 	while( int(time.time() - start_time) < capture_duration ):
-	
 		# reads frame from a camera 
 		_, frame = cap.read() 
 	
@@ -139,11 +156,203 @@ def annotate_video(filename, info_list):
 	cv2.destroyAllWindows()
 	print('track: ', track)
 
+
+#------------------------------------------------------------------------------------------
+# VIDEO TRANSFORMATIONS;
+# this set contains the tools to transform the videos and some safeguards;
+# 1. get_frame_count;
+# 2. lstm window check; to check whether the minimum window width has been met;
+# 3. horizontal flipped;
+# 4. change film speed while maintaining the frame count;
+# 5. rotation;
+#------------------------------------------------------------------------------------------
+
+def get_frame_count_CV(input):
+	'''
+	function:
+		- to get the frame count using CV2 library;
+	args:
+		- the complete mp4 filename (incl, path);
+	return: 
+		- the total number of frames in the video;
+	'''
+	cap = cv2.VideoCapture(input)
+	if (cap.isOpened()== False):
+		print("Error opening video stream or file")
+	input_fps = int(cap.get(5))
+	total_frames = int(cap.get(7))
+	print("CV2; input_fps ", input_fps)
+	print("CV2; frame count ", total_frames)
+	return total_frames
+
+def get_frame_count_MP(input):
+	'''
+	function:
+		- to get the frame count using moviepy library;
+	args:
+		- the complete mp4 filename (incl, path);
+	return: 
+		- the total number of frames in the video;
+	'''
+	clip = mp.VideoFileClip(input)
+	num_frames = len(list(clip.iter_frames()))
+	print("movidepy; num_frames: ", num_frames)
+	return num_frames
+
+def lstm_window_check(input_list):
+	'''
+	function:
+		- assert the length >= 75, otherwise pad it with anything
+		- to make up to the required window width;
+	args:
+		- a list of the video frames;
+	return:
+		- the input_list with the "correct" length;
+	'''
+	window_width = 77 # leave some room: 75 + buffer;
+	length = len(input_list)
+	if(length < window_width):
+		# pad it with the last frame;
+		grab = input_list[-1]
+		diff = window_width - length
+		for i in range(0, diff):
+			input_list.append(grab)
+	# checked; safe now;
+	return input_list
+
+def frames2video(input_list, size):
+	'''
+	function:
+		- to convert a list of frames to a video;
+	args:
+		- input_list; the list of frames;
+		- size; the (width, height) of the frame;
+	return;
+		- none;
+	'''
+	# encode it with its bare ascii code; a wraparound;
+	# src - https://forums.developer.nvidia.com/t/python-what-is-the-four-characters-fourcc-code-for-mp4-encoding-on-tx2/57701/4
+	fourcc = 0x7634706d
+	out = cv2.VideoWriter(output,fourcc, 30, size)
+	for i in range(len(input_list)):
+		# writing to a image array
+		out.write(input_list[i])
+	out.release()
+
+def video_flip(input, output):
+	'''
+	function:
+		- to horizontally flip the video and save as a new video;
+	args:
+		- input; the filename (path) of the input video;
+		- output; where to save?
+	return:
+		- none;
+	'''
+	video = mp.VideoFileClip(input)
+	out = video.fx(vfx.mirror_x)
+	out.write_videofile(output)
+	
+def video_rotate(input, output, degree):
+	'''
+	function:
+		- to rotate a video by ?? degree, and save as a new video
+	args:
+		- input; the filename (path) of the input video;
+		- output; where to save?
+		- degree; clockwise if positive; otherwise; anticlockwise;
+	return:
+		- none;
+	'''
+
+	clip = mp.VideoFileClip(input)
+	newclip = (clip.fx( vfx.rotate, degree))
+	newclip.write_videofile(output)
+	print('the rotated video has been saved to : ', output)
+
+def slow_video(input, output, speed):
+	'''
+	function:
+		- to slow down a film while maintaining the frame count, 
+		- and save it as a new video;
+	args:
+		- input; the filename (path) of the input video;
+		- output; where to save?
+		- speed; must be <= 1;
+	return:
+		- none;
+	'''
+	clip = mp.VideoFileClip(input) 
+	slow_clip = (clip.fx( vfx.speedx, speed))
+	# get the (width, height)
+	size = slow_clip.size
+	input_list = (list(slow_clip.iter_frames()))
+	length = len(input_list)
+	# assert we meet the lstm window width minimum;
+	input_list = lstm_window_check(input_list)
+	# now, it's safe to extract the centre frame ...
+	# of size 75;
+	middle = float(len(input_list))/2
+	hardcode =37
+	# consider odd and even list length separately;
+	if(middle % 2 != 0):
+		middle = int(middle - .5)
+		extract = input_list[middle-hardcode:middle+1+hardcode]
+	else:
+		middle = int(middle-1)
+		extract = input_list[middle-(hardcode-1):middle+2+hardcode]
+	# done? write it;
+	frames2video(extract, size)
+	print("the slowed-video has been saved to: ", output)
+
+def fast_video(input, output, speed):
+	'''
+	function:
+		- to speed up a film while maintaining the frame count, 
+		- and save it as a new video;
+	args:
+		- input; the filename (path) of the input video;
+		- output; where to save?
+		- speed; must be > 1;
+	return:
+		- none;
+	'''
+	clip = mp.VideoFileClip(input) 
+	fast_clip = (clip.fx( vfx.speedx, speed))
+	# get the (width, height)
+	size = fast_clip.size
+	input_list = (list(fast_clip.iter_frames()))
+	# assert we meet the lstm window width minimum;
+	
+	input_list = lstm_window_check(input_list)
+	# done? write it;
+	frames2video(input_list, size)
+	print("the fast-video has been saved to: ", output)
+
+def video_speed(input, output, speed):
+	'''
+	function:
+		- to change the speed of  a film while maintaining the frame count, 
+		- and save it as a new video;
+	args:
+		- input; the filename (path) of the input video;
+		- output; where to save?
+		- speed; slower if < 1; faster if > 1; otherwise, unchanged;
+	return:
+		- none;
+	'''
+	speed = abs(speed)
+	if (speed <= 1):
+		slow_video(input, output, speed)
+	else:
+		fast_video(input, output, speed)
+
+
 # test driver;
 if __name__ == '__main__':
 	# test - 01
 	#filename = "C:\\Users\\yongw4\\Desktop\\JSON\\" + 'dummy.avi'
-    #fps = 30.0
+	#fps = 30.0
 	#record_video(filename,  signtime = 3)
 	
 
