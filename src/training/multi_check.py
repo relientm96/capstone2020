@@ -9,6 +9,7 @@ import errno
 import tempfile
 import glob, os
 import ffmpeg
+import tensorflow as tf
 
 # from nebulaM78;
 import file_tools as ftools
@@ -16,8 +17,7 @@ import generate_XY as genxy
 import json_video2txt as jv2t
 import multiprocessing
 import time
-	
-	
+
 
 def PARAMS(video_path, write_path):
 	params = dict()
@@ -26,13 +26,13 @@ def PARAMS(video_path, write_path):
 	params['number_people_max']         = 1
 	params["model_pose"]                = "BODY_25"
 	params["net_resolution"]         = "336x336"
-	params["hand"]                      = False
-	#params["hand_net_resolution"]       = "328x328"
+	params["hand"]                      = True
+	params["hand_net_resolution"]       = "328x328"
 	params['disable_multi_thread']      = True
 	params['process_real_time']         = False
 	params["fps_max"]             = -1
-	#params["frame_first"]         = 0
-	#params["frame_last"]          = 74 
+	params["frame_first"]         = 0
+	params["frame_last"]          = 74 
 	params['frame_flip']            = False
 	params['keypoint_scale']            = 3
 
@@ -59,6 +59,18 @@ def PARAMS(video_path, write_path):
 	return params
 
 def MAIN(video_path, write_path):
+	gpus = tf.config.experimental.list_physical_devices('GPU')
+	if gpus:
+		try:
+			# Currently, memory growth needs to be the same across GPUs
+			for gpu in gpus:
+				tf.config.experimental.set_memory_growth(gpu, True)
+			logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+			print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+		except RuntimeError as e:
+			# Memory growth must be set before GPUs have been initialized
+			print(e)
+
 	params = PARAMS(video_path, write_path)
 	try:
 		# Import Openpose (Windows/Ubuntu/OSX)
@@ -116,19 +128,19 @@ def MAIN(video_path, write_path):
 		sys.exit(-1)
 
 if __name__ == '__main__':
-    video_path = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\ambulance_1.mp4"
-    video_path2 = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\fullbody.mp4"
-    write_path = "C:\\Users\\yongw4\\Desktop\\DUMMY_JSON"
-    write_path2 = "C:\\Users\\yongw4\\Desktop\\DUMMY_JSON2"
+	video_path = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\ambulance_1.mp4"
+	video_path2 = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\fullbody.mp4"
+	write_path = "C:\\Users\\yongw4\\Desktop\\DUMMY_JSON"
+	write_path2 = "C:\\Users\\yongw4\\Desktop\\DUMMY_JSON2"
 
-    start_time = time.time()
-    proc = [[video_path, write_path], [video_path2, write_path2]]
-    for ls in proc:
-        ## right here
-        p = multiprocessing.Process(target=MAIN, args=(ls[0], ls[1]))
-        p.start()
-        proc.append(p)
-    for pp in proc:
-        pp.join()
-    print("--- %s seconds ---" % (time.time() - start_time))
-	#MAIN(vvideo_path, write_path)
+	start_time = time.time()
+	proc = [[video_path, write_path], [video_path2, write_path2]]
+	for ls in proc:
+		## right here
+		p = multiprocessing.Process(target=MAIN, args=(ls[0], ls[1]))
+		p.start()
+		proc.append(p)
+	for pp in proc:
+		pp.join()
+	print("--- %s seconds ---" % (time.time() - start_time))
+	
