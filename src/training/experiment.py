@@ -6,8 +6,6 @@ import ffmpeg
 import moviepy.editor as mp
 import moviepy.video.fx.all as vfx
 import os
-# src - https://timber.io/blog/multiprocessing-vs-multithreading-in-python-what-you-need-to-know/
-# src - https://stackoverflow.com/questions/20886565/using-multiprocessing-process-with-a-maximum-number-of-simultaneous-processes
 import file_tools as ftools
 
 import multiprocessing as MP
@@ -58,14 +56,19 @@ if __name__ == '__main__':
 	# src - https://stackoverflow.com/questions/23816546/how-many-processes-should-i-run-in-parallel
 	# src - https://stackoverflow.com/questions/11996632/multiprocessing-in-python-while-limiting-the-number-of-running-processes
 	# src - https://stackoverflow.com/questions/868568/what-do-the-terms-cpu-bound-and-i-o-bound-mean
+    # src - https://timber.io/blog/multiprocessing-vs-multithreading-in-python-what-you-need-to-know/
+    # src - https://stackoverflow.com/questions/20886565/using-multiprocessing-process-with-a-maximum-number-of-simultaneous-processes
 	# observation: two processes execution at a time with Pool method; gpu crashes for > 2 processes!
 	# observation: it took ~78.314712 seconds to openpose process 6 videos of 3-second duration;
 
 	start_time = time.time()
 	
 	num_workers = MP.cpu_count()  
+	print("total number of cpu cores here: ", num_workers)
 	DEGREE = [3,5,7,-3,-5,-7, 90]
-	pool = MP.Pool(3)
+	# at max, 2 processes could be executed; such value is obtained through get-your-hands-dirty benchmarking;
+	CPU_MAX = 2
+	pool = MP.Pool(CPU_MAX)
 	for index in range(len(DEGREE)):
 		[classname, _] = ftools.checkoff_file(INPUT, "")
 		OUTPUT = PREFIX + classname + "_" + "transformed_" + str(index) + ".mp4"
