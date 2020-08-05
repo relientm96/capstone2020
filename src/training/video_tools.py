@@ -5,6 +5,11 @@ import cv2
 import time
 import sys
 import numpy as np
+import ffmpeg
+import moviepy.editor as mp
+import moviepy.video.fx.all as vfx
+import os
+
 # needed to save non-string python object; eg dictionary;
 try:
 	import cPickle as pickle
@@ -20,20 +25,19 @@ except ImportError:  # python 3.x
 # ASSUMPTIONS;
 # 1. only mp4 format;
 # 2. the window width for lstm is fixed at 75-size;
+# 3. by (2), the transformed video's frame count will have at least size of 75;
 #------------------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------------------
 # TOOLS FOR SANITY CHECK ON OPENPOSE VIDEOS AND AUSLAN RECOGNITION:
 # 1. record_video(); this is our offline auslan prediction;
 # 2. annotate_video(); to insert text onto the video;
-# acknowledgement;
+# *acknowledgement;
 # src = https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_gui/py_video_display/py_video_display.html
 # src - https://raspberrypi.stackexchange.com/questions/66976/capture-video-for-a-certain-time-then-quit-and-save-to-a-folder-using-opencv-3
 # src - https://www.geeksforgeeks.org/python-opencv-write-text-on-video/
 # src - https://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html#videocapture-get
-# src - https://github.com/kkroening/ffmpeg-python
 #------------------------------------------------------------------------------------------
-
 
 def record_video(filename, signtime = 3, preptime = 3):
 	'''
@@ -165,6 +169,8 @@ def annotate_video(filename, info_list):
 # 3. horizontal flipped;
 # 4. change film speed while maintaining the frame count;
 # 5. rotation;
+# *acknowledgement;
+# src - https://zulko.github.io/moviepy/index.html
 #------------------------------------------------------------------------------------------
 
 def get_frame_count_CV(input):
