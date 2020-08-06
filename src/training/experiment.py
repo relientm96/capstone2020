@@ -17,7 +17,7 @@ def NANI(input, output, param, jsonpath):
 	REC.video_rotate(input, output, param)
 	#REC.video_flip(input, output)
 	#print("FUCKKKKKKKKKK")
-	MC.MAIN(output, jsonpath)
+	#MC.MAIN(output, jsonpath)
 
 
 if __name__ == '__main__':
@@ -83,7 +83,7 @@ if __name__ == '__main__':
 	#DEGREE = [0.6, 0.7, 0.8]
 	
 	# at max, 2 processes could be executed; such value is obtained through get-your-hands-dirty benchmarking;
-	CPU_MAX = 2
+	CPU_MAX = num_workers
 	pool = MP.Pool(CPU_MAX)
 	for index in range(len(DEGREE)):
 		print('index: ', index)
