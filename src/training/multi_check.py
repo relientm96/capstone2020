@@ -22,7 +22,10 @@ import time
 def PARAMS(video_path, write_path):
 	params = dict()
 	params['render_pose']               = 1
+	#params['render_pose']               = 0
+
 	params['display']                   = 2
+	#params['display']                   = 0
 	params['number_people_max']         = 1
 	params["model_pose"]                = "BODY_25"
 	params["net_resolution"]         = "336x336"

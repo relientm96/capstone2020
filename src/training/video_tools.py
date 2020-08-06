@@ -4,11 +4,13 @@
 import cv2
 import time
 import sys
+import tempfile
 import numpy as np
 import ffmpeg
 import moviepy.editor as mp
 import moviepy.video.fx.all as vfx
 import os
+import imageio
 
 # needed to save non-string python object; eg dictionary;
 try:
@@ -121,6 +123,7 @@ def annotate_video(filename, info_list):
 	cap = cv2.VideoCapture(filename)
 	if (cap.isOpened()== False):
 		print("Error opening video stream or file")
+		sys.exit("cv2 cannot open the video stream")
 	input_fps = int(cap.get(5))
 	total_frames = int(cap.get(7))
 
@@ -169,6 +172,8 @@ def annotate_video(filename, info_list):
 # 3. horizontal flipped;
 # 4. change film speed while maintaining the frame count;
 # 5. rotation;
+# 6. convert video to frames;
+# 7. combine frames and save it as a video;
 # *acknowledgement;
 # src - https://zulko.github.io/moviepy/index.html
 #------------------------------------------------------------------------------------------
@@ -226,7 +231,42 @@ def lstm_window_check(input_list):
 	# checked; safe now;
 	return input_list
 
-def frames2video(input_list, size):
+def grab_frames(input):
+	'''
+		function:
+			- use opencv to convert a video to frames in list;
+		args:
+			- input file;
+		return:
+			- a list of the frames;
+	'''
+	cap = cv2.VideoCapture(input)
+	if (cap.isOpened()== False):
+		print("Error opening video stream or file")
+		sys.exit("cv2 cannot open the video stream")
+	# get some metadata;
+	input_fps = int(cap.get(5))
+	total_frames = int(cap.get(7))
+	
+	count_frame = 0
+	store = []
+	while(cap.isOpened()):
+		# process the frame;
+		ret, frame = cap.read()
+		count_frame += 1
+		#cv2.imshow('frame', frame)
+		store.append(frame)
+		if cv2.waitKey(30) & 0xFF == ord('q'):
+			break
+		# after all the frames have been read, no point to continue;
+		# a wrap around to prevent opencv2 error
+		if(count_frame > total_frames-1):
+			break
+	cap.release()
+	cv2.destroyAllWindows()
+	return store	
+
+def frames2video(input_list, output, size):
 	'''
 	function:
 		- to convert a list of frames to a video;
@@ -288,11 +328,15 @@ def slow_video(input, output, speed):
 	return:
 		- none;
 	'''
+	
 	clip = mp.VideoFileClip(input) 
 	slow_clip = (clip.fx( vfx.speedx, speed))
 	# get the (width, height)
 	size = slow_clip.size
-	input_list = (list(slow_clip.iter_frames()))
+	with tempfile.TemporaryDirectory() as dummy_path:
+		dummy = dummy_path + "\\dummy.mp4"
+		slow_clip.write_videofile(dummy)
+		input_list = grab_frames(dummy)
 	length = len(input_list)
 	# assert we meet the lstm window width minimum;
 	input_list = lstm_window_check(input_list)
@@ -308,7 +352,7 @@ def slow_video(input, output, speed):
 		middle = int(middle-1)
 		extract = input_list[middle-(hardcode-1):middle+2+hardcode]
 	# done? write it;
-	frames2video(extract, size)
+	frames2video(extract, output, size)
 	print("the slowed-video has been saved to: ", output)
 
 def fast_video(input, output, speed):
@@ -327,12 +371,15 @@ def fast_video(input, output, speed):
 	fast_clip = (clip.fx( vfx.speedx, speed))
 	# get the (width, height)
 	size = fast_clip.size
-	input_list = (list(fast_clip.iter_frames()))
-	# assert we meet the lstm window width minimum;
+	with tempfile.TemporaryDirectory() as dummy_path:
+		dummy = dummy_path + "\\dummy.mp4"
+		fast_clip.write_videofile(dummy)
+		input_list = grab_frames(dummy)
 	
+	# assert we meet the lstm window width minimum;
 	input_list = lstm_window_check(input_list)
 	# done? write it;
-	frames2video(input_list, size)
+	frames2video(input_list, output, size)
 	print("the fast-video has been saved to: ", output)
 
 def video_speed(input, output, speed):
@@ -347,30 +394,48 @@ def video_speed(input, output, speed):
 	return:
 		- none;
 	'''
-	speed = abs(speed)
 	if (speed <= 1):
 		slow_video(input, output, speed)
 	else:
-		fast_video(input, output, speed)
-
-
+		fast_video(input, output, speed)	
+		
 # test driver;
 if __name__ == '__main__':
 	# test - 01
-	#filename = "C:\\Users\\yongw4\\Desktop\\JSON\\" + 'dummy.avi'
-	#fps = 30.0
-	#record_video(filename,  signtime = 3)
-	
+	'''
+	filename = "C:\\Users\\yongw4\\Desktop\\JSON\\" + 'dummy.avi'
+	fps = 30.0
+	record_video(filename,  signtime = 3)
+	'''
 
 	# test - 02
+	'''
 	list_path = "C:\\Users\\yongw4\\Desktop\\OP_VIDEOS\\"+ 'future_prediction.txt'
 	with open(list_path, "rb") as fp:   
 		info_list = pickle.load(fp)
 	filename = "C:\\Users\\yongw4\\Desktop\\OP_VIDEOS\\" +  "result.avi"
 	annotate_video(filename, info_list)
+	'''
+	'''
+	# test 03;
+	PREFIX = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\"
+	input = PREFIX + "ambulance_14.mp4"
+	output = PREFIX + "output_test.mp4"
+	video_rotate(input, output, -10)
+	'''
 
-
-
-
+	# test 04
+	PREFIX = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\"
+	input = PREFIX + "ambulance_14.mp4"
+	output = PREFIX + "output_test.mp4"
+	video_speed(input, output, 3)
+	
+	'''
+	# test 05;
+	PREFIX = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\"
+	input = PREFIX + "help_95.mp4"
+	output = PREFIX + "output_test.mp4"
+	video2frames(input)
+	'''
 
 	
