@@ -19,9 +19,13 @@ params = dict()
 # (refer to https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/include/openpose/flags.hpp
 # for more parameters)
 
-params["net_resolution"]       = "336x336"
+params["net_resolution"]       = "144x112"
+params["hand_net_resolution"]  = "272x272"
+
+#params["net_resolution"]       = "336x336"
+#params["hand_net_resolution"]  = "328x328"
+
 params["hand"]                 = True
-params["hand_net_resolution"]  = "328x328"
 params['keypoint_scale']       = 3
 params["disable_multi_thread"] = False
 params["number_people_max"]    = 1
@@ -94,9 +98,11 @@ def main():
             # Read capture from opencv2
             ret, frame = cap.read()
 
+            start = time.process_time()
             datum = op.Datum()
             datum.cvInputData = frame
             opWrapper.emplaceAndPop([datum])
+            print("OpenPose process frame in {} seconds".format(time.process_time() - start))
 
             # Pass in datum object to send keypoints to gesture recognition module
             word = "Word: " + gr.translate(datum)
@@ -119,6 +125,8 @@ def main():
             
         except Exception as e:
             print(e)
+        
+        print('-------------------------------------------------------------')
     
     # Break and release if detected
     cap.release()

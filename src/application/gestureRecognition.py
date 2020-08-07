@@ -136,7 +136,6 @@ def translate(datum):
     global lstm
     try:
         predictions = lstm.predict([reshaped_keypoints])
-        #print(predictions)
         guess = np.argmax(predictions)
         word = dictOfSigns[guess] + "-" + str(round(float(np.max(predictions)),2))
     except Exception as e:

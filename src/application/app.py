@@ -51,4 +51,5 @@ def handleImageData(data_image):
 
 if __name__ == '__main__':
     #socketio.run(app)
-    wsgi.server(eventlet.wrap_ssl(eventlet.listen(('', 5000)),certfile='cert.pem',keyfile='key.pem'), app)
+    wsgi.server(eventlet.listen(('', 5000)), app)
+    # wsgi.server(eventlet.wrap_ssl(eventlet.listen(('', 5000)),certfile='cert.pem',keyfile='key.pem'), app)
