@@ -36,11 +36,6 @@ def json_video2txt(jsondata_path, output_path):
 			# 21 keypoints for each hand
 			# get body + both hands;
 			
-			# debugging ...
-			#print("json_video2txt-debug\n")
-			#print('data\n', data)
-			#assert(len(data["people"]) != 0)
-			
 			# in case of no people detected, 
 			# hence, we will have empty sets; 
 			# skip
@@ -65,20 +60,9 @@ def json_video2txt(jsondata_path, output_path):
 				# https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md#face-output-format
 				# remember, we have (x,y accuracy) for each keypoints;
 				
-				# debugging ...
-				#print("json_video2txt-1\n")
-			
 				upperbody_keypoints = body_keypoints[3:24] 
-			
-				# debugging ..
-				#print("json_video2txt-2\n")
-
 				# concatenate all the keypoints into one list: pose_keypoints;
 				pose_keypoints = upperbody_keypoints + lefthand_keypoints + righthand_keypoints
-				#print('length of body', len(upperbody_keypoints))
-				print('length of left_keypoints', len(lefthand_keypoints))
-				print('length of roght_keypoints', len(righthand_keypoints))
-				#print('length of pose_keypoints', len(pose_keypoints))
 				
 			
 			# pose keypoints are done processed;
@@ -98,7 +82,6 @@ def json_video2txt(jsondata_path, output_path):
 			kps.append(frame_kps)
 			n_elements = len(frame_kps)
 			
-
 	#Now we have kps, a list of lists, that includes the x and y positions of all 18 keypoints, for all frames in the frameset
 	# So a list of length frameset.length, with each element being a N-element long list.
 	#Next, we simply loop through kps, writing the contents to a text file, where each sub list is a new line.
