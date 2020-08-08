@@ -223,8 +223,9 @@ def lstm_window_check(input_list):
 	window_width = 77 # leave some room: 75 + buffer;
 	length = len(input_list)
 	if(length < window_width):
-		# pad it with the last frame;
-		grab = input_list[-1]
+		# pad it with a black frame;
+		grab = (input_list[-1])
+		grab.fill(0)
 		diff = window_width - length
 		for i in range(0, diff):
 			input_list.append(grab)
@@ -416,20 +417,19 @@ if __name__ == '__main__':
 	filename = "C:\\Users\\yongw4\\Desktop\\OP_VIDEOS\\" +  "result.avi"
 	annotate_video(filename, info_list)
 	'''
-	
+	'''
 	# test 03;
 	PREFIX = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\"
 	input = PREFIX + "help_95.mp4"
 	output = PREFIX + "output_test.mp4"
-	video_rotate(input, output, -9)
-	
+	video_rotate(input, output, 90)
 	'''
 	# test 04
 	PREFIX = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\"
-	input = PREFIX + "ambulance_1.mp4"
+	input = PREFIX + "translation.mp4"
 	output = PREFIX + "output_test.mp4"
-	video_speed(input, output, 1.4)
-	'''
+	video_speed(input, output, 2)
+	
 	'''
 	# test 05;
 	PREFIX = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\"
