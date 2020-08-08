@@ -416,20 +416,20 @@ if __name__ == '__main__':
 	filename = "C:\\Users\\yongw4\\Desktop\\OP_VIDEOS\\" +  "result.avi"
 	annotate_video(filename, info_list)
 	'''
-	'''
+	
 	# test 03;
 	PREFIX = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\"
-	input = PREFIX + "ambulance_14.mp4"
+	input = PREFIX + "help_95.mp4"
 	output = PREFIX + "output_test.mp4"
-	video_rotate(input, output, -10)
+	video_rotate(input, output, -9)
+	
 	'''
-
 	# test 04
 	PREFIX = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\"
-	input = PREFIX + "ambulance_14.mp4"
+	input = PREFIX + "ambulance_1.mp4"
 	output = PREFIX + "output_test.mp4"
-	video_speed(input, output, 3)
-	
+	video_speed(input, output, 1.4)
+	'''
 	'''
 	# test 05;
 	PREFIX = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\"
