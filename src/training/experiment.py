@@ -7,92 +7,141 @@ import moviepy.editor as mp
 import moviepy.video.fx.all as vfx
 import os
 import file_tools as ftools
-
-import multiprocessing as MP
-import time
-import video_tools as REC
+import multiprocessing as mp
+import video_tools as VID
 import multi_check as MC
+import tempfile
+import shutil
+import errno
 
-def NANI(input, output, param, jsonpath):
-	REC.video_rotate(input, output, param)
-	#REC.video_flip(input, output)
-	#print("FUCKKKKKKKKKK")
-	#MC.MAIN(output, jsonpath)
+# src - https://stackoverflow.com/questions/48191238/can-multiple-processes-write-to-the-same-folder
 
-
-if __name__ == '__main__':
-	PREFIX = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\"
-	#input = PREFIX + "ambulance_14.mp4"
-	output = PREFIX + "output_test_3.mp4"
-	INPUT = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\help_95.mp4"
-	jsonpath = "C:\\Users\\yongw4\\Desktop\\DUMMY_JSON2"
+# global var;
+DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
 	
-	# experiment 1
-	# using Processes
-	# src - https://timber.io/blog/multiprocessing-vs-multithreading-in-python-what-you-need-to-know/
-	# src - https://stackoverflow.com/questions/20886565/using-multiprocessing-process-with-a-maximum-number-of-simultaneous-processes
-	# observation: one process execution at a time with join() method to avoid spamming the gpu which will crash the comp;
-	# observation: it took ~128.81336 seconds to openpose process 6 videos of 3-second duration;
+
+def assign_video_locations(input_list, prefix, classname, identity, henshin_type):
 	'''
-	start_time = time.time()
-	#proc = [[video_path, write_path], [video_path2, write_path2]]
-	#DEGREE = [3,5,7,-3,-5,-7]
-	DEGREE = [3,]
-	index = 0
-	subprocess = []
-	for index in range(len(DEGREE)):
-		## right here
-		print("entered;")
-		[classname, _] = ftools.checkoff_file(INPUT, "")
-		OUTPUT = PREFIX + classname + "_" + "transformed_" + str(index) + ".mp4"
-		p = MP.Process(target = NANI, args=(INPUT, OUTPUT, DEGREE[index], jsonpath))
-		# only execute one process at a time;
-		# our gpu cannot handle the load!!;
-		p.start()
-		p.join()
-		#index += 1
-	#	subprocess.append(p)
-	#for pp in subprocess:
-	#	pp.join()
-	print("--- %s seconds ---" % (time.time() - start_time))
+	function:
+		- auxiliary function;
+		- to assign "IP input address" for the video transformation;
+	args:
+		- input_list; the list of parameters;
+		- prefix;   the directory path;
+		- classname; which class the current video being processed belongs to?
+	return:
+		- a list of the "IP addresses"
 	'''
+	length = len(input_list)
+	# video format; hardcode this;
+	vformat = ".mp4"
+	temp = os.path.join(prefix, classname)
+	locations = []
+	for i in range(length):
+		filename = temp + "_" + identity + "_" + henshin_type + str(i) + vformat
+		locations.append(filename)
+	return locations
 
-	# experiment 2
-	# using Pool
-	# src - https://stackoverflow.com/questions/23816546/how-many-processes-should-i-run-in-parallel
-	# src - https://stackoverflow.com/questions/11996632/multiprocessing-in-python-while-limiting-the-number-of-running-processes
-	# src - https://stackoverflow.com/questions/868568/what-do-the-terms-cpu-bound-and-i-o-bound-mean
-	
-	#-------------------------------------------------------------------------
-	# observation: 
-	# [rendering] 
-	#   - two processes execution at a time with Pool method; gpu crashes for > 2 processes!
-	#   - observation: it took ~78.314712 seconds to openpose process 6 videos of 3-second duration;
-	# [off rendering];
-	#   - similar result as with rendering; cannot go beyond 2 processes;
-	#-------------------------------------------------------------------------
+def which_block(func, input, storage_path):
+	print("\n function: ", func)
+	func(input, storage_path)
 
-	print('using pool here')
-	start_time = time.time()
-	num_workers = MP.cpu_count()  
-	print("total number of cpu cores here: ", num_workers)
-	#time.sleep(5)
-	DEGREE = [3,5,7,-3,-5,-7]
-	#DEGREE = [1,1,1,1]
-	#DEGREE = [1.5,2,3]
-	#DEGREE = [0.6, 0.7, 0.8]
+def rotate_block(input, storage_path):
+	print("\n video input: ", input)
+	# extract the info from the input pathname;
+	tmp = input.split('.')
+	prefix = tmp[0]
+	token = (prefix.split('\\'))[-1]
+	suffix = token.split('_')
+	classname = suffix[0]
+	speedname = suffix[1]
+
+	# rotation degree;
+	#DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
 	
-	# at max, 2 processes could be executed; such value is obtained through get-your-hands-dirty benchmarking;
-	CPU_MAX = num_workers
-	pool = MP.Pool(CPU_MAX)
+	# assigning addresses for each rotation for convenienece;
+	addresses = assign_video_locations(DEGREE, storage_path, classname, speedname, "r")
+	print('\n assigned address: ', addresses)
+	num_workers = mp.cpu_count()  
+	print("number of cpu cores: ", num_workers)
+	pool = mp.Pool(num_workers)
 	for index in range(len(DEGREE)):
-		print('index: ', index)
-		[classname, _] = ftools.checkoff_file(INPUT, "")
-		OUTPUT = PREFIX + classname + "_" + "transformed_" + str(index) + ".mp4"
-		pool.apply_async(NANI, args=(INPUT, OUTPUT, DEGREE[index], jsonpath))
-		print('pooled')
+		print(index)
+		pool.apply_async(VID.video_rotate, args=(input, addresses[index], DEGREE[index]))
+	print('pooled')
 	pool.close()
 	pool.join()
-	print("--- %s seconds ---" % (time.time() - start_time))
+	# end of function;
+
+def flip_and_rotate_block(input, storage_path):
+	# extract the info from the input pathname;
+	tmp = input.split('.')
+	prefix = tmp[0]
+	token = (prefix.split('\\'))[-1]
+	suffix = token.split('_')
+	classname = suffix[0]
+	speedname = suffix[1]
+
+	# flip first;
+	# create a temporary directory;
+	with tempfile.TemporaryDirectory() as prefix:
+		output_flip_path = os.path.join(prefix , "tmp.mp4")
+		VID.video_speed(input, output_flip_path)
 	
-	
+		# rotation degree;
+		#DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
+		# assigning addresses for each rotation for convenienece;
+		addresses = assign_video_locations(DEGREE, storage_path, classname, speedname, "fr")
+		num_workers = mp.cpu_count()  
+		pool = mp.Pool(num_workers)
+		for index in range(len(DEGREE)):
+			pool.apply_async(VID.video_rotate, args=(output_flip_path, addresses[index], DEGREE[index]))
+		pool.close()
+		pool.join()
+		# end of function;
+
+def synthesize_block(input, speed_seed, storage_path):
+	# get the classname of the video;
+	[classname, _] = ftools.checkoff_file(input, "")
+	print("classname: ", classname)
+	# create a temporary directory;
+	with tempfile.TemporaryDirectory() as prefix:
+		identity = "s" + str(int(speed_seed*10))
+		output_speed_path = prefix + "\\" + classname + "_" + identity + ".mp4"
+		VID.video_speed(input, output_speed_path, speed_seed)
+
+		# now, pass through:
+		# transformation 1: only rotate;
+		# transformation 2: flip then rotate;
+		transform = [rotate_block, flip_and_rotate_block]
+		#rotate_block(output_speed_path, storage_path)
+		num_workers = mp.cpu_count()  
+		pool = mp.Pool(2)
+		print("entering the pool")
+		for func in transform:
+			pool.apply_async(which_block, args=(func, output_speed_path, storage_path))
+		print("pooled")
+		pool.close()
+		pool.join()
+		
+
+if __name__ == '__main__':
+
+	storage_path = "C:\\Users\\yongw4\\Desktop\\test_synthesis"
+	input = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\help_95.mp4"
+	speed_seed = 0.7
+	synthesize_block(input, speed_seed, storage_path)
+
+
+
+
+
+
+
+
+
+
+
+
+
+

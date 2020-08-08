@@ -19,7 +19,7 @@ import multiprocessing
 import time
 
 
-def PARAMS(video_path, write_path):
+def PARAMS(video_path,write_jsonpath):
 	params = dict()
 	params['render_pose']               = 1
 	#params['render_pose']               = 0
@@ -58,10 +58,10 @@ def PARAMS(video_path, write_path):
 	else:
 		print('the directory has been created\n')
 
-	params["write_json"] =  write_path # Warning! this must exists before you start the program
+	params["write_json"] = write_jsonpath # Warning! this must exists before you start the program
 	return params
 
-def MAIN(video_path, write_path):
+def MAIN(video_path,write_jsonpath):
 	gpus = tf.config.experimental.list_physical_devices('GPU')
 	if gpus:
 		try:
@@ -74,7 +74,7 @@ def MAIN(video_path, write_path):
 			# Memory growth must be set before GPUs have been initialized
 			print(e)
 
-	params = PARAMS(video_path, write_path)
+	params = PARAMS(video_path,write_jsonpath)
 	try:
 		# Import Openpose (Windows/Ubuntu/OSX)
 		dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -133,11 +133,11 @@ def MAIN(video_path, write_path):
 if __name__ == '__main__':
 	video_path = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\ambulance_1.mp4"
 	video_path2 = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\fullbody.mp4"
-	write_path = "C:\\Users\\yongw4\\Desktop\\DUMMY_JSON"
-	write_path2 = "C:\\Users\\yongw4\\Desktop\\DUMMY_JSON2"
+	write_jsonpath = "C:\\Users\\yongw4\\Desktop\\DUMMY_JSON"
+	write_jsonpath2 = "C:\\Users\\yongw4\\Desktop\\DUMMY_JSON2"
 
 	start_time = time.time()
-	proc = [[video_path, write_path], [video_path2, write_path2]]
+	proc = [[video_path,write_jsonpath], [video_path2,write_jsonpath2]]
 	for ls in proc:
 		## right here
 		p = multiprocessing.Process(target=MAIN, args=(ls[0], ls[1]))
