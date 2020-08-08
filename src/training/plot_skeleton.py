@@ -96,7 +96,7 @@ def batch(iterable, n=1):
 
 # '->' here is a function annotation;
 # info - https://www.python.org/dev/peps/pep-3107/
-def read_openpose_json(filename: str, add_noise) -> List[Dict[str, Any]]:
+def read_openpose_json(filename: str, add_noise : int, translate_center: int) -> List[Dict[str, Any]]:
 	'''
 	args -
 		- json filename;
@@ -122,7 +122,11 @@ def read_openpose_json(filename: str, add_noise) -> List[Dict[str, Any]]:
 		assert (
 			len(points_2d) == 25 * 3
 		), "We have 25 points with (x, y, c); where c is confidence."
-
+		
+		shouldercenter = 0
+		if(translate_center):
+			shouldercenter = points_2d[3]
+		
 		# safe? process them;
 		for point_index, (x, y, confidence) in enumerate(batch(points_2d, 3)):
 			assert x is not None, "x should be defined"
@@ -136,7 +140,7 @@ def read_openpose_json(filename: str, add_noise) -> List[Dict[str, Any]]:
 				noise = 0
 			keypoints_list.append(
 				{
-					"x": x + noise,
+					"x": x + noise - shouldercenter,
 					"y": y + noise,
 					"c": confidence,
 					"point_label": OpenPoseMap[point_index],
@@ -205,12 +209,12 @@ if __name__ == '__main__':
 	# change it to your location when testing this script;
 	#filestr = 'C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\output_test_000000000000_keypoints.json'
    
-	filestr2 = 'C:\\Users\\yongw4\\Desktop\\DUMMY_JSON\\output_test_000000000071_keypoints.json'
-	#filestr2 = 'C:\\Users\\yongw4\\Desktop\\DUMMY_JSON\\translation_centre_000000000006_keypoints.json'
+	#filestr2 = 'C:\\Users\\yongw4\\Desktop\\DUMMY_JSON\\output_test_000000000071_keypoints.json'
+	filestr2 = 'C:\\Users\\yongw4\\Desktop\\DUMMY_JSON\\translation_000000000049_keypoints.json'
 
 	filestr = filestr2
-	clean_output = read_openpose_json(filestr, 0)   
-	augment_output = read_openpose_json(filestr2, 0)
+	clean_output = read_openpose_json(filestr, 0, 0)   
+	augment_output = read_openpose_json(filestr2, 0, 1)
 
 	# check the output from the terminal;
 	print(clean_output)
