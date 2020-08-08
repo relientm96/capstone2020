@@ -101,18 +101,21 @@ def flip_and_rotate_block(input, storage_path):
 		pool.join()
 		# end of function;
 
-def synthesize_block(input, speed_seed, path_X, path_Y):
-	
-	# create a temp direc;
-	with tempfile.TemporaryDirectory() as storage_path:
-		# create two sub directories wrt storage_path;
-		# to store two different sets;
-		# so that we could run openpose parallely on the two sets;
-		storage_path_01 = os.path.join(storage_path, "temp_01")
-		storage_path_02 = os.path.join(storage_path, "temp_02")
+def synthesize_block(input, speed_seed, main_X, main_Y):
+	try:
+		# create temporary locations
+		tmp_dir = tempfile.mkdtemp()
+		x1_path = os.path.join(tmp_dir, "x1.txt")
+		y1_path = os.path.join(tmp_dir, "y1.txt")
 
-		storage_path_01 = "C:\\Users\\yongw4\\Desktop\\test_synthesis\\temp_01"
-		storage_path_02 = "C:\\Users\\yongw4\\Desktop\\test_synthesis\\temp_02"
+		tmp_dir2 = tempfile.mkdtemp()
+		x2_path = os.path.join(tmp_dir, "x2.txt")
+		y2_path = os.path.join(tmp_dir, "y2.txt")
+		storage_paths = [tmp_dir, tmp_dir2]
+
+		paths_X = [x1_path, x2_path]
+		paths_Y = [y1_path, y2_path]
+		
 		# get the classname of the video;
 		[classname, _] = ftools.checkoff_file(input, "")
 		# create a temporary directory;
@@ -124,32 +127,55 @@ def synthesize_block(input, speed_seed, path_X, path_Y):
 			# now, pass through:
 			# transformation 1: only rotate;
 			# transformation 2: flip then rotate;
-			rotate_block(output_speed_path, storage_path_01)
-			flip_and_rotate_block(output_speed_path, storage_path_02)
+			rotate_block(output_speed_path, storage_paths[0])
+			flip_and_rotate_block(output_speed_path, storage_paths[1])
 		
-			direc_list = [storage_path_01, storage_path_02]
-			print("list: ", direc_list)
+		# maximize the cpu cores;
+		num_workers = mp.cpu_count()  
+		pool = mp.Pool(num_workers)
+		print("entering the pool")
+		for i in range(len(storage_paths)):
+			pool.apply_async(OP_SET.openpose_driver, args=(storage_paths[i], paths_X[i], paths_Y[i]))
+		print("pooled")
+		pool.close()
+		pool.join()
 
-			OP_SET.openpose_driver(storage_path_01, path_X, path_Y)
-			'''
-			# maximize the cpu cores;
-			num_workers = mp.cpu_count()  
-			pool = mp.Pool(num_workers)
-			print("entering the pool")
-			for direc in direc_list[0]:
-				pool.apply_async(OP_SET.openpose_driver, args=(direc, path_X, path_Y))
-			print("pooled")
-			pool.close()
-			pool.join()
-			'''
+		# append the results to the main path_X.txt and path_Y.txt
+		for i in range(len(paths_X)):
+			ftools.append_file(paths_X[i], main_X)
+			ftools.append_file(paths_Y[i], main_Y)
+	# the created temporary paths are no longer needed;
+	# clean up;
+	finally:
+		try:
+			# delete directory
+			shutil.rmtree(tmp_dir)  
+			shutil.rmtree(tmp_dir2)
+		except OSError as exc:
+			 # ENOENT - no such file or directory
+			if exc.errno != errno.ENOENT: 
+				# re-raise exception
+				raise  
+	
 if __name__ == '__main__':
 
 	path_X = "C:\\Users\\yongw4\\Desktop\\test_synthesis\\X_dummy.txt"
 	path_Y = "C:\\Users\\yongw4\\Desktop\\test_synthesis\\Y_dummy.txt"
+
+	# safeguard;
+    # create them if the files do not exist;
+	print("Checking if the X.txt and Y.txt exist ...\n")
+	if not (os.path.exists(path_X) or os.path.exists(path_Y)):
+		try:
+			open(path_X, 'w').close()
+			open(path_Y, 'w').close()
+		except Exception as e:
+			print("An error occured", e)
+			sys.exit(-1)
 	input = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\ambulance_14.mp4"
 	speed_seed = 2
 	synthesize_block(input, speed_seed, path_X, path_Y)
-
+	#encapsulate_block(input, speed_seed, path_X, path_Y)
 
 
 
