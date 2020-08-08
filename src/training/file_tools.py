@@ -102,6 +102,18 @@ def track_count(src_path, saved_path = "", save_name = 'saved_counter.p'):
 
 	return dict
 
+def append_file(src, dst):
+	with open(dst, 'a') as fileX, open(src, 'r') as fileY:
+		print('given the source\n', src)
+		print("Appending ... \n")
+		for line in fileY:
+			# safe guard;
+			assert(line != "")
+			#print("txt line, \n", line)
+			fileX.write(line)
+		print("finished appending\n")
+
+
 # test driver;
 if __name__ == '__main__':
 	dummy_directory = "C:\\Users\\yongw4\\Desktop\\dummy-directory"
