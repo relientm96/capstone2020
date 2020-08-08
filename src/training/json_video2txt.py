@@ -8,6 +8,11 @@ import json
 from pprint import pprint
 import glob, os
 
+
+def offset_translation(input_list, reference):
+	ls = [(x-reference) if not(i%3) else x for i, x in enumerate(input_list)]
+	return ls
+
 def json_video2txt(jsondata_path, output_path):
 	'''
 	arg:
@@ -48,7 +53,8 @@ def json_video2txt(jsondata_path, output_path):
 			else:
 				body_keypoints = data["people"][0]["pose_keypoints_2d"]
 				lefthand_keypoints = data["people"][0]["hand_left_keypoints_2d"] 
-				righthand_keypoints = data["people"][0]["hand_right_keypoints_2d"] 
+				righthand_keypoints = data["people"][0]["hand_right_keypoints_2d"]
+
 				# safeguard;
 				# empty set? for the hand keypoints?
 				if (len(lefthand_keypoints) == 0):
@@ -60,6 +66,13 @@ def json_video2txt(jsondata_path, output_path):
 				# https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md#face-output-format
 				# remember, we have (x,y accuracy) for each keypoints;
 				
+				# normalize with respect to the shoulder center;
+				# translation invariant;
+				shoulder_center = body_keypoints[3]
+				body_keypoints = offset_translation(body_keypoints, shoulder_center)
+				lefthand_keypoints = offset_translation(lefthand_keypoints, shoulder_center)
+				righthand_keypoints = offset_translation(righthand_keypoints, shoulder_center)
+
 				upperbody_keypoints = body_keypoints[3:24] 
 				# concatenate all the keypoints into one list: pose_keypoints;
 				pose_keypoints = upperbody_keypoints + lefthand_keypoints + righthand_keypoints
@@ -102,4 +115,7 @@ if __name__ == '__main__':
 	data_path = PATH 
 
 	output_path = PATH + "\\X_test.txt"
-	json_video2txt(data_path, output_path)
+	#json_video2txt(data_path, output_path)
+
+	input_list = [10,3,3, 10,2,2,10,4,1]
+	print(offset_translation(input_list, 1))
