@@ -8,6 +8,7 @@ from pprint import pprint
 import glob, os
 import sys
 
+
 def generate_XY(txt_path, path_X,  path_Y):
 	'''
 	args:
@@ -23,7 +24,6 @@ def generate_XY(txt_path, path_X,  path_Y):
 	#-----------------------------------------------
 	# copy the individual txt to the X.txt;
 	#-----------------------------------------------
-
 	with open(path_X, 'a') as fileX, open(txt_path, 'r') as fileVideo:
 		print('given txt_path\n', txt_path)
 		print("Appending ... \n")
@@ -37,7 +37,6 @@ def generate_XY(txt_path, path_X,  path_Y):
 	#-----------------------------------------------
 	# generate its corresponding Y label for Y.txt;
 	#-----------------------------------------------
-
 	# first, update the dict in case of new entries;
 	dict = dict_m.update_dict(txt_path, saved_path = "", save_name = 'saved_dict.p')
 
@@ -57,7 +56,7 @@ def generate_XY(txt_path, path_X,  path_Y):
 		# add EOL to conform to txt format;
 		insertline = str(ylabel) + "\n"
 		fileY.write(insertline)
-		print("done labelling for one image\n")
+		print("done labelling\n")
 
 	
 # test driver;
