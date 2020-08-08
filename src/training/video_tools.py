@@ -299,6 +299,7 @@ def video_flip(input, output):
 	video = mp.VideoFileClip(input)
 	out = video.fx(vfx.mirror_x)
 	out.write_videofile(output)
+	print("the flipped video has been saved to: ", output)
 	
 def video_rotate(input, output, degree):
 	'''
