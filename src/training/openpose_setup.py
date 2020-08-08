@@ -26,7 +26,6 @@ import video_tools as VID
 import shutil
 import errno
 
-
 def PARAMS():
 	params = dict()
 	# preamble and computation;
