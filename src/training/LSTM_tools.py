@@ -59,14 +59,13 @@ def load_Y(y_path):
 	# for 0-based indexing 
 	return y_ - 1
 
-
 #---------------------------------------------------------------------------------------------
 # set up for the neural network;
 # 1. define the hyperparameters: "super_params"
 # 2. set up the model architecture: "LSTM_setup"
 #---------------------------------------------------------------------------------------------
 # (hyper)parameters set up for the (lstm) model;
-def super_params(n_hidden, n_classes, dropout, epoch, batch_size):
+def super_params(n_hidden = n_hidden, n_classes = n_classes, dropout = 0.2, epoch = 100, batch_size = batch_size):
     params = dict()
     params['n_hidden'] = n_hidden
     params['n_classes'] = n_classes
@@ -133,7 +132,27 @@ def cross_validate(x_raw, y_raw, kfold):
     # now average the metrics across the evaluations and display the results;
     print("%.2f%% (+/- %.2f%%)" % (numpy.mean(cvscores), numpy.std(cvscores)))
 
+#---------------------------------------------------------------------------------------------
+# extract the best model in terms of accuracy for deployment;
+# note:
+#   1. since the model is of stochastic nature, so for a fixed set of hyperparameters and architecture,
+#       we will different model every time we train and fit it;
+#   2. as such, we ought to run for multiple times, and get the best for deployment;
+# remark;
+#   1. this stage is after we have optimize/tuning the hyperparameters;
+#   2. i.e. once we have done: validation, tuning, validation (again), and testing; 
+#---------------------------------------------------------------------------------------------
 
+def get_deployable_model(x_raw, y_raw):
+    # load the raw data;
+    x_train = load_X(x_raw)
+    y_train = load_Y(y_raw)
+    # set up the model;  
+    par = super_params()
+    model = LSTM_setup(x_train, y_train)
+    # iterating ....
+
+    # define checkpoints to get the best model locally during training;
 
 
 # test driver;

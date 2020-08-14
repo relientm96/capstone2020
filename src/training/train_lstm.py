@@ -92,11 +92,15 @@ print('shape of Y_train: ', y_train.shape)
 # 5. training the model;
 # note(s) - https://stackoverflow.com/questions/46308374/what-is-validation-data-used-for-in-a-keras-sequential-model?fbclid=IwAR0q5jS4KZqGl36b-G64dwrr51ebZ1hAv4fFyjyjGjnvwA5sMkNhRCiX7IE
 # source - https://github.com/SmitSheth/Human-Activity-Recognition/blob/master/train.ipynb
+# src - https://stackoverflow.com/questions/40331510/how-to-stack-multiple-lstm-in-keras
+# src - https://keras.io/guides/sequential_model/
+# src - https://machinelearningmastery.com/stacked-long-short-term-memory-networks/
+# src - https://github.com/keras-team/keras/issues/3522
 #----------------------------------------------------------------------
 
 n_hidden = 30 # hidden layer number of features;
 n_classes = 4  # number of sign classes;
-batch_size = 256
+batch_size = 150
 #batch_size = 150
 
 print('------ LSTM Model ---------')
@@ -113,7 +117,8 @@ model = Sequential()
 model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True))
 model.add(Dropout(0.2))
 model.add(LSTM(n_hidden, activation='relu'))
-model.add(Dropout(0.2))
+#model.add(LSTM(n_hidden, activation='relu', return_sequences=True))
+#model.add(Dropout(0.2))
 #model.add(LSTM(n_hidden, activation='relu'))
 model.add(Dropout(0.2))
 model.add(Dense(n_classes, activation='softmax'))
@@ -158,6 +163,10 @@ else:
 # Print summary
 model.summary()
 
+
+
+
+
 #----------------------------------------------------------------------
 # EVALUATION;
 # - offline prediction;
@@ -184,18 +193,4 @@ for i in predictions:
 	predicted = MAP_DICT[index]
 	print(j, ': Guessed Sign:', predicted, '; probability:', prob)
 	j = j + 1
-
-# manual marker;
-print("\n correct outputs corresponding to the test video:")
-print(1, 'pain')
-print(2, 'ambulance')
-print(3, 'dummy 1')
-print(4, 'dummy 2')
-print(5, 'help')
-
-# comment;
-print("\n so, there's one false positive which is (3)\n")
-
-
-
 
