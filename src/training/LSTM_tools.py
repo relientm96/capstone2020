@@ -7,6 +7,7 @@ from random import randint
 import time
 import os
 import tensorflow as tf 
+from sklearn.model_selection import StratifiedKFold
 
 
 # global constants
@@ -15,7 +16,7 @@ n_hidden = 34 # Hidden layer num of features
 n_classes = 4
 
 #---------------------------------------------------------------------------------------------
-# auxilairy tools to load the networks inputs
+# auxiliary tools to load the networks inputs
 # definitions:
 # 1. X is the raw data;
 # 2. Y is the label
@@ -34,13 +35,7 @@ def load_X(X_path):
 		dtype=np.float32
 	)
 	file.close()
-	#print('values\n\n', X_)
-	#print('len\n', len(X_))
-	#print('len 02\n\n', len(X_[0]))
-	#print('values 02\n\n', X_[0])
-	
 	blocks = int(len(X_) / n_steps)
-	#print("hello)")
 	X_ = np.array(np.split(X_,blocks))
 
 	return X_ 
@@ -64,66 +59,107 @@ def load_Y(y_path):
 	# for 0-based indexing 
 	return y_ - 1
 
+
 #---------------------------------------------------------------------------------------------
-# the core functions to build and train the neural network;
+# set up for the neural network;
+# 1. define the hyperparameters: "super_params"
+# 2. set up the model architecture: "LSTM_setup"
+#---------------------------------------------------------------------------------------------
+# (hyper)parameters set up for the (lstm) model;
+def super_params(n_hidden, n_classes, dropout, epoch, batch_size):
+    params = dict()
+    params['n_hidden'] = n_hidden
+    params['n_classes'] = n_classes
+    params['dropout'] = dropout
+    params['epoch'] = epoch
+    params["batch_size"] = batch_size
+    return params
+
+def LSTM_setup(x_train, y_train):
+    # get the params;
+    par = super_params()
+    # Define Model
+    model = Sequential()
+    model.add(LSTM(par["n_hidden"], input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True))
+    model.add(Dropout(par["dropout"]))
+    model.add(LSTM(n_hidden, activation='relu'))
+    model.add(Dropout(par["dropout"]))
+    model.add(Dense(par["n_classes"], activation='softmax'))
+    return model
+
+#---------------------------------------------------------------------------------------------
+# (stratified) k-fold cross-validation (CV);
+# 1. we use stratified version of CV as we have imbalanced dataset; (i.e. not all classes are uniform);
+# 2. k-fold = 10, by standard practice of applied machine learning;
+# src - https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html
+# src - https://machinelearningmastery.com/evaluate-performance-deep-learning-models-keras/#:~:text=Keras%20can%20separate%20a%20portion,size%20of%20your%20training%20dataset.
 #---------------------------------------------------------------------------------------------
 
-def LSTM_RNN(_X, _weights, _biases, n_input):
-	# model architecture based on "guillaume-chevalier" and "aymericdamien" under the MIT license.
-
-	_X = tf.transpose(_X, [1, 0, 2])  # permute n_steps and batch_size
-	_X = tf.reshape(_X, [-1, n_input])   
-	# Rectifies Linear Unit activation function used
-	_X = tf.nn.relu(tf.matmul(_X, _weights['hidden']) + _biases['hidden'])
-	# Split data because rnn cell needs a list of inputs for the RNN inner loop
-	_X = tf.split(_X, n_steps, 0) 
-
-	# Define two stacked LSTM cells (two recurrent layers deep) with tensorflow
-	lstm_cell_1 = tf.contrib.rnn.BasicLSTMCell(n_hidden, forget_bias=1.0, state_is_tuple=True)
-	lstm_cell_2 = tf.contrib.rnn.BasicLSTMCell(n_hidden, forget_bias=1.0, state_is_tuple=True)
-	lstm_cell_3 = tf.contrib.rnn.BasicLSTMCell(n_hidden, forget_bias=1.0, state_is_tuple=True)
-	lstm_cell_4 = tf.contrib.rnn.BasicLSTMCell(n_hidden, forget_bias=1.0, state_is_tuple=True)
-	
-	lstm_cells = tf.contrib.rnn.MultiRNNCell([lstm_cell_1, lstm_cell_2, lstm_cell_3, lstm_cell_4], state_is_tuple=True)
-	outputs, states = tf.contrib.rnn.static_rnn(lstm_cells, _X, dtype=tf.float32)
-
-	# A single output is produced, in style of "many to one" classifier, refer to http://karpathy.github.io/2015/05/21/rnn-effectiveness/ for details
-	lstm_last_output = outputs[-1]
-	
-	# Linear activation
-	return tf.matmul(lstm_last_output, _weights['out']) + _biases['out']
-
-
-def extract_batch_size(_train, _labels, _unsampled, batch_size):
-	# Fetch a "batch_size" amount of data and labels from "(X|y)_train" data. 
-	# Elements of each batch are chosen randomly, without replacement, from X_train with corresponding label from Y_train
-	# unsampled_indices keeps track of sampled data ensuring non-replacement. Resets when remaining datapoints < batch_size    
-	
-	shape = list(_train.shape)
-	shape[0] = batch_size
-	batch_s = np.empty(shape)
-	batch_labels = np.empty((batch_size,1)) 
-	for i in range(batch_size):
-		# Loop index
-		# index = random sample from _unsampled (indices)
-		#print('lstm tools\n',_unsampled)
-		index = random.choice(list(_unsampled))
-		batch_s[i] = _train[index] 
-		batch_labels[i] = _labels[index]
-		# yick-modified;
-		# reference - https://stackoverflow.com/questions/28150965/why-range0-10-remove1-does-not-work
-		#_unsampled.remove(index) # note: '_unsampled' is of class: range; see the reference; 
-		_unsampled = [i for i in _unsampled if i != index]
-		
-	return batch_s, batch_labels, _unsampled
+def cross_validate(x_raw, y_raw, kfold):
+    # load the raw data;
+    x_train = load_X(x_raw)
+    y_train = load_Y(y_raw)
+    
+    # load the relevant hyperparameters;
+    par = super_params()
+    
+    #---------------------------------------------------------------
+    # define a stratified kfold cross validation test harness;
+    # turn on the random shuffling since our data has an order;
+    #---------------------------------------------------------------
+    # fix random seed for reproducibility
+    seed = 7
+    np.random.seed(seed)
+    skf = StratifiedKFold(n_splits=kfold, shuffle=True, random_state=seed)
+    csvscores = []
+    # now, execute the cross-validation;
+    for train_index, test_index in skf.split(x_train, y_train):
+        # set up the lstm ;
+        model = LSTM_setup(x_train, y_train)
+        
+        # Optimizer
+        opt = tf.keras.optimizers.Adam(lr=1e-4, decay=1e-5)
+	    
+        # Compile model
+	    model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+	    
+        # fit the model using the training set;
+	    model.fit(x_train[train_index], y_train[train_index], epochs=par['epoch'], batch_size = par['batch_size'], verbose = 0)
+        
+        # evaluate the model using the validation set and store each metric;
+	    scores = model.evaluate(x_train[test_index], y_train[test_index], verbose=0)
+	    print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
+        cvscores.append(scores[1] * 100)
+    # now average the metrics across the evaluations and display the results;
+    print("%.2f%% (+/- %.2f%%)" % (numpy.mean(cvscores), numpy.std(cvscores)))
 
 
-def one_hot(y_):
-	# One hot encoding of the network outputs
-	# e.g.: [[5], [0], [3]] --> [[0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0]]
-	
-	y_ = y_.reshape(len(y_))
-	n_values = int(np.max(y_)) + 1
-	return np.eye(n_values)[np.array(y_, dtype=np.int32)]  # Returns FLOATS
 
 
+# test driver;
+if __name__ == '__main__':
+    xtrain_path = "./training_files/X_train.txt"
+    ytrain_path = "./training_files/Y_train.txt"
+    X_train = load_X(xtrain_path)
+    Y_train = load_Y(ytrain_path)
+    print(Y_train.shape)
+    print(X_train.shape)
+    #print(X_train)
+
+    # src - https://machinelearningmastery.com/evaluate-performance-deep-learning-models-keras/#:~:text=Keras%20can%20separate%20a%20portion,size%20of%20your%20training%20dataset.
+    # src - https://scikit-learn.org/stable/modules/cross_validation.html
+    # src - https://scikit-learn.org/stable/auto_examples/model_selection/plot_nested_cross_validation_iris.html#:~:text=Nested%20cross%2Dvalidation%20(CV),its%20(hyper)parameter%20search.&text=Information%20may%20thus%20%E2%80%9Cleak%E2%80%9D%20into,model%20and%20overfit%20the%20data.
+
+    seed = 7
+    np.random.seed(seed)
+    # define 10-fold cross validation test harness
+    #kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=seed)
+    cvscores = []
+    skf = StratifiedKFold(n_splits = 2, random_state = seed, shuffle = True)
+    for train_index, test_index in skf.split(X_train, Y_train):
+        print("TRAIN:", train_index, "TEST:", test_index)
+        x_train, x_test = X_train[train_index], X_train[test_index]
+        y_train, y_test = Y_train[train_index], Y_train[test_index]
+        print("y_train: ", (y_train))
+        print("y_test: ", (y_test))
+        
