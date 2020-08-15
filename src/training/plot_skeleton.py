@@ -83,6 +83,22 @@ SkeletonBones = [
 	[16, 18], 		# left eye -> left ear
 ]
 
+RightHand = [
+	[0,17], [17,18], [18, 19], [19, 20],
+	[0,13], [13, 14], [14,15], [15, 16],
+	[0,9], [9,10], [10, 11], [11, 12],
+	[0,5], [5,6], [6,7], [7,8],
+	[0,1], [1,2], [2,3], [3,4]
+]
+
+LeftHand = [
+	[0,17], [17,18], [18, 19], [19, 20],
+	[0,13], [13, 14], [14,15], [15, 16],
+	[0,9], [9,10], [10, 11], [11, 12],
+	[0,5], [5,6], [6,7], [7,8],
+	[0,1], [1,2], [2,3], [3,4]
+]
+
 def batch(iterable, n=1):
 	'''
 	args - iterable;
@@ -93,6 +109,38 @@ def batch(iterable, n=1):
 	length = len(iterable)
 	for index in range(0, length, n):
 		yield iterable[index : min(index + n, length)]
+
+def json2list(input_list, add_noise = 0, shouldercenter = 0):
+		keypoints_list = []
+		# safe? process them;
+		for point_index, (x, y, confidence) in enumerate(batch(input_list, 3)):
+			assert x is not None, "x should be defined"
+			assert y is not None, "y should be defined"
+			assert confidence is not None, "confidence should be defined"
+			
+			# "nullify" the keypoints with very low confidence value;
+			if(confidence <= 0.1):
+				x = -1
+				y = -1
+			if((add_noise) and not(confidence <= 0.1)):
+				# loc = mean;
+				# scale = standard deviation
+				noise = random.normal(loc = 0, scale = 0.005)
+			else:
+				noise = 0
+			keypoints_list.append(
+				{
+					"x": x + noise - shouldercenter,
+					"y": y + noise,
+					"c": confidence,
+					#"point_label": OpenPoseMap[point_index],
+					"point_index": point_index,
+				}
+			)
+		print(keypoints_list)
+		return keypoints_list
+
+
 
 # '->' here is a function annotation;
 # info - https://www.python.org/dev/peps/pep-3107/
@@ -109,7 +157,6 @@ def read_openpose_json(filename: str, add_noise : int, translate_center: int) ->
 			- the associated index (for convenience);
 	'''
 	with open(filename, "rb") as file:
-		keypoints_list = []
 		keypoints = json.load(file)
 
 		# safeguarding;
@@ -118,55 +165,44 @@ def read_openpose_json(filename: str, add_noise : int, translate_center: int) ->
 		), "In all pictures, we should have only one person!"
 
 		# we only care about 2d; ignore the rest in the json;
-		points_2d = keypoints["people"][0]["pose_keypoints_2d"]
+		body_keypoints = keypoints["people"][0]["pose_keypoints_2d"]
 		assert (
-			len(points_2d) == 25 * 3
+			len(body_keypoints) == 25 * 3
 		), "We have 25 points with (x, y, c); where c is confidence."
+		
+		
+		lefthand_keypoints = keypoints["people"][0]["hand_left_keypoints_2d"] 
+		righthand_keypoints = keypoints["people"][0]["hand_right_keypoints_2d"]
 		
 		shouldercenter = 0
 		if(translate_center):
-			shouldercenter = points_2d[3]
-		
-		# safe? process them;
-		for point_index, (x, y, confidence) in enumerate(batch(points_2d, 3)):
-			assert x is not None, "x should be defined"
-			assert y is not None, "y should be defined"
-			assert confidence is not None, "confidence should be defined"
-			if(add_noise):
-				# loc = mean;
-				# scale = standard deviation
-				noise = random.normal(loc = 0, scale = 1)
-			else:
-				noise = 0
-			keypoints_list.append(
-				{
-					"x": x + noise - shouldercenter,
-					"y": y + noise,
-					"c": confidence,
-					"point_label": OpenPoseMap[point_index],
-					"point_index": point_index,
-				}
-			)
-		return keypoints_list
+			shouldercenter = body_keypoints[3]
+		body_list = json2list(body_keypoints, add_noise, shouldercenter)
+		righthand_list = json2list(righthand_keypoints, add_noise, shouldercenter)
+		lefthand_list = json2list(lefthand_keypoints, add_noise , shouldercenter)
 
-def draw_skeleton(keypoints_list):
+		return [body_list, righthand_list, lefthand_list]
+
+def draw_skeleton(keypoints_list, body_part):
+
 	'''
 		args - the output from read_openpose_json()
 		returns - none
 		task - reconstruct the (upside-down) skeleton from json keypoints;
 	'''
-	print('hello, my skeleton friend, welcome to the world!')
-	
-	# draw the bones;
-	for i in range(len(SkeletonBones)):
-		p1 = SkeletonBones[i][0]
-		p2 = SkeletonBones[i][1]
-		x_values = [keypoints_list[p1]['x'], keypoints_list[p2]['x']]
-		y_values = [keypoints_list[p1]['y'], keypoints_list[p2]['y']]
-		plt.plot(x_values, y_values)
-	plt.axis('equal')
-	plt.show()
-	return None
+	# there's nothing to plot;
+	if (len(keypoints_list) != 0):
+		# draw the bones;
+		for i in range(len(body_part)):
+			p1 = body_part[i][0]
+			p2 = body_part[i][1]
+			x_values = [keypoints_list[p1]['x'], keypoints_list[p2]['x']]
+			y_values = [keypoints_list[p1]['y'], keypoints_list[p2]['y']]
+			plt.plot(x_values, y_values)
+		plt.axis('equal')
+		plt.show()
+	else:
+		print("there's nothing to plot")
 
 def compare_skeletons(clean_input, noisy_input):
 	'''
@@ -179,7 +215,9 @@ def compare_skeletons(clean_input, noisy_input):
 			renders  draw_skeleton() useless...
 	'''
 	 # draw the clean bones;
-	fig = plt.figure()
+	fig,ax  = plt.subplots(2,1)
+	fig.suptitle('LHS = clean; RHS = noisy')
+	
 	plt.subplot(1,2,1)
 	for i in range(len(SkeletonBones)):
 		p1 = SkeletonBones[i][0]
@@ -199,7 +237,6 @@ def compare_skeletons(clean_input, noisy_input):
 	plt.axis('equal')
 	plt.xlabel('x')
 	plt.ylabel('y')
-	fig.suptitle('LHS = clean; RHS = noisy')
 	plt.show()
 	return None
 
@@ -210,19 +247,28 @@ if __name__ == '__main__':
 	#filestr = 'C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\output_test_000000000000_keypoints.json'
    
 	#filestr2 = 'C:\\Users\\yongw4\\Desktop\\DUMMY_JSON\\output_test_000000000071_keypoints.json'
-	filestr2 = 'C:\\Users\\yongw4\\Desktop\\DUMMY_JSON\\translation_000000000049_keypoints.json'
+	filestr2 = 'C:\\Users\\yongw4\\Desktop\\DUMMY_JSON\\ambulance_10_000000000010_keypoints.json'
 
 	filestr = filestr2
 	clean_output = read_openpose_json(filestr, 0, 0)   
-	augment_output = read_openpose_json(filestr2, 0, 1)
+	augment_output = read_openpose_json(filestr2, 1, 0)
 
-	# check the output from the terminal;
-	print(clean_output)
-	print(augment_output)
+	# body keypoints
+	# note the skeleton is upside down ...
+	cleanbody = clean_output[0]
+	noisybody = augment_output[0]
+	draw_skeleton(cleanbody, SkeletonBones)
+	draw_skeleton(noisybody, SkeletonBones)
+
+	# right hand keypoints
+	cleanhand = clean_output[1]
+	noisyhand = augment_output[1]
+	draw_skeleton(cleanhand, RightHand)
+	draw_skeleton(noisyhand, RightHand)
+
+	# left hand keypoints
+	cleanhand = clean_output[2]
+	noisyhand = augment_output[2]
+	draw_skeleton(cleanhand, LeftHand)
+	draw_skeleton(noisyhand, LeftHand)
 	
-	# oops, the skeleton is upside down ...
-	draw_skeleton(clean_output)
-	draw_skeleton(augment_output)
-
-	# comparing both skeletons: clean vs noisy;
-	compare_skeletons(clean_output, augment_output)
