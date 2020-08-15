@@ -8,6 +8,19 @@ import json
 from pprint import pprint
 import glob, os
 
+# if the confidence value for the keypoint is very low;
+# no point using it;
+def nullify_keypoints(input_list):
+	ls = input_list
+	length = len(input_list)
+	fixed = 2
+	for index, elem in enumerate(input_list):
+		if ((abs(index - fixed)%3) == 0):
+			confidence = input_list[index]
+			if(confidence <= 0.1):
+				ls[index-1] = -1
+				ls[index-2] = -1
+	return ls
 
 def offset_translation(input_list, reference):
 	ls = [(x-reference) if not(i%3) else x for i, x in enumerate(input_list)]
@@ -66,7 +79,13 @@ def json_video2txt(jsondata_path, output_path):
 				# https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md#face-output-format
 				# remember, we have (x,y accuracy) for each keypoints;
 				
-				# normalize with respect to the shoulder center;
+				# nullify the keypoint to a fixed constant if 
+				# its associated confidence level is very low (<= 0.1);
+				body_keypoints  = nullify_keypoints(body_keypoints)
+				lefthand_keypoints  = nullify_keypoints(lefthand_keypoints)
+				righthand_keypoints  = nullify_keypoints(righthand_keypoints)
+
+				# centering with respect to the shoulder;
 				# translation invariant;
 				shoulder_center = body_keypoints[3]
 				body_keypoints = offset_translation(body_keypoints, shoulder_center)
@@ -77,7 +96,6 @@ def json_video2txt(jsondata_path, output_path):
 				# concatenate all the keypoints into one list: pose_keypoints;
 				pose_keypoints = upperbody_keypoints + lefthand_keypoints + righthand_keypoints
 				
-			
 			# pose keypoints are done processed;
 			# ignore the confidence level;
 			number_xy_coor = int((len(pose_keypoints)/3)*2)
@@ -118,4 +136,7 @@ if __name__ == '__main__':
 	#json_video2txt(data_path, output_path)
 
 	input_list = [10,3,3, 10,2,2,10,4,1]
-	print(offset_translation(input_list, 1))
+	#print(offset_translation(input_list, 1))
+
+	input_list = [10,3,1, 10,2,0.01,10,4,0.002]
+	print(nullify_keypoints(input_list))
