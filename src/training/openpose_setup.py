@@ -2,7 +2,6 @@
 # It requires OpenCV installed for Python
 import sys
 import cv2
-import os
 from sys import platform
 import argparse
 import errno
@@ -12,19 +11,19 @@ import ffmpeg
 import tensorflow as tf
 
 # from nebulaM78;
-import file_tools as ftools
-import generate_XY as genxy
-import json_video2txt as jv2t
 import time
-
+import multiprocessing as mp
+import shutil
 import numpy as np
 import moviepy.editor as mp
 import moviepy.video.fx.all as vfx
+
 import file_tools as ftools
-import multiprocessing as mp
+import generate_XY as genxy
+import json_video2txt as jv2t
 import video_tools as VID
-import shutil
-import errno
+import synthetic_tools as SYNTH
+
 
 def PARAMS():
 	params = dict()
@@ -120,29 +119,32 @@ def openpose_driver(signvideodirectory, path_X, path_Y):
 						sys.exit(-1)
 					# done processing; we have our video json files now;
 					# convert them to one single txt format;
-					# by using another temporary storage;
-					print("creating a temp directory to store txt\n")
-					with tempfile.TemporaryDirectory() as txt_path:
-						filename = (((src_path.split('\\')[-1])).split('.'))[0]
-						dummy_path = txt_path + "\\" + filename + ".txt"
-						jv2t.json_video2txt(json_path, dummy_path)
-						# safeguard; ensure the files exist;
-						print("Checking if the X.txt and Y.txt exist ...\n")
-						if not os.path.exists(path_X):
-							try:
-								open(path_X, 'a').close()
-							except Exception as e:
-								print("An error occured", e)
-								sys.exit(-1)
-						if not os.path.exists(path_Y):
-							try:
-								open(path_Y, 'a').close()
-							except Exception as e:
-								print("An error occured", e)
-								sys.exit(-1)
-						# now save it to the label file, X.txt; Y.txt
-						genxy.generate_XY(dummy_path, path_X,  path_Y)
-						print("individual {X,Y} has been appended\n")
+					# any extra processing on the extracted keypoints before saving to txt?
+					func_list = [SYNTH.pass_keypoints, SYNTH.perturb_keypoints]
+					for j in range(len(func_list)):
+						# use another temporary storage;
+						print("creating a temp directory to store txt\n")
+						with tempfile.TemporaryDirectory() as txt_path:
+							filename = (((src_path.split('\\')[-1])).split('.'))[0]
+							dummy_path = txt_path + "\\" + filename + ".txt"
+							jv2t.json_video2txt(json_path, dummy_path, func_list[j])
+							# safeguard; ensure the files exist;
+							print("Checking if the X.txt and Y.txt exist ...\n")
+							if not os.path.exists(path_X):
+								try:
+									open(path_X, 'a').close()
+								except Exception as e:
+									print("An error occured", e)
+									sys.exit(-1)
+							if not os.path.exists(path_Y):
+								try:
+									open(path_Y, 'a').close()
+								except Exception as e:
+									print("An error occured", e)
+									sys.exit(-1)
+							# now save it to the label file, X.txt; Y.txt
+							genxy.generate_XY(dummy_path, path_X,  path_Y)
+							print("individual {X,Y} has been appended\n")
 
 				# updating the number of processed video of this class; 
 				print('now, updating the number of processed video of this class;\n')
@@ -165,3 +167,10 @@ def openpose_driver(signvideodirectory, path_X, path_Y):
 	except Exception as e:
 		print(e)
 		sys.exit(-1)
+
+# test driver;
+if __name__ == '__main__':
+	signvideodirectory = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\DUMMY\\HOSPITAL"
+	path_X = os.path.join(signvideodirectory, "X_dummy.txt")
+	path_Y = os.path.join(signvideodirectory, "Y_dummy.txt")
+	openpose_driver(signvideodirectory, path_X, path_Y)
