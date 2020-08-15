@@ -125,13 +125,15 @@ def json2list(input_list, add_noise = 0, shouldercenter = 0):
 			if((add_noise) and not(confidence <= 0.1)):
 				# loc = mean;
 				# scale = standard deviation
-				noise = random.normal(loc = 0, scale = 0.005)
+				noise = random.normal(loc = 0, scale = 0.003)
+				noise2 = random.normal(loc = 0, scale = 0.003)
 			else:
 				noise = 0
+				noise2 = 0
 			keypoints_list.append(
 				{
 					"x": x + noise - shouldercenter,
-					"y": y + noise,
+					"y": y + noise2,
 					"c": confidence,
 					#"point_label": OpenPoseMap[point_index],
 					"point_index": point_index,
