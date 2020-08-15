@@ -26,7 +26,7 @@ def offset_translation(input_list, reference):
 	ls = [(x-reference) if not(i%3) else x for i, x in enumerate(input_list)]
 	return ls
 
-def json_video2txt(jsondata_path, output_path):
+def json_video2txt(jsondata_path, output_path, func):
 	'''
 	arg:
 		1. jsonpath; data path where the set of json files located;
@@ -79,18 +79,23 @@ def json_video2txt(jsondata_path, output_path):
 				# https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md#face-output-format
 				# remember, we have (x,y accuracy) for each keypoints;
 				
-				# nullify the keypoint to a fixed constant if 
-				# its associated confidence level is very low (<= 0.1);
-				body_keypoints  = nullify_keypoints(body_keypoints)
-				lefthand_keypoints  = nullify_keypoints(lefthand_keypoints)
-				righthand_keypoints  = nullify_keypoints(righthand_keypoints)
-
 				# centering with respect to the shoulder;
 				# translation invariant;
 				shoulder_center = body_keypoints[3]
 				body_keypoints = offset_translation(body_keypoints, shoulder_center)
 				lefthand_keypoints = offset_translation(lefthand_keypoints, shoulder_center)
 				righthand_keypoints = offset_translation(righthand_keypoints, shoulder_center)
+
+				# nullify the keypoint to a fixed constant if 
+				# its associated confidence level is very low (<= 0.1);
+				body_keypoints  = nullify_keypoints(body_keypoints)
+				lefthand_keypoints  = nullify_keypoints(lefthand_keypoints)
+				righthand_keypoints  = nullify_keypoints(righthand_keypoints)
+
+				# do some extra stuff with the function passed;
+				body_keypoints  = func(body_keypoints)
+				lefthand_keypoints  = func(lefthand_keypoints)
+				righthand_keypoints  = func(righthand_keypoints)
 
 				upperbody_keypoints = body_keypoints[3:24] 
 				# concatenate all the keypoints into one list: pose_keypoints;
@@ -139,4 +144,6 @@ if __name__ == '__main__':
 	#print(offset_translation(input_list, 1))
 
 	input_list = [10,3,1, 10,2,0.01,10,4,0.002]
-	print(nullify_keypoints(input_list))
+	#print(nullify_keypoints(input_list))
+
+	
