@@ -11,6 +11,7 @@ import multiprocessing as mp
 import tempfile
 import shutil
 import errno
+from numpy import random
 
 # self-written modules;
 import video_tools as VID
@@ -144,6 +145,7 @@ def synthesize_block(input, speed_seed, main_X, main_Y):
 		for i in range(len(paths_X)):
 			ftools.append_file(paths_X[i], main_X)
 			ftools.append_file(paths_Y[i], main_Y)
+
 	# the created temporary paths are no longer needed;
 	# clean up;
 	finally:
@@ -156,6 +158,38 @@ def synthesize_block(input, speed_seed, main_X, main_Y):
 			if exc.errno != errno.ENOENT: 
 				# re-raise exception
 				raise  
+
+#----------------------------------------------------------------------
+# here, we synthesize by augmenting the keypoints
+# instead on the raw video itself;
+#----------------------------------------------------------------------
+# a neutral function
+# the output is equal to the input;
+def pass_keypoints(input_list):
+	return input_list
+
+# perturb the keypoints;
+def perturb_keypoints(input_list):
+	# loc = mean;
+	# scale = standard deviation
+	noise = random.normal(loc = 0, scale = 0.003)
+	noise2 = random.normal(loc = 0, scale = 0.003)
+	ls = input_list
+	length = len(input_list)
+	fixed = 2
+	for index, elem in enumerate(input_list):
+		# the index for the confidence;
+		if ((abs(index - fixed)%3) == 0):
+			xval = input_list[index -1]
+			yval = input_list[index -2]
+			# since we have normalized the keypoints;
+			# we dont want the added noise to "violate" the range;
+			if not (abs(xval) == 1):
+				ls[index-1] = input_list[index -1] + noise
+			if not (abs(yval) == 1):
+				ls[index-2] = input_list[index -2] + noise2
+	return ls
+
 	
 if __name__ == '__main__':
 
