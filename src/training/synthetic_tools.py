@@ -20,6 +20,7 @@ import openpose_setup as OP_SET
 
 # global var;
 DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
+
 	
 def assign_video_locations(input_list, prefix, classname, identity, henshin_type):
 	'''
@@ -40,6 +41,7 @@ def assign_video_locations(input_list, prefix, classname, identity, henshin_type
 	locations = []
 	for i in range(length):
 		filename = temp + "_" + identity + "_" + henshin_type + str(i) + vformat
+		ftools.check_newfile(filename)
 		locations.append(filename)
 	return locations
 
@@ -87,6 +89,11 @@ def flip_and_rotate_block(input, storage_path):
 	# create a temporary directory;
 	with tempfile.TemporaryDirectory() as prefix:
 		output_flip_path = os.path.join(prefix , "flipped_tmp.mp4")
+		# create the file within the temp directory;
+		ftools.check_newfile(output_flip_path)
+
+		# the dummy file has been created;
+		# safe to process;
 		VID.video_flip(input, output_flip_path)
 	
 		# rotation degree;
@@ -114,26 +121,16 @@ def synthesize_block(input, speed_seed, main_X, main_Y):
 		tmp_dir = tempfile.mkdtemp()
 		x1_path = os.path.join(tmp_dir, "x1.txt")
 		y1_path = os.path.join(tmp_dir, "y1.txt")
-        # create the files within the temp directory;
-		if not (os.path.exists(x1_path) or os.path.exists(y1_path)):
-			try:
-				open(x1_path, 'w').close()
-				open(y1_path, 'w').close()
-			except Exception as e:
-				print("An error occured", e)
-				sys.exit(-1)
+		# create the files within the temp directory;
+		ftools.check_newfile(x1_path)
+		ftools.check_newfile(y1_path)
 
 		tmp_dir2 = tempfile.mkdtemp()
 		x2_path = os.path.join(tmp_dir, "x2.txt")
 		y2_path = os.path.join(tmp_dir, "y2.txt")
-        # create the files within the temp directory;
-		if not (os.path.exists(x2_path) or os.path.exists(y2_path)):
-			try:
-				open(x2_path, 'w').close()
-				open(y2_path, 'w').close()
-			except Exception as e:
-				print("An error occured", e)
-				sys.exit(-1)
+		# create the files within the temp directory;
+		ftools.check_newfile(x2_path)
+		ftools.check_newfile(y2_path)
 
 		storage_paths = [tmp_dir, tmp_dir2]
 		paths_X = [x1_path, x2_path]
@@ -145,6 +142,9 @@ def synthesize_block(input, speed_seed, main_X, main_Y):
 		with tempfile.TemporaryDirectory() as prefix:
 			identity = "s" + str(int(speed_seed*10))
 			output_speed_path = prefix + "\\" + classname + "_" + identity + ".mp4"
+			# make sure the file in the temp exists;
+			ftools.check_newfile(output_speed_path)
+		
 			VID.video_speed(input, output_speed_path, speed_seed)
 		
 			# now, pass through:
@@ -219,7 +219,7 @@ if __name__ == '__main__':
 	path_Y = "C:\\Users\\yongw4\\Desktop\\test_synthesis\\Y_dummy.txt"
 
 	# safeguard;
-    # create them if the files do not exist;
+	# create them if the files do not exist;
 	print("Checking if the X.txt and Y.txt exist ...\n")
 	if not (os.path.exists(path_X) or os.path.exists(path_Y)):
 		try:

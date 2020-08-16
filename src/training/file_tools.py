@@ -113,6 +113,15 @@ def append_file(src, dst):
 			fileX.write(line)
 		print("finished appending\n")
 
+# create the file within the temp directory;
+def check_newfile(file_path):
+	if not (os.path.exists(file_path)):
+		try:
+			open(file_path, 'w').close()
+		except Exception as e:
+			print("An error occured", e)
+			sys.exit(-1)
+
 
 # test driver;
 if __name__ == '__main__':

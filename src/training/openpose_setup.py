@@ -117,6 +117,7 @@ def openpose_driver(signvideodirectory, path_X, path_Y):
 					except Exception as e:
 						print(e)
 						sys.exit(-1)
+
 					# done processing; we have our video json files now;
 					# convert them to one single txt format;
 					# any extra processing on the extracted keypoints before saving to txt?
@@ -128,13 +129,9 @@ def openpose_driver(signvideodirectory, path_X, path_Y):
 							filename = (((src_path.split('\\')[-1])).split('.'))[0]
 							dummy_path = os.path.join(txt_path, filename + ".txt")
 							# create the file within the temp directory;
-							if not (os.path.exists(dummy_path)):
-								try:
-									open(dummy_path, 'w').close()
-								except Exception as e:
-									print("An error occured", e)
-									sys.exit(-1)
-							# now, all the file handling has been setlled;
+							ftools.check_newfile(dummy_path)
+                            
+                            # now, all the file handling has been setlled;
 							# process it;
 							jv2t.json_video2txt(json_path, dummy_path, func_list[j])
 
