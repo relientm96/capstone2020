@@ -126,8 +126,21 @@ def openpose_driver(signvideodirectory, path_X, path_Y):
 						print("creating a temp directory to store txt\n")
 						with tempfile.TemporaryDirectory() as txt_path:
 							filename = (((src_path.split('\\')[-1])).split('.'))[0]
-							dummy_path = txt_path + "\\" + filename + ".txt"
+							dummy_path = os.path.join(txt_path, filename + ".txt")
+							# create the file within the temp directory;
+							if not (os.path.exists(dummy_path)):
+								try:
+									open(dummy_path, 'w').close()
+								except Exception as e:
+									print("An error occured", e)
+									sys.exit(-1)
+							# now, all the file handling has been setlled;
+							# process it;
 							jv2t.json_video2txt(json_path, dummy_path, func_list[j])
+
+							# json has been converted to txt;
+							# to append the result to the parent txt files;
+
 							# safeguard; ensure the files exist;
 							print("Checking if the X.txt and Y.txt exist ...\n")
 							if not os.path.exists(path_X):
