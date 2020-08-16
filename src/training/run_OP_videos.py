@@ -1,12 +1,16 @@
 import synthetic_tools as syntools
 import os
+import file_tools as ftools
 
 # global var(s);
 SPEED = [1, 0.6, 0.8, 1.2, 1.4]
 def process_one_video(input, path_X, path_Y):
+    print("entering process_one_video(): ")
 	for i in range(len(SPEED)):
 		speed_seed = SPEED[i]
 		syntools.synthesize_block(input, speed_seed, path_X, path_Y)
+    print("exiting process_one_video(): ")
+	
 
 if __name__ == '__main__':
 	signvideodirectory = "C:\\Users\\yongw4\\Desktop\\FATE"
@@ -33,17 +37,16 @@ if __name__ == '__main__':
 				continue
 			# OK, it's mp4; process it;
 			src_path = os.path.join(root, name)
-			
+			print("currently processing: ", src_path)
 			# current video has not been processed; 
 			if not (ftools.checksubstring(src_path, "checked")):
 				process_one_video(src_path, path_X, path_Y)
 
 				# done processing? sign off;
 				# so that the processed video will not be processed again;
-				print('the current video has been processed\n')
+				print('the current video has been processed: ', src_path)
 				[_, dst_checked] = ftools.checkoff_file(src_path, "checked")
 				os.rename(src_path, dst_checked)
-			
 			# have processed;
 			else:       
 				print("the current video has already been processed, skip\n")

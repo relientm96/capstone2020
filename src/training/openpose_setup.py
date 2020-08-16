@@ -154,8 +154,6 @@ def openpose_driver(signvideodirectory, path_X, path_Y):
 				# sign off;
 				# so that the processed video will not be processed again;
 				print('the current video has been processed\n')
-				[classname, dst_checked] = ftools.checkoff_file(src_path, "checked")
-				os.rename(src_path, dst_checked)
 			
 			# have already been processed;
 			else:       

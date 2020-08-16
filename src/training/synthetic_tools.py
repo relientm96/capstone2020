@@ -102,18 +102,40 @@ def flip_and_rotate_block(input, storage_path):
 		pool.join()
 		# end of function;
 
+# exception handler  
+# needed for synthesize_bloack() function below;
+def handler(func, path, exc_info):  
+	print("Inside handler")  
+	print(exc_info)
+
 def synthesize_block(input, speed_seed, main_X, main_Y):
 	try:
 		# create temporary locations
 		tmp_dir = tempfile.mkdtemp()
 		x1_path = os.path.join(tmp_dir, "x1.txt")
 		y1_path = os.path.join(tmp_dir, "y1.txt")
+        # create the files within the temp directory;
+		if not (os.path.exists(x1_path) or os.path.exists(y1_path)):
+			try:
+				open(x1_path, 'w').close()
+				open(y1_path, 'w').close()
+			except Exception as e:
+				print("An error occured", e)
+				sys.exit(-1)
 
 		tmp_dir2 = tempfile.mkdtemp()
 		x2_path = os.path.join(tmp_dir, "x2.txt")
 		y2_path = os.path.join(tmp_dir, "y2.txt")
-		storage_paths = [tmp_dir, tmp_dir2]
+        # create the files within the temp directory;
+		if not (os.path.exists(x2_path) or os.path.exists(y2_path)):
+			try:
+				open(x2_path, 'w').close()
+				open(y2_path, 'w').close()
+			except Exception as e:
+				print("An error occured", e)
+				sys.exit(-1)
 
+		storage_paths = [tmp_dir, tmp_dir2]
 		paths_X = [x1_path, x2_path]
 		paths_Y = [y1_path, y2_path]
 		
@@ -151,8 +173,8 @@ def synthesize_block(input, speed_seed, main_X, main_Y):
 	finally:
 		try:
 			# delete directory
-			shutil.rmtree(tmp_dir)  
-			shutil.rmtree(tmp_dir2)
+			shutil.rmtree(tmp_dir, onerror = handler)  
+			shutil.rmtree(tmp_dir2, onerror = handler)
 		except OSError as exc:
 			 # ENOENT - no such file or directory
 			if exc.errno != errno.ENOENT: 
