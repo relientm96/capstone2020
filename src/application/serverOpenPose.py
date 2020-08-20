@@ -93,6 +93,7 @@ def processFrames(inputImageUri):
     Returns encoded base64 url string for processed openpose image
     '''
     try:
+        
         b64_string = inputImageUri.split(',')[0]
         b64_string += "=" * ((4 - len(b64_string) % 4) % 4)
         encoded_string = base64.b64decode(b64_string)
@@ -105,7 +106,7 @@ def processFrames(inputImageUri):
         opWrapper.emplaceAndPop([datum])
 
         # Pass in datum object to send keypoints to gesture recognition module
-        word = "Word: " + gr.translate(datum)
+        word = gr.translate(datum)
 
         # Adding all of these into image
         image = datum.cvOutputData
@@ -128,4 +129,23 @@ def processFrames(inputImageUri):
         sys.exit(-1)
         return "noimage"
 
-        
+def translateWord(inputImageUri):
+    '''
+    Translates word given image uri
+    '''
+    try:
+        b64_string = inputImageUri.split(',')[0]
+        b64_string += "=" * ((4 - len(b64_string) % 4) % 4)
+        encoded_string = base64.b64decode(b64_string)
+        # Send image to OpenPose for processing
+        jpg_as_np = np.frombuffer(encoded_string, dtype=np.uint8)
+        frame = cv2.imdecode(jpg_as_np, flags=1)
+        datum = op.Datum()
+        datum.cvInputData = frame
+        opWrapper.emplaceAndPop([datum])
+        # Get translated word
+        return gr.translate(datum)
+    except Exception as e:
+        print(e)
+        sys.exit(-1)
+        return "noimage"

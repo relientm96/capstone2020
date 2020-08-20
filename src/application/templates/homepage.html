@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />        
+        <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+        <title> Pose Detector </title>
+        <!-- Load Materialize Stuff -->
+        <!-- Compiled and minified CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+        <!-- Compiled and minified JavaScript -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <!-- Load TensorFlow.js -->
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
+        <!-- Load Posenet -->
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script>
+        <!-- Socket IO -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+        <!-- Place your code in the script tag below. You can also use an external .js file -->
+        <script src="../static/posenet.js"></script>
+    </head>
+
+  <body>
+    <video autoplay="true" id="videoElement" style="display: none;"></video>
+    <div style="text-align: center; height: 100%;">
+        <h3>Real Time Sign Recognition</h3>
+        <p>PoseNet Sample Demo (No Recognition)</p>
+        <div class="container" id="outputID">
+            <h5 id="camSetup">Waiting for Camera Setup</h5>
+            <canvas id="output"></canvas>
+            <br>
+            <div style="display:inline-block">
+              <a class="waves-effect waves-light blue btn" onclick="enablePoints()">Show Points</a>
+              <a class="waves-effect waves-light blue btn" href="/">Back To Home</a>
+            </div>
+        </div>
+    </div>
+  </body>
+</html>

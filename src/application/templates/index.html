@@ -15,84 +15,180 @@
 </head>
 
 <body>
-    <div style="text-align: center;">
+    <div style="text-align: center; height:100%">
         <h3> Real Time Sign Language Translation System </h3>
-        <p id='status'> Connecting to OpenPose Server... </p>
-        <div class="row">
-            <div class='col s12 m12 l6'>
-                <canvas id="canvasOutput"></canvas>
-                <video autoplay="true" id="videoElement" style="display: none;"></video>
-                <p> Your Camera </p>
-            </div>
-            <div class='col s12 m12 l6'>
-                <div class='video'>
-                    <img id="image">
-                </div>
-                <p> Model Output </p>
+        <div class="container" style="text-align:center;">
+            <p id='status'> Connecting to OpenPose Server... </p>
+            <canvas id="canvasOutput"></canvas>
+            <img id="imageOut" style="display: none;"></img>
+            <video autoplay="true" id="videoElement" style="display: none;"></video>
+            <br>
+            <div style="display: inline-block">
+                <a class="waves-effect waves-light btn orange" href="/openpose" >Old Version</a>
+                <a id="buttonControl" class="waves-effect waves-light btn blue" onclick="enableSkeleton()"> </a>
+                <a class="waves-effect waves-light btn purple" href="/posenet">PoseNet Demo</a>
             </div>
         </div>
     </div>
 
     <script>
-
         // Hardcoded Pixel Values
         var videoWidth = 620;
         var videoHeight = 480;
-
-        const video = document.querySelector("#videoElement");
-        video.width = videoWidth; 
-        video.height = videoHeight; 
-
         // Canvas details
         var canvas = document.getElementById('canvasOutput')
         canvas.width = videoWidth
         canvas.height = videoHeight
+        // Image render details
+        const imageOutput = document.getElementById('imageOut');
+        // Socketio obj
+        const socket = io();
+        // Translated word placeholder
+        var word = "Hello & Welcome!"
+        // Flag to indicate if we want to enable skeleton rendering
+        var isSkeleton = 0;
+        document.getElementById('buttonControl').innerHTML = "Enable Skeleton"
+        /**
+         * Frame control variables
+         * Video is rendered on canvas every 1000/fps milliseconds
+         * The "frame" is transmitted to the server every frameThresholdCount times of fps
+         */
+        // Control FPS (how often to transmit frames to openpose server)
+        const fps = 15; 
+        // Control how often you are sending images to openpose server
+        const frameThresholdCount = 3;
+        // Counter for frames
+        var frameCount = 0;
 
-        // Handle User Media
-        navigator.getUserMedia = navigator.getUserMedia ||
-            navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-        // Handle camera setup
-        if (navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: true })
-            .then(function (stream) {
-                video.srcObject = stream;
-                video.play();
-        })
-        .catch(function (error) {
-            console.log(error)
-            console.log("Something went wrong!");
-        });
-    }
+        // Mobile Support
+        const mobile = /Android/i.test(navigator.userAgent) || /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        // Asynchronous function to set camera configurations
+        async function setupCamera() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error(
+                    'Browser API navigator.mediaDevices.getUserMedia not available');
+            }
+            const video = document.getElementById('videoElement');
+            video.width = videoWidth;
+            video.height = videoHeight;
+            const stream = await navigator.mediaDevices.getUserMedia({
+                'audio': false,
+                'video': {
+                    facingMode: 'user',
+                    width: mobile ? undefined : videoWidth,
+                    height: mobile ? undefined : videoHeight,
+                },
+            });
+            video.srcObject = stream;
+            return new Promise((resolve) => {
+                video.onloadedmetadata = () => {
+                    resolve(video);
+                };
+            });
+        }
+        
+        // Button will control if we want to enable skeleton rendering or not
+        function enableSkeleton(){
+            isSkeleton ^= 1;
+            btnElem = document.getElementById('buttonControl');
+            btnElem.className = "";
+            if (isSkeleton){
+                canvas.style.display = "none"
+                imageOutput.style.display = "";
+                btnElem.className = "waves-effect waves-light btn red"
+                btnElem.innerHTML = "Disable Skeleton";
+            }
+            else {
+                canvas.style.display = "";
+                imageOutput.style.display = "none";
+                btnElem.className = "waves-effect waves-light btn blue"
+                btnElem.innerHTML = "Enable Skeleton";
+            }
+        }
 
-        // Setting up Socket IO Connection to Server
-        var socket = io();
+        // Async function to load camera permissions and settings
+        async function loadVideo() {
+            const video = await setupCamera();
+            video.play();
+            return video;
+        }
+
+        // Detects poses in real time with a WebCam Stream
+        function detectPoseInRealTime(video) {
+            // Canvas used
+            //const canvas = document.getElementById('canvasOutput');
+            const ctx = canvas.getContext('2d');
+            canvas.width = videoWidth;
+            canvas.height = videoHeight;
+            async function getPose() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.save();
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                ctx.restore();
+                if (isSkeleton == 0){
+                    ctx.font = "30px Arial";
+                    ctx.fillStyle = "white";
+                    ctx.fillText(word, 20, 50);
+                }
+                if ( frameCount > frameThresholdCount ){
+                    // Transmit image to backend for processing
+                    let format = "image/jpeg"             
+                    var data = canvas.toDataURL(format, 0.5); // lossy compression at 50%
+                    data = data.replace('data:' + format + ';base64,', ''); 
+                    if (isSkeleton) {
+                        socket.emit('imageSend', data);
+                        if(imageOutput.src === ""){
+                            document.getElementById('status').innerHTML = "Loading Images from Server, please wait...";
+                        }
+                        else {
+                            document.getElementById('status').innerHTML = "Streaming Images from OpenPose Server";
+                        }
+                    }
+                    else {
+                        document.getElementById('status').innerHTML = "Translating Sign!";
+                        socket.emit('translateForMe', data)
+                    }
+                    frameCount = 0;
+                }
+                frameCount += 1;
+                setTimeout( () => {
+                    window.requestAnimationFrame(getPose);
+                }, 1000/fps)
+            } 
+            getPose();
+        }
+        // Socket io Callback functions
         socket.on('connect', function(){
             console.log("Connected...!", socket.connected)
         });
         socket.on('resp', function(responseText){
             document.getElementById('status').innerHTML = responseText;
         });
-
-        setInterval(() =>{
-            canvas.getContext('2d').drawImage(video, 0, 0, video.width, video.height);
-        }, 1000/20)
-
-        const FPS = 2;
-        setInterval(() => {
-            // This function runs according to FPS rate
-            // Takes image from webcam, sends it to server for processing
-            //canvas.getContext('2d').drawImage(video, 0, 0, video.width, video.height);
-            var data = canvas.toDataURL("image/png");
-            data = data.replace('data:' + "image/png" + ';base64,', ''); 
-            socket.emit('imageSend', data);
-        }, 1000/FPS);
-
+        socket.on('output_word', function(translatedWord){
+            word = translatedWord
+        });
         socket.on('response_back', function(image){
             // This function is called whenever server finishes processing the frame
-            const image_id = document.getElementById('image');
-            image_id.src = image;
+            imageOutput.src = image;
         });
-        
+        //  Function to run entire thing
+        async function run() {
+            let video;
+            try {
+                video = await loadVideo();  
+            } catch (e) {
+                document.getElementById('status').textContent =
+                    'this browser does not support video capture,' +
+                    'or this device does not have a camera';
+                throw e;
+            }
+            detectPoseInRealTime(video);
+        }
+        // Web media api enable
+        navigator.getUserMedia = navigator.getUserMedia ||
+            navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+        // Start program
+        run();
     </script>
             
 </body>
