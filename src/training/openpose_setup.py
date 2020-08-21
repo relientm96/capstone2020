@@ -130,8 +130,8 @@ def openpose_driver(signvideodirectory, path_X, path_Y):
 							dummy_path = os.path.join(txt_path, filename + ".txt")
 							# create the file within the temp directory;
 							ftools.check_newfile(dummy_path)
-                            
-                            # now, all the file handling has been setlled;
+							
+							# now, all the file handling has been setlled;
 							# process it;
 							jv2t.json_video2txt(json_path, dummy_path, func_list[j])
 
@@ -171,6 +171,8 @@ def openpose_driver(signvideodirectory, path_X, path_Y):
 		# done;
 		# outside of the outermost loop;		
 		print('all videos in the folder have been processed at\n', signvideodirectory)
+		# success?
+		return True
 
 	except Exception as e:
 		print(e)

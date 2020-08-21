@@ -158,7 +158,8 @@ def synthesize_block(input, speed_seed, main_X, main_Y):
 		pool = mp.Pool(num_workers)
 		print("entering the pool")
 		for i in range(len(storage_paths)):
-			pool.apply_async(OP_SET.openpose_driver, args=(storage_paths[i], paths_X[i], paths_Y[i]))
+			result = pool.apply_async(OP_SET.openpose_driver, args=(storage_paths[i], paths_X[i], paths_Y[i])).get()
+			print("success in running openpose driver in the pipeline?", result)
 		print("pooled")
 		pool.close()
 		pool.join()
