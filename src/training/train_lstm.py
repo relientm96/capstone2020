@@ -11,8 +11,8 @@ import tensorflow as tf
 from tensorflow import keras
 import matplotlib.pyplot as plt
 import math
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, LSTM, CuDNNLSTM
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Dense, Dropout, LSTM
 
 # known issue: keras version mismatch;
 # solution src - https://stackoverflow.com/questions/53183865/unknown-initializer-glorotuniform-when-loading-keras-model
@@ -23,7 +23,7 @@ from tensorflow.keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 import numpy as np
-from keras.callbacks import ModelCheckpoint
+from tensorflow.keras.callbacks import ModelCheckpoint
 import os
 
 try:
@@ -41,16 +41,16 @@ import nebulaM78 as ultraman
 # 2. Y_train.txt; the labels for the training;
 # 3. X_test.txt; for offline evaluation;
 # #----------------------------------------------------------------------
-PATH = "C:\\CAPSTONE\\capstone2020\\src\\training\\"
-X_TRAIN_PATH = PATH + "X_train.txt"
-Y_TRAIN_PATH = PATH + "Y_train.txt"
+#PATH = "C:\\CAPSTONE\\capstone2020\\src\\training_files\\"
+X_TRAIN_PATH =  "./training_files/X_train.txt"
+Y_TRAIN_PATH =  "./training_files/Y_train.txt"
 
 # note this text file is generated manually;
 # make sure the #frames is multiple of 75;
 # the video source is at :
 # C:\CAPSTONE\capstone2020\src\training\auslan-videos\testing.mp4
 # check "edited_testing.mp4" as well
-X_TEST_PATH = PATH + "X_test.txt"
+X_TEST_PATH =  "./training_files/X_test.txt"
 
 #----------------------------------------------------------------------
 # SET-UP
@@ -116,10 +116,10 @@ model = Sequential()
 #model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True, unit_forget_bias=1.0))
 model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True))
 model.add(Dropout(0.2))
-model.add(LSTM(n_hidden, activation='relu'))
-#model.add(LSTM(n_hidden, activation='relu', return_sequences=True))
-#model.add(Dropout(0.2))
 #model.add(LSTM(n_hidden, activation='relu'))
+model.add(LSTM(n_hidden, activation='relu', return_sequences=True))
+model.add(Dropout(0.2))
+model.add(LSTM(n_hidden, activation='relu'))
 model.add(Dropout(0.2))
 model.add(Dense(n_classes, activation='softmax'))
 
@@ -134,10 +134,10 @@ opt = tf.keras.optimizers.Adam(lr=1e-4, decay=1e-5)
 # src - https://stackoverflow.com/questions/45393429/keras-how-to-save-model-and-continue-training
 
 # have we trained the model?
-final_path = "final_lstm.h5"
-filepath = "saved_model.h5"
+final_path = "./training_files/final_lstm.h5"
+filepath = "./training_files/saved_model.h5"
 	
-RETRAIN = False
+RETRAIN =True
 if ((not os.path.exists(final_path)) or RETRAIN):
 	print("training the model")
 	filepath = "saved_model.h5"
