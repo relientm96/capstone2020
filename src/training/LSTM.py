@@ -21,7 +21,6 @@ import sys
 # global variables
 xtrain_path = "./training_files/X_train.txt"
 ytrain_path = "./training_files/Y_train.txt"
-n_hidden = 34
 
 def data_feed():
 	"""
@@ -35,7 +34,7 @@ def data_feed():
 
 	X_data = lstm.load_X(xtrain_path)
 	Y_data = lstm.load_Y(ytrain_path)
-	# note, we need to stratify as we have an imbalanced dataset;
+	# CAUTION, we need to stratify as we have an imbalanced dataset;
 	# some technique besides stratification;
 	# src - https://datascience.stackexchange.com/questions/32818/train-test-split-of-unbalanced-dataset-classification
 	x_train, x_test, y_train, y_test =  train_test_split(X_data, Y_data, test_size=0.2, random_state=42, shuffle = True, stratify = Y_data)
@@ -81,9 +80,14 @@ def create_model(x_train, y_train, x_test, y_test):
 				  optimizer=opt)
 	model.summary()
 	print((x_train.shape, y_train.shape))
+
+
+    # TODO: need to check how keras split for the validation;
+    # i.e. model.fit( .... validation_split = 0.1)
+
 	result = model.fit(x_train, y_train,
 			  batch_size={{choice([32, 64, 128])}},
-			  epochs = {{choice([50, 70, 80, 100, 150])}},
+			  epochs = {{choice([50, 70, 80, 100])}},
 			  verbose=2,
 			  validation_split=0.1)
 	# clear tensorflow state to prevent memory overloading;
@@ -110,7 +114,28 @@ if __name__ == '__main__':
 	print("Y: ", Y_test.shape)
 	
 	# test 02 - hyperparameter tuning'
-	# use TPE-bayesian optimization for the tuning;
+
+    # ***************************
+    # summary of the structure;
+    # ***************************
+
+    # hyperparameters of interest for tuning;
+    # 1. hidden unit = {32, 64, 128, 256, 512}
+    # 2. number of layers = {2, 3}
+    # 3. dropout = Uniform(0,1); note it's variational
+    # 4. Activation = {'relu', 'sigmoid'}
+    # 5. batch_size={32, 64, 128}
+	# 6. epochs = {50, 70, 80, 100, 150}
+
+    # fixed hyperparameters;
+    # 1. learning rate;
+    # 2. decay rate;
+    # 3. loss='sparse_categorical_crossentropy'
+    # 4. optimizer; (Adam)
+
+    # objective; maximize validation accuracy;
+    # hyperparameter optimizer: Tree-Parzen Estimators (TPE) - bayesian type;
+
 	best_run, best_model = optim.minimize(model=create_model,
 										  data=data_feed,
 										  algo=tpe.suggest,
