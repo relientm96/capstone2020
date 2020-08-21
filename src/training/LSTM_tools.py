@@ -1,17 +1,21 @@
-import numpy as np
-import matplotlib # not in the environment previously
-import matplotlib.pyplot as plt
-from sklearn import metrics # not in the environment previously
 import random
 from random import randint
 import time
 import os
+import tracemalloc
+
+import numpy as np
+import matplotlib 
+import matplotlib.pyplot as plt
+
+from sklearn import metrics
 from sklearn.model_selection import StratifiedKFold
+
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, LSTM
 from tensorflow.keras import backend as keras_backend
-import tracemalloc
 import tensorflow as tf
+
 
 
 #---------------------------------------------------------------------------------------------
@@ -66,6 +70,7 @@ def load_Y(y_path):
 		]], 
 		dtype=np.int32
 	)
+	
 	file.close()
 	
 	# for 0-based indexing 
@@ -148,24 +153,23 @@ def cross_validate(x_raw, y_raw, kfold):
 		model.fit(x_train[train_index], y_train[train_index], epochs=par['epoch'], batch_size = par['batch_size'], verbose = 0)
 		
 		# resetting the state after every model evaluation;
-		# otherwise, the global state maintained by tensorflow will overload;
+		# otherwise, the global state maintained by tensorflow might overload;
 		# src - https://www.tensorflow.org/api_docs/python/tf/keras/backend/clear_session
 		keras_backend.clear_session()
 		
-        # evaluate the model using the validation set and store each metric;
+		# evaluate the model using the validation set and store each metric;
 		scores = model.evaluate(x_train[test_index], y_train[test_index], verbose=0)
-		print("inner: %s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
+		print("fold: %d;    %s: %.2f%%" % (track, model.metrics_names[1], scores[1]*100))
 		csv_scores.append(scores[1] * 100)
 		track += 1
 	
-    # now average the metrics across the evaluations and display the results;
-	print("outer: %.2f%% (+/- %.2f%%)" % (np.mean(csv_scores), np.std(csv_scores)))
-	print("track: ", track)
-
-    # what is the statistics on the memory usage?
+	# now average the metrics across the evaluations and display the results;
+	print("averaging: %.2f%% (+/- %.2f%%)" % (np.mean(csv_scores), np.std(csv_scores)))
+	
+	# what is the statistics on the memory usage?
 	top_stats = tracemalloc.take_snapshot().compare_to(snapshot, 'lineno')
-	print("statistics on the memory usage;")
-	for stat in top_stats:
+	print("statistics on the memory usage (top 5);")
+	for stat in top_stats[:5]:
 			print(stat)
 
 #---------------------------------------------------------------------------------------------
