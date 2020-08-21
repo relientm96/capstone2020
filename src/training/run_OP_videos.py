@@ -1,15 +1,14 @@
 import synthetic_tools as syntools
 import os
 import file_tools as ftools
+import sys
 
 # global var(s);
 SPEED = [1, 0.6, 0.8, 1.2, 1.4]
 def process_one_video(input, path_X, path_Y):
-    print("entering process_one_video(): ")
 	for i in range(len(SPEED)):
 		speed_seed = SPEED[i]
 		syntools.synthesize_block(input, speed_seed, path_X, path_Y)
-    print("exiting process_one_video(): ")
 	
 
 if __name__ == '__main__':
@@ -50,4 +49,7 @@ if __name__ == '__main__':
 			# have processed;
 			else:       
 				print("the current video has already been processed, skip\n")
+
+            # debugging ...
+			#sys.exit("stop at one-video to check;")
 		
