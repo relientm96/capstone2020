@@ -52,23 +52,12 @@ def create_model(x_train, y_train, x_test, y_test):
 	The last one is optional, though recommended, namely:
 		- model: specify the model just created so that we can later use it again.
 
-    acknowledgement - https://github.com/maxpumperla/hyperas
+        acknowledgement - https://github.com/maxpumperla/hyperas
 	"""
-	print((x_train.shape, y_train.shape))
-
 	model = Sequential()
-	print((x_train.shape[1], x_train.shape[2]))
-	
-	print("debug 01")	
-
 	model.add(LSTM(32, input_shape=(x_train.shape[1], x_train.shape[2]), return_sequences=True))
-	print("debug 02")
-	
 	model.add(Activation({{choice(['relu', 'sigmoid'])}}))
-	print("debug 03")
-	
 	model.add(Dropout({{uniform(0, 1)}}))
-	print("debug 04")
 	
 	# If we choose 'four', add an additional fourth layer
 	if {{choice(['two', 'three'])}} == 'three':
@@ -78,43 +67,31 @@ def create_model(x_train, y_train, x_test, y_test):
 	
 	# last layer;
 	model.add(LSTM({{choice([32, 64, 128, 256, 512])}}))
-	print("debug 04")
-	
 	model.add(Activation({{choice(['relu', 'sigmoid'])}}))
-	print("debug 04")
-	
 	model.add(Dropout({{uniform(0, 1)}}))
-	
-	print("debug 04")
 	model.add(Dense(4, activation='softmax'))
-	print("debug 04")
 	
 	# does not have high impact on the performance;
 	# so not needed for tuning;
 	opt = tf.keras.optimizers.Adam(lr=1e-4, decay=1e-5)
-	print("debug 04")
-	# done;
+	
+    # done;
 	# objective, maximize the accuracy;
 	model.compile(loss='sparse_categorical_crossentropy', metrics=['accuracy'],
 				  optimizer=opt)
 	model.summary()
-	print("debug HEHA")
 	print((x_train.shape, y_train.shape))
 	result = model.fit(x_train, y_train,
-			  #batch_size={{choice([32, 64, 128])}},
-			  batch_size = 100,
+			  batch_size={{choice([32, 64, 128])}},
 			  epochs = {{choice([50, 70, 80, 100, 150])}},
-			  #epochs = 2,
 			  verbose=2,
 			  validation_split=0.1)
-	print("debug HELLO")
 	# clear tensorflow state to prevent memory overloading;
 	keras_backend.clear_session()
 	#get the highest validation accuracy of the training epochs
 	validation_acc = np.amax(result.history['val_accuracy']) 
 	print('Best validation acc of epoch:', validation_acc)
 	return {'loss': -validation_acc, 'status': STATUS_OK, 'model': model}
-
 
 # test driver;
 if __name__ == '__main__':
@@ -124,7 +101,6 @@ if __name__ == '__main__':
 	print(Y_data.shape)
 	print(X_data.shape)
 	
-	# test 01 - split the data into training and validation
 	# test 01 - split the data into training and validation
 	# note, we have an imbalanced dataset, so stratify it;
 	X_train, X_test, Y_train, Y_test = data_feed()
