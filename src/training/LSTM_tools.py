@@ -6,14 +6,26 @@ import random
 from random import randint
 import time
 import os
-import tensorflow as tf 
 from sklearn.model_selection import StratifiedKFold
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, LSTM
+from tensorflow.keras import backend as keras_backend
+import tracemalloc
+import tensorflow as tf
+
+
+#---------------------------------------------------------------------------------------------
+# issue on memory leak;
+# src - https://stackoverflow.com/questions/42886049/keras-tensorflow-cpu-training-sequential-models-in-loop-eats-memory?rq=1
+# src - https://stackoverflow.com/questions/55742356/training-keras-models-in-a-loop-tensor-is-not-an-element-of-this-graph-when-s
+#---------------------------------------------------------------------------------------------
 
 
 # global constants
-n_steps = 75 # 32 timesteps per series
+n_steps = 75 
 n_hidden = 34 # Hidden layer num of features
 n_classes = 4
+batch_size = 64
 
 #---------------------------------------------------------------------------------------------
 # auxiliary tools to load the networks inputs
@@ -65,26 +77,26 @@ def load_Y(y_path):
 # 2. set up the model architecture: "LSTM_setup"
 #---------------------------------------------------------------------------------------------
 # (hyper)parameters set up for the (lstm) model;
-def super_params(n_hidden = n_hidden, n_classes = n_classes, dropout = 0.2, epoch = 100, batch_size = batch_size):
-    params = dict()
-    params['n_hidden'] = n_hidden
-    params['n_classes'] = n_classes
-    params['dropout'] = dropout
-    params['epoch'] = epoch
-    params["batch_size"] = batch_size
-    return params
+def super_params(n_hidden = n_hidden, n_classes = n_classes, dropout = 0.2, epoch = 80, batch_size = batch_size):
+	params = dict()
+	params['n_hidden'] = n_hidden
+	params['n_classes'] = n_classes
+	params['dropout'] = dropout
+	params['epoch'] = epoch
+	params["batch_size"] = batch_size
+	return params
 
 def LSTM_setup(x_train, y_train):
-    # get the params;
-    par = super_params()
-    # Define Model
-    model = Sequential()
-    model.add(LSTM(par["n_hidden"], input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True))
-    model.add(Dropout(par["dropout"]))
-    model.add(LSTM(n_hidden, activation='relu'))
-    model.add(Dropout(par["dropout"]))
-    model.add(Dense(par["n_classes"], activation='softmax'))
-    return model
+	# get the params;
+	par = super_params()
+	# Define Model
+	model = Sequential()
+	model.add(LSTM(par["n_hidden"], input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True))
+	model.add(Dropout(par["dropout"]))
+	model.add(LSTM(n_hidden, activation='relu'))
+	model.add(Dropout(par["dropout"]))
+	model.add(Dense(par["n_classes"], activation='softmax'))
+	return model
 
 #---------------------------------------------------------------------------------------------
 # (stratified) k-fold cross-validation (CV);
@@ -92,45 +104,69 @@ def LSTM_setup(x_train, y_train):
 # 2. k-fold = 10, by standard practice of applied machine learning;
 # src - https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html
 # src - https://machinelearningmastery.com/evaluate-performance-deep-learning-models-keras/#:~:text=Keras%20can%20separate%20a%20portion,size%20of%20your%20training%20dataset.
+# src - https://scikit-learn.org/stable/modules/cross_validation.html
+# src - https://scikit-learn.org/stable/auto_examples/model_selection/plot_nested_cross_validation_iris.html#:~:text=Nested%20cross%2Dvalidation%20(CV),its%20(hyper)parameter%20search.&text=Information%20may%20thus%20%E2%80%9Cleak%E2%80%9D%20into,model%20and%20overfit%20the%20data.
 #---------------------------------------------------------------------------------------------
 
 def cross_validate(x_raw, y_raw, kfold):
-    # load the raw data;
-    x_train = load_X(x_raw)
-    y_train = load_Y(y_raw)
-    
-    # load the relevant hyperparameters;
-    par = super_params()
-    
-    #---------------------------------------------------------------
-    # define a stratified kfold cross validation test harness;
-    # turn on the random shuffling since our data has an order;
-    #---------------------------------------------------------------
-    # fix random seed for reproducibility
-    seed = 7
-    np.random.seed(seed)
-    skf = StratifiedKFold(n_splits=kfold, shuffle=True, random_state=seed)
-    csvscores = []
-    # now, execute the cross-validation;
-    for train_index, test_index in skf.split(x_train, y_train):
-        # set up the lstm ;
-        model = LSTM_setup(x_train, y_train)
-        
-        # Optimizer
-        opt = tf.keras.optimizers.Adam(lr=1e-4, decay=1e-5)
-	    
-        # Compile model
-	    model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
-	    
-        # fit the model using the training set;
-	    model.fit(x_train[train_index], y_train[train_index], epochs=par['epoch'], batch_size = par['batch_size'], verbose = 0)
-        
+
+	# trace the memory usage;
+	tracemalloc.start()
+
+	# load the raw data;
+	x_train = load_X(x_raw)
+	y_train = load_Y(y_raw)
+	
+	# load the relevant hyperparameters;
+	par = super_params()
+	
+	#---------------------------------------------------------------
+	# define a stratified kfold cross validation test harness;
+	# turn on the random shuffling since our data has an order;
+	#---------------------------------------------------------------
+	# fix random seed for reproducibility
+	seed = 7
+	np.random.seed(seed)
+	skf = StratifiedKFold(n_splits=kfold, shuffle=True, random_state=seed)
+	csv_scores = []
+	track = 0
+	# now, execute the cross-validation;
+	for train_index, test_index in skf.split(x_train, y_train):
+
+		snapshot = tracemalloc.take_snapshot()
+
+		# set up the lstm ;
+		model = LSTM_setup(x_train, y_train)
+		
+		# Optimizer
+		opt = tf.keras.optimizers.Adam(lr=1e-4, decay=1e-5)
+		
+		# Compile model
+		model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+		
+		# fit the model using the training set;
+		model.fit(x_train[train_index], y_train[train_index], epochs=par['epoch'], batch_size = par['batch_size'], verbose = 0)
+		
+		# resetting the state after every model evaluation;
+		# otherwise, the global state maintained by tensorflow will overload;
+		# src - https://www.tensorflow.org/api_docs/python/tf/keras/backend/clear_session
+		keras_backend.clear_session()
+		
         # evaluate the model using the validation set and store each metric;
-	    scores = model.evaluate(x_train[test_index], y_train[test_index], verbose=0)
-	    print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
-        cvscores.append(scores[1] * 100)
+		scores = model.evaluate(x_train[test_index], y_train[test_index], verbose=0)
+		print("inner: %s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
+		csv_scores.append(scores[1] * 100)
+		track += 1
+	
     # now average the metrics across the evaluations and display the results;
-    print("%.2f%% (+/- %.2f%%)" % (numpy.mean(cvscores), numpy.std(cvscores)))
+	print("outer: %.2f%% (+/- %.2f%%)" % (np.mean(csv_scores), np.std(csv_scores)))
+	print("track: ", track)
+
+    # what is the statistics on the memory usage?
+	top_stats = tracemalloc.take_snapshot().compare_to(snapshot, 'lineno')
+	print("statistics on the memory usage;")
+	for stat in top_stats:
+			print(stat)
 
 #---------------------------------------------------------------------------------------------
 # extract the best model in terms of accuracy for deployment;
@@ -144,41 +180,31 @@ def cross_validate(x_raw, y_raw, kfold):
 #---------------------------------------------------------------------------------------------
 
 def get_deployable_model(x_raw, y_raw):
-    # load the raw data;
-    x_train = load_X(x_raw)
-    y_train = load_Y(y_raw)
-    # set up the model;  
-    par = super_params()
-    model = LSTM_setup(x_train, y_train)
-    # iterating ....
+	# load the raw data;
+	x_train = load_X(x_raw)
+	y_train = load_Y(y_raw)
+	# set up the model;  
+	par = super_params()
+	model = LSTM_setup(x_train, y_train)
+	# iterating ....
 
-    # define checkpoints to get the best model locally during training;
+	# define checkpoints to get the best model locally during training;
 
 
 # test driver;
 if __name__ == '__main__':
-    xtrain_path = "./training_files/X_train.txt"
-    ytrain_path = "./training_files/Y_train.txt"
-    X_train = load_X(xtrain_path)
-    Y_train = load_Y(ytrain_path)
-    print(Y_train.shape)
-    print(X_train.shape)
-    #print(X_train)
+	xtrain_path = "./training_files/X_train.txt"
+	ytrain_path = "./training_files/Y_train.txt"
+	
+   # test - 01
+   # the auxiiliary functions to load up the txt files;
+	X_train = load_X(xtrain_path)
+	Y_train = load_Y(ytrain_path)
+	print(Y_train.shape)
+	print(X_train.shape)
 
-    # src - https://machinelearningmastery.com/evaluate-performance-deep-learning-models-keras/#:~:text=Keras%20can%20separate%20a%20portion,size%20of%20your%20training%20dataset.
-    # src - https://scikit-learn.org/stable/modules/cross_validation.html
-    # src - https://scikit-learn.org/stable/auto_examples/model_selection/plot_nested_cross_validation_iris.html#:~:text=Nested%20cross%2Dvalidation%20(CV),its%20(hyper)parameter%20search.&text=Information%20may%20thus%20%E2%80%9Cleak%E2%80%9D%20into,model%20and%20overfit%20the%20data.
-
-    seed = 7
-    np.random.seed(seed)
-    # define 10-fold cross validation test harness
-    #kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=seed)
-    cvscores = []
-    skf = StratifiedKFold(n_splits = 2, random_state = seed, shuffle = True)
-    for train_index, test_index in skf.split(X_train, Y_train):
-        print("TRAIN:", train_index, "TEST:", test_index)
-        x_train, x_test = X_train[train_index], X_train[test_index]
-        y_train, y_test = Y_train[train_index], Y_train[test_index]
-        print("y_train: ", (y_train))
-        print("y_test: ", (y_test))
-        
+	# test - 02
+	# cross-validation script;
+	kfold = 3
+	cross_validate(xtrain_path, ytrain_path, kfold)
+		
