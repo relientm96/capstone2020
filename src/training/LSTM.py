@@ -58,7 +58,7 @@ def create_model(x_train, y_train, x_test, y_test):
 	model.add(Activation({{choice(['relu', 'sigmoid'])}}))
 	model.add(Dropout({{uniform(0, 1)}}))
 	
-	# If we choose 'four', add an additional fourth layer
+	# If we choose 'three', add an additional third layer
 	if {{choice(['two', 'three'])}} == 'three':
 		model.add(LSTM({{choice([32, 64, 128, 256, 512])}}, return_sequences=True))
 		model.add(Activation({{choice(['relu', 'sigmoid'])}}))
