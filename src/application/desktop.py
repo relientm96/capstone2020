@@ -98,14 +98,12 @@ def main():
             # Read capture from opencv2
             ret, frame = cap.read()
 
-            start = time.process_time()
             datum = op.Datum()
             datum.cvInputData = frame
             opWrapper.emplaceAndPop([datum])
-            print("OpenPose process frame in {} seconds".format(time.process_time() - start))
 
             # Pass in datum object to send keypoints to gesture recognition module
-            word = "Word: " + gr.translate(datum)
+            word = gr.translate(datum)
 
             # Adding all of these into image
             image = datum.cvOutputData

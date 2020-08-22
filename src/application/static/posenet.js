@@ -27,23 +27,54 @@
  * CAMERA Functions
  * Referenced from posenet's github camera demo
  */
-
+ 
 // Hardcoded Pixel Values
 var videoWidth = 640;
 var videoHeight = 480;
 
 //Threshold to render poses
-minConfidence = 0.2;
-// Flag to enable/disable pose
-displayPose = 1;
-function enablePoints(){
-    // User clicks this if he/she wants to see rendered pose points
-    displayPose ^= 1;
+minConfidence = 0.4;
+
+// Callback to check which mode to do
+handEnabled = false;
+poseEnabled = true;
+
+// State to render
+var render_state = 0;
+
+window.onload = function(){
+    document.getElementById("buttonCtrl").innerHTML = "Enable Hand"
+    document.getElementById("buttonCtrl").className = "waves-effect waves-light btn red";
 }
-// Socketio obj
-var socket = io();
-// Translated word placeholder
-var word = "Hello"
+
+function handleButton(){
+
+    render_state += 1;
+
+    if (render_state > 2){
+        render_state = 0;
+    }
+    
+    if (render_state == 0){
+        document.getElementById("buttonCtrl").innerHTML = "Enable Hand"
+        document.getElementById("buttonCtrl").className = "waves-effect waves-light btn red";
+        document.getElementById("camSetup").innerHTML = "Now Doing Pose Estimation!";
+    }
+    else if (render_state == 1) {
+        document.getElementById("buttonCtrl").innerHTML = "Enable Both"
+        document.getElementById("buttonCtrl").className = "waves-effect waves-light btn purple";
+        document.getElementById("camSetup").innerHTML = "Now Doing Hand Estimation! (Keep Hand In frame to process video)";
+    }
+    else {
+        document.getElementById("buttonCtrl").innerHTML = "Enable Pose"
+        document.getElementById("buttonCtrl").className = "waves-effect waves-light btn orange";
+        document.getElementById("camSetup").innerHTML = "Now Doing Both Pose and Hand Estimation! (Keep Hand In frame to process video)";
+    }
+}
+
+const state = {
+    backend: 'webgl'
+};
 
 // Mobile Support
 const mobile = /Android/i.test(navigator.userAgent) || /iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -80,16 +111,6 @@ async function loadVideo() {
     return video;
 }
 
-// Reads in socket io message to acknowledge connection is made
-socket.on('resp', function(responseText){
-    document.getElementById('camSetup').innerHTML = responseText;
-});
-
-//Reads translated result
-socket.on('response_back', function(translated_word){
-    word = translated_word
-});
-
 function drawLine(sourceX, sourceY, destX, destY){
     const canvas = document.getElementById('output')
     let ctx = canvas.getContext('2d');
@@ -124,41 +145,119 @@ function drawAllSkeleton(array){
         }
     }
     // Complete the skeleton
+    drawLine(array[0].position['x'], array[0].position['y'], array[2].position['x'], array[2].position['y'])
     drawLine(array[11].position['x'], array[11].position['y'], array[12].position['x'], array[12].position['y'])
     drawLine(array[5].position['x'], array[5].position['y'], array[6].position['x'], array[6].position['y'])
 }
 
 // Detects poses in real time with a WebCam Stream
 // Referenced from posenet's camera.js demo code
-function detectPoseInRealTime(video, net) {
+function detectPoseInRealTime(video, net, model) {
     // Canvas details
     var canvas = document.getElementById('output')
-    let ctx = canvas.getContext('2d');
+    var ctx = canvas.getContext('2d');
     canvas.width = videoWidth;
     canvas.height = videoHeight;
     async function getPose() {
-        const pose = net.estimatePoses(video, {
+                
+        if (render_state == 0){
+            const posepredictions = await net.estimatePoses(video, {
                 flipHorizontal: false,
                 maxDetections: 1,
                 scoreThreshold: minConfidence,
                 nmsRadius: 20
-            }).then(function(results) {
-                // Redraw Key Points for each new rendered frame
+            });
+            if (posepredictions.length > 0){
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.save();
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 ctx.restore();
-                if (displayPose){
+                const results = posepredictions[0].keypoints;
+                for (i = 0; i < results.length; i++) {
+                    x = results[i].position['x'];
+                    y = results[i].position['y'];
+                    ctx.fillStyle = "#FF0000";
+                    ctx.fillRect(x, y, 10, 10);
+                    ctx.fill();
+                }
+                drawAllSkeleton(results);
+            }
+        }
+        
+        if (render_state == 1){
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const handpredictions = await model.estimateHands(video);
+            if (handpredictions.length > 0)  {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.save();
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                ctx.restore();
+                const keypoints = handpredictions[0].landmarks;
+                for (i = 0; i < keypoints.length; i++) {
+                    const [x, y] = keypoints[i];
+                    ctx.fillStyle = "#00FFFF";
+                    ctx.fillRect(x, y, 10, 10);
+                    ctx.fill();
+                }
+            }    
+        }
+
+        if (render_state == 2){
+            const handpredictions = await model.estimateHands(video);
+            const posepredictions = await net.estimatePoses(video, {
+                flipHorizontal: false,
+                maxDetections: 1,
+                scoreThreshold: minConfidence,
+                nmsRadius: 20
+            });
+            if ((handpredictions.length > 0) && (posepredictions.length > 0)) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.save();
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                ctx.restore();
+                const keypoints = handpredictions[0].landmarks;
+                for (i = 0; i < keypoints.length; i++) {
+                    const [x, y] = keypoints[i];
+                    ctx.fillStyle = "#00FFFF";
+                    ctx.fillRect(x, y, 10, 10);
+                    ctx.fill();
+                }
+                const results = posepredictions[0].keypoints;
+                for (i = 0; i < results.length; i++) {
+                    x = results[i].position['x'];
+                    y = results[i].position['y'];
+                    ctx.fillStyle = "#FF0000";
+                    ctx.fillRect(x, y, 10, 10);
+                    ctx.fill();
+                }
+                drawAllSkeleton(results);
+            }    
+        }
+
+
+        /*
+       const pose = net.estimatePoses(video, {
+                    flipHorizontal: false,
+                    maxDetections: 1,
+                    scoreThreshold: minConfidence,
+                    nmsRadius: 20
+                }).then(function(results) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.save();
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    ctx.restore();
+                    // Redraw Key Points for each new rendered frame
                     for (i = 0; i < results[0].keypoints.length; i++) {
                         x = results[0].keypoints[i].position['x'];
                         y = results[0].keypoints[i].position['y'];
                         ctx.fillStyle = "#FF0000";
                         ctx.fillRect(x, y, 10, 10);
+                        ctx.fill();
                     }
                     drawAllSkeleton(results[0].keypoints)
-                }
-            })
-            // Looping frame rendering continuosly
+                })
+        */
+        // Looping frame rendering continuosly
         window.requestAnimationFrame(getPose);
     }
     getPose();
@@ -166,7 +265,9 @@ function detectPoseInRealTime(video, net) {
 
 //  Function to run entire thing
 async function run() {
-    const net = await posenet.load();
+    await tf.setBackend(state.backend);
+    const net   = await posenet.load();
+    const model = await handpose.load();
     let video;
     try {
         video = await loadVideo();  
@@ -177,7 +278,7 @@ async function run() {
             'or this device does not have a camera';
         throw e;
     }
-    detectPoseInRealTime(video, net);
+    detectPoseInRealTime(video, net, model);
 }
 
 // Web media api enable

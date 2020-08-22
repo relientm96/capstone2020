@@ -14,10 +14,15 @@
         <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
         <!-- Load Posenet -->
         <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script>
-        <!-- Socket IO -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
-        <!-- Place your code in the script tag below. You can also use an external .js file -->
-        <script src="../static/posenet.js"></script>
+        <!-- Hand pose Peer dependencies -->
+        <script src="https://unpkg.com/@tensorflow/tfjs-core@2.1.0/dist/tf-core.js"></script>
+        <script src="https://unpkg.com/@tensorflow/tfjs-converter@2.1.0/dist/tf-converter.js"></script>
+        <!--Load in HandPose-->
+        <script src="https://unpkg.com/@tensorflow-models/handpose@0.0.6/dist/handpose.js"></script>
+        <!-- You must explicitly require a TF.js backend if you're not using the tfs union bundle. -->
+        <script src="https://unpkg.com/@tensorflow/tfjs-backend-webgl@2.1.0/dist/tf-backend-webgl.js"></script>
+        <!-- Alternatively you can use the WASM backend: <script src="https://unpkg.com/@tensorflow/tfjs-backend-wasm@2.1.0/dist/tf-backend-wasm.js"></script> -->
+        <script src="https://unpkg.com/@tensorflow-models/handpose@0.0.6/dist/handpose.js"></script>
     </head>
 
   <body>
@@ -26,14 +31,16 @@
         <h3>Real Time Sign Recognition</h3>
         <p>PoseNet Sample Demo (No Recognition)</p>
         <div class="container" id="outputID">
-            <h5 id="camSetup">Waiting for Camera Setup</h5>
+            <h5 id="camSetup">Waiting for WebGL Libraries, Please Be Patient...</h5>
             <canvas id="output"></canvas>
             <br>
             <div style="display:inline-block">
-              <a class="waves-effect waves-light blue btn" onclick="enablePoints()">Show Points</a>
+              <a id="buttonCtrl" class="waves-effect waves-light red btn" onclick="handleButton()"> Enable Hand</a>
               <a class="waves-effect waves-light blue btn" href="/">Back To Home</a>
             </div>
         </div>
     </div>
+    <!-- Place your code in the script tag below. You can also use an external .js file -->
+    <script src="../static/posenet.js"></script>
   </body>
 </html>
