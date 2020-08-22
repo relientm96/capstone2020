@@ -148,11 +148,8 @@ function detectPoseInRealTime(video, net) {
                 ctx.save();
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 ctx.restore();
-                //console.log(results[0])
                 if (displayPose){
                     for (i = 0; i < results[0].keypoints.length; i++) {
-                        // Only redraw them if score higher than threshold score
-                        // threshold score here is set by slider by user
                         x = results[0].keypoints[i].position['x'];
                         y = results[0].keypoints[i].position['y'];
                         ctx.fillStyle = "#FF0000";
@@ -160,7 +157,6 @@ function detectPoseInRealTime(video, net) {
                     }
                     drawAllSkeleton(results[0].keypoints)
                 }
-                socket.emit('posenet_keypoints', results[0])
             })
             // Looping frame rendering continuosly
         window.requestAnimationFrame(getPose);

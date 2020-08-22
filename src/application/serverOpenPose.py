@@ -86,6 +86,22 @@ except Exception as e:
     print(e)
     sys.exit(-1)
 
+def removeConfidenceAndShapeAsNumpy(datum):
+    '''
+    Takes in datum object and get pose, and both hand keypoints 
+    and returns a numpy array for prediction
+    '''
+    # We want to keep only first two columns for all keypoints (ignore confidence levels)
+    posePoints = datum.poseKeypoints[0][1:8,0:2]  # Slice to only take keypoints 1-7 removing confidence
+    lefthand   = datum.handKeypoints[0][0][:,0:2] # Get all hand points removing confidence
+    righthand  = datum.handKeypoints[1][0][:,0:2] # Get all hand points removing confidence
+
+    # Concatenate all numpy matrices and flatten for rolling window storage (as a row)
+    keypoints = np.vstack([posePoints,lefthand,righthand]).flatten()
+    
+    # Return this as the keypoint to be added to rolling window
+    return keypoints
+
 def processFrames(inputImageUri):
     '''
     Receives input image url from browser as a base64 string
@@ -145,6 +161,27 @@ def translateWord(inputImageUri):
         opWrapper.emplaceAndPop([datum])
         # Get translated word
         return gr.translate(datum)
+    except Exception as e:
+        print(e)
+        sys.exit(-1)
+        return "noimage"
+
+def returnKeypointsFlattened(inputImageUri):
+    '''
+    Returns keypoints generated for this image (flattened for prediction)
+    '''
+    try:
+        b64_string = inputImageUri.split(',')[0]
+        b64_string += "=" * ((4 - len(b64_string) % 4) % 4)
+        encoded_string = base64.b64decode(b64_string)
+        # Send image to OpenPose for processing
+        jpg_as_np = np.frombuffer(encoded_string, dtype=np.uint8)
+        frame = cv2.imdecode(jpg_as_np, flags=1)
+        datum = op.Datum()
+        datum.cvInputData = frame
+        opWrapper.emplaceAndPop([datum])
+        # Get translated word
+        return removeConfidenceAndShapeAsNumpy(datum)
     except Exception as e:
         print(e)
         sys.exit(-1)
