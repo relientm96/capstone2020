@@ -4,7 +4,10 @@ import file_tools as ftools
 import sys
 
 # global var(s);
-SPEED = [1, 0.6, 0.8, 1.2, 1.4]
+#SPEED = [1, 0.6, 0.8, 1.2, 1.4]
+
+# date - 24 aug, 2020;
+SPEED = [1]
 def process_one_video(input, path_X, path_Y):
 	for i in range(len(SPEED)):
 		speed_seed = SPEED[i]
