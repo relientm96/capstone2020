@@ -39,6 +39,18 @@ minConfidence = 0.4;
 handEnabled = false;
 poseEnabled = true;
 
+var canvas;
+var ctx;
+
+// for rendering each finger as a polyline
+fingerLookupIndices = {
+    thumb: [0, 1, 2, 3, 4],
+    indexFinger: [0, 5, 6, 7, 8],
+    middleFinger: [0, 9, 10, 11, 12],
+    ringFinger: [0, 13, 14, 15, 16],
+    pinky: [0, 17, 18, 19, 20]
+};  
+
 // State to render
 var render_state = 0;
 
@@ -112,8 +124,6 @@ async function loadVideo() {
 }
 
 function drawLine(sourceX, sourceY, destX, destY){
-    const canvas = document.getElementById('output')
-    let ctx = canvas.getContext('2d');
     ctx.beginPath();
     ctx.moveTo(sourceX, sourceY);
     ctx.lineTo(destX, destY);
@@ -150,14 +160,24 @@ function drawAllSkeleton(array){
     drawLine(array[5].position['x'], array[5].position['y'], array[6].position['x'], array[6].position['y'])
 }
 
+function drawPoint(y, x, r) {
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 2 * Math.PI);
+    ctx.fill();
+}
+
+
 // Detects poses in real time with a WebCam Stream
 // Referenced from posenet's camera.js demo code
 function detectPoseInRealTime(video, net, model) {
     // Canvas details
-    var canvas = document.getElementById('output')
-    var ctx = canvas.getContext('2d');
+    canvas = document.getElementById('output')
+    ctx = canvas.getContext('2d');
     canvas.width = videoWidth;
     canvas.height = videoHeight;
+    ctx.clearRect(0, 0, videoWidth, videoHeight);
+    ctx.strokeStyle = 'red';
+    ctx.fillStyle = 'red';
     async function getPose() {
                 
         if (render_state == 0){
@@ -188,10 +208,12 @@ function detectPoseInRealTime(video, net, model) {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const handpredictions = await model.estimateHands(video);
             if (handpredictions.length > 0)  {
+                /*
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.save();
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 ctx.restore();
+                */
                 const keypoints = handpredictions[0].landmarks;
                 for (i = 0; i < keypoints.length; i++) {
                     const [x, y] = keypoints[i];
@@ -210,18 +232,21 @@ function detectPoseInRealTime(video, net, model) {
                 scoreThreshold: minConfidence,
                 nmsRadius: 20
             });
-            if ((handpredictions.length > 0) && (posepredictions.length > 0)) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.save();
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                ctx.restore();
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            if (handpredictions.length > 0) {
                 const keypoints = handpredictions[0].landmarks;
                 for (i = 0; i < keypoints.length; i++) {
+                    ctx.save();
+                    ctx.restore();
                     const [x, y] = keypoints[i];
                     ctx.fillStyle = "#00FFFF";
                     ctx.fillRect(x, y, 10, 10);
                     ctx.fill();
                 }
+            }
+            if (posepredictions.length > 0){
+                ctx.save();
+                ctx.restore();
                 const results = posepredictions[0].keypoints;
                 for (i = 0; i < results.length; i++) {
                     x = results[i].position['x'];
