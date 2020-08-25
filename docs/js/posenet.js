@@ -197,7 +197,7 @@ function detectPoseInRealTime(video, net, model) {
                     x = results[i].position['x'];
                     y = results[i].position['y'];
                     ctx.fillStyle = "#FF0000";
-                    ctx.fillRect(x, y, 10, 10);
+                    ctx.fillRect(x, y, 8, 8);
                     ctx.fill();
                 }
                 drawAllSkeleton(results);
@@ -216,7 +216,7 @@ function detectPoseInRealTime(video, net, model) {
                 for (i = 0; i < keypoints.length; i++) {
                     const [x, y] = keypoints[i];
                     ctx.fillStyle = "#00FFFF";
-                    ctx.fillRect(x, y, 10, 10);
+                    ctx.fillRect(x, y, 8, 8);
                     ctx.fill();
                 }
             }    
@@ -238,19 +238,19 @@ function detectPoseInRealTime(video, net, model) {
                     ctx.restore();
                     const [x, y] = keypoints[i];
                     ctx.fillStyle = "#00FFFF";
-                    ctx.fillRect(x, y, 10, 10);
+                    ctx.fillRect(x, y, 8, 8);
                     ctx.fill();
                 }
             }
             if (posepredictions.length > 0){
-                ctx.save();
-                ctx.restore();
+                //ctx.save();
+                //ctx.restore();
                 const results = posepredictions[0].keypoints;
                 for (i = 0; i < results.length; i++) {
                     x = results[i].position['x'];
                     y = results[i].position['y'];
                     ctx.fillStyle = "#FF0000";
-                    ctx.fillRect(x, y, 10, 10);
+                    ctx.fillRect(x, y, 8, 8);
                     ctx.fill();
                 }
                 drawAllSkeleton(results);

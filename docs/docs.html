@@ -10,6 +10,8 @@
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
     />
+    <!--Jquery-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <!-- Load Materialize Stuff -->
     <!-- Compiled and minified CSS -->
     <link
@@ -21,49 +23,114 @@
   </head>
 
   <body>
-      <div class="section container">
-        <h3> Documentation </h3>
-        <div class="divider"></div>
-        <h5> Overview </h5>
-        <p>
-           This is a Proof of Concept application to show case the possibilty of using
-           keypoint extraction for sign language recognition.
-        </p>
-        <div class="divider"></div>
+
+     <div class="row">
+
+      <div class="col s2 m2 l2" >
+          <ul id="slide-out" class="sidenav sidenav-fixed">
+            <li>
+              <div class="user-view">
+                <h5> Documentation</h5>
+              </div>
+            </li>
+            <li><div class="divider"></div></li>
+            <li>
+              <a href="#overview" class="waves-effect waves-teal">Overview</a>            
+            </li>
+            <li>
+              <a href="#features" class="waves-effect waves-teal">Features</a>            
+            </li>
+            <li>
+              <a href="#projectdetails" class="waves-effect waves-teal">Project Details</a>
+              <ul class="container" >
+                <li>
+                  <a href="#features" class="waves-effect waves-teal">Dataset Processing</a>
+                </li>
+                <li>
+                  <a href="#features" class="waves-effect waves-teal">Model Development</a>
+                </li>
+                <li>
+                  <a href="#features" class="waves-effect waves-teal">Application Deployment</a>
+                </li>
+              </ul>            
+            </li>
+         </ul>
+         <a href="#" data-target="nav-mobile" class="top-nav sidenav-trigger full hide-on-large-only"><i class="material-icons">menu</i></a>
       </div>
-      
-      <div class="section container">
-        <h5> Dataset Processing </h5>
+
+      <div class="col s10 m10 l10">
+        <div class="section container">
+
+          <h3 id="overview"> Overview </h3>
+          <p>
+            Sign language is primarily used in facilitating 
+            communication between the hearing impaired and the rest
+            of the society. As speaking is detri
+
+            <br><br>
+            <b>Primarly, our Project aims to:</b>
+          </p>
+
+        <blockquote>
+          Explore the possibility of performing 
+          Real Time Sign Language Detection
+          via Human Pose Estimation. 
+        </blockquote>
+
         <p>
-            We started out doing...
-            Blah blah
+          As our project is a realisation of
+          a proof of concept,
+          we decided to focus on creating a 
+          gesture detection model that detects
+          emergency Australian Sign Language signs.
         </p>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section container">
+        <h3 id="features"> Features </h3>
+        <p>
+          <ul> 
+            <li style="list-style-type: circle !important"> Able to detect up to </li>
+            <li style="list-style-type: circle !important"> Web Application with live camera feed for sign recognition</li>
+          </ul>
+        </p>
+      </div>
+
         <div class="divider"></div>
+
+        <div class="section container">
+            <h3> Project Details </h3>
+            <br>
+            <h4> Dataset Processing </h4>
+            <p>
+                We started out doing...
+                Blah blah
+            </p>
+            <h4> Model Development </h4>
+            <p>
+                We are using LSTM, Long Short Term Memory, blah blah...
+            </p>
+            <h4> Application Deployment </h4>
+            <p>
+                We have a web application blah blah (App architecture to be updated)
+            </p>
+            <img class="materialboxed" style="height:500px;" src="images/app2.png">
+          <div class="divider"></div>
+        </div>
       </div>
 
       <div class="section container">
-        <h5> Model Development </h5>
+        <h3> Acknowledgements </h3>
         <p>
-            We are using LSTM, Long Short Term Memory, blah blah...
-        </p>
-        <div class="divider"></div>
-      </div>
+            We would like to thank Professor Jonathan, who has 
+            supervised us in our project with great guidance and help.
 
-      <div class="section container">
-        <h5> Application Deployment </h5>
-        <p>
-            We have a web application blah blah (App architecture to be updated)
+            We would also like to extend our gratitude to Lucas Barbuto, 
+            in helping us set up our MSE-IT Virtual Machine in order 
+            to provide us with computational resource and power to 
+            train and deploy our AI model.
         </p>
-        <img class="responsive-img" style="height:500px;" src="images/app_draft.png">
-        <div class="divider"></div>
-      </div>
-
-      <div class="section container">
-        <h5> Acknowledgements </h5>
-        <p>
-            We would like to thank...
-        </p>
-        <div class="divider"></div>
       </div>
 
       <div class="container">
@@ -74,6 +141,10 @@
       </div>
 
       <br>
+      </div>
+    </div>
+
+     <script src="js/docs.js"></script>
   </body>
 
 </html>
