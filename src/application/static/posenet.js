@@ -197,7 +197,7 @@ function detectPoseInRealTime(video, net, model) {
                     x = results[i].position['x'];
                     y = results[i].position['y'];
                     ctx.fillStyle = "#FF0000";
-                    ctx.fillRect(x, y, 10, 10);
+                    ctx.fillRect(x, y, 8, 8);
                     ctx.fill();
                 }
                 drawAllSkeleton(results);
@@ -208,17 +208,15 @@ function detectPoseInRealTime(video, net, model) {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const handpredictions = await model.estimateHands(video);
             if (handpredictions.length > 0)  {
-                /*
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.save();
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 ctx.restore();
-                */
                 const keypoints = handpredictions[0].landmarks;
                 for (i = 0; i < keypoints.length; i++) {
                     const [x, y] = keypoints[i];
                     ctx.fillStyle = "#00FFFF";
-                    ctx.fillRect(x, y, 10, 10);
+                    ctx.fillRect(x, y, 8, 8);
                     ctx.fill();
                 }
             }    
@@ -240,48 +238,25 @@ function detectPoseInRealTime(video, net, model) {
                     ctx.restore();
                     const [x, y] = keypoints[i];
                     ctx.fillStyle = "#00FFFF";
-                    ctx.fillRect(x, y, 10, 10);
+                    ctx.fillRect(x, y, 8, 8);
                     ctx.fill();
                 }
             }
             if (posepredictions.length > 0){
-                ctx.save();
-                ctx.restore();
+                //ctx.save();
+                //ctx.restore();
                 const results = posepredictions[0].keypoints;
                 for (i = 0; i < results.length; i++) {
                     x = results[i].position['x'];
                     y = results[i].position['y'];
                     ctx.fillStyle = "#FF0000";
-                    ctx.fillRect(x, y, 10, 10);
+                    ctx.fillRect(x, y, 8, 8);
                     ctx.fill();
                 }
                 drawAllSkeleton(results);
             }    
         }
 
-
-        /*
-       const pose = net.estimatePoses(video, {
-                    flipHorizontal: false,
-                    maxDetections: 1,
-                    scoreThreshold: minConfidence,
-                    nmsRadius: 20
-                }).then(function(results) {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.save();
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    ctx.restore();
-                    // Redraw Key Points for each new rendered frame
-                    for (i = 0; i < results[0].keypoints.length; i++) {
-                        x = results[0].keypoints[i].position['x'];
-                        y = results[0].keypoints[i].position['y'];
-                        ctx.fillStyle = "#FF0000";
-                        ctx.fillRect(x, y, 10, 10);
-                        ctx.fill();
-                    }
-                    drawAllSkeleton(results[0].keypoints)
-                })
-        */
         // Looping frame rendering continuosly
         window.requestAnimationFrame(getPose);
     }
