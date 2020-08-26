@@ -1,9 +1,11 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
+from engineio.payload import Payload
 
 import base64
 import serverOpenPose as serverOP
 
+Payload.max_decode_packets = 500
 app = Flask(__name__)
 socketio = SocketIO(app)
 

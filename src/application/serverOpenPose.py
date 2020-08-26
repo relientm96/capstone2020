@@ -19,9 +19,21 @@ params = dict()
 # Custom Params 
 # (refer to https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/include/openpose/flags.hpp
 # for more parameters)
-params["net_resolution"] = "320x320"
-params["hand"] = False
+
+params["net_resolution"]  = "336x336"
+#params["net_resolution"] = "160x80"
+params["hand"] = True
 params["hand_net_resolution"] = "328x328"
+params['keypoint_scale']      = 3
+params["model_pose"]          = "BODY_25"
+params['process_real_time'] = True
+params['disable_blending']  = True
+params['disable_multi_thread'] = True
+params["fps_max"]             = -1
+
+#params['output_resolution'] = "300x300"
+#params['render_pose'] = 0
+#params["part_candidates"] = True
 
 ############################################
 
@@ -65,13 +77,19 @@ try:
             key = curr_item.replace('-','')
             if key not in params: params[key] = next_item
 
-    # Initialize Gesture Recognition Program + OPENPOSE Wrapper
+    # Import OpenPose library to Gesture System
     gr.initOpenPoseLoad()
     print("Gesture Recognition System Started!")
+
+    # Start openpose wrapper
     opWrapper = op.WrapperPython()
     opWrapper.configure(params)
     opWrapper.start()
     print("OpenPose Wrapper Started!")
+
+    # Load Model from keras
+    gr.loadModel()
+    print('Successfully Loaded Model')
 
 except Exception as e:
     print(e)
