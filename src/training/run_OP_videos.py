@@ -7,7 +7,11 @@ import sys
 #SPEED = [1, 0.6, 0.8, 1.2, 1.4]
 
 # date - 24 aug, 2020;
-SPEED = [1]
+#SPEED = [1]
+
+# date - 26 aug, 2020;
+SPEED = [0.8]
+
 def process_one_video(input, path_X, path_Y):
 	for i in range(len(SPEED)):
 		speed_seed = SPEED[i]
