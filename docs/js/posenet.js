@@ -29,8 +29,8 @@
  */
  
 // Hardcoded Pixel Values
-var videoWidth = 640;
-var videoHeight = 480;
+var videoWidth = 800; //640
+var videoHeight = 600; //480
 
 //Threshold to render poses
 minConfidence = 0.4;
@@ -170,12 +170,18 @@ function drawPoint(y, x, r) {
 // Detects poses in real time with a WebCam Stream
 // Referenced from posenet's camera.js demo code
 function detectPoseInRealTime(video, net, model) {
+
+    // Delete loader when video is detected and model loaded
+    document.getElementById('loaderbar').remove();
+
     // Canvas details
     canvas = document.getElementById('output')
-    ctx = canvas.getContext('2d');
     canvas.width = videoWidth;
     canvas.height = videoHeight;
+    ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, videoWidth, videoHeight);
+    ctx.translate(videoWidth, 0);
+    ctx.scale(-1, 1);
     ctx.strokeStyle = 'red';
     ctx.fillStyle = 'red';
     async function getPose() {

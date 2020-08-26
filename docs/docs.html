@@ -1,150 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Documentation</title>
-    <!--Import Google Icon Font-->
-    <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet"
-    />
-    <!--Jquery-->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-    <!-- Load Materialize Stuff -->
-    <!-- Compiled and minified CSS -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
-    />
-    <!-- Compiled and minified JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-  </head>
-
-  <body>
-
-     <div class="row">
-
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+      <title>Documentation</title>
+      <!--Import Google Icon Font-->
+      <link
+         href="https://fonts.googleapis.com/icon?family=Material+Icons"
+         rel="stylesheet"
+         />
+      <!--Jquery-->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+      <!-- Load Materialize Stuff -->
+      <!-- Compiled and minified CSS -->
+      <link
+         rel="stylesheet"
+         href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+         />
+      <!-- Compiled and minified JavaScript -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+   </head>
+   <body>
+      <div class="row">
       <div class="col s2 m2 l2" >
-          <ul id="slide-out" class="sidenav sidenav-fixed">
+         <ul id="slide-out" class="sidenav sidenav-fixed">
             <li>
-              <div class="user-view">
-                <h5> Documentation</h5>
-              </div>
-            </li>
-            <li><div class="divider"></div></li>
-            <li>
-              <a href="#overview" class="waves-effect waves-teal">Overview</a>            
+               <div class="user-view">
+                  <a href="#">
+                     <h5> Documentation </h5>
+                  </a>
+               </div>
             </li>
             <li>
-              <a href="#features" class="waves-effect waves-teal">Features</a>            
+               <div class="divider"></div>
             </li>
             <li>
-              <a href="#projectdetails" class="waves-effect waves-teal">Project Details</a>
-              <ul class="container" >
-                <li>
-                  <a href="#features" class="waves-effect waves-teal">Dataset Processing</a>
-                </li>
-                <li>
-                  <a href="#features" class="waves-effect waves-teal">Model Development</a>
-                </li>
-                <li>
-                  <a href="#features" class="waves-effect waves-teal">Application Deployment</a>
-                </li>
-              </ul>            
+               <a href="#overview" class="waves-effect waves-teal">Overview</a>            
+            </li>
+            <li>
+               <a href="#features" class="waves-effect waves-teal">Features</a>            
+            </li>
+            <li>
+               <a href="#datasetprocessing" class="waves-effect waves-teal">Dataset Processing</a>
+            </li>
+            <li>
+               <a href="#modeldevelopment" class="waves-effect waves-teal">Model Development</a>
+            </li>
+            <li>
+               <a href="#applicationdeployment" class="waves-effect waves-teal">Application Deployment</a>
+            </li>
+            <li>
+               <a href="#acknowledgements" class="waves-effect waves-teal">Acknoledgements</a>
             </li>
          </ul>
-         <a href="#" data-target="nav-mobile" class="top-nav sidenav-trigger full hide-on-large-only"><i class="material-icons">menu</i></a>
+         <a href="#" data-target="slide-out" class="top-nav sidenav-trigger full hide-on-large-only"><i class="material-icons">menu</i></a>
       </div>
-
       <div class="col s10 m10 l10">
-        <div class="section container">
-
-          <h3 id="overview"> Overview </h3>
-          <p>
-            Sign language is primarily used in facilitating 
-            communication between the hearing impaired and the rest
-            of the society. As speaking is detri
-
-            <br><br>
-            <b>Primarly, our Project aims to:</b>
-          </p>
-
-        <blockquote>
-          Explore the possibility of performing 
-          Real Time Sign Language Detection
-          via Human Pose Estimation. 
-        </blockquote>
-
-        <p>
-          As our project is a realisation of
-          a proof of concept,
-          we decided to focus on creating a 
-          gesture detection model that detects
-          emergency Australian Sign Language signs.
-        </p>
-      </div>
-
-      <div class="divider"></div>
-      <div class="section container">
-        <h3 id="features"> Features </h3>
-        <p>
-          <ul> 
-            <li style="list-style-type: circle !important"> Able to detect up to </li>
-            <li style="list-style-type: circle !important"> Web Application with live camera feed for sign recognition</li>
-          </ul>
-        </p>
-      </div>
-
-        <div class="divider"></div>
-
-        <div class="section container">
-            <h3> Project Details </h3>
-            <br>
+         <!-- Over View Section -->
+         <div id="overview" class="section container scrollspy">
+            <h3> Overview </h3>
+            <p>
+              Funnel:
+              - Talk about human motion capture
+              - Talk about techniques, particularly using AI
+              - Talk about the benefits of using ai human pose detection
+              - Talk about the impact it can make in our application, sign language
+               Sign language is primarily used in facilitating 
+               communication between the hearing impaired and the rest
+               of the society. As speaking is detri
+               <br><br>
+               <b>Primarly, our Project aims to:</b>
+            </p>
+            <blockquote>
+               Explore the possibility of performing 
+               Real Time Sign Language Detection
+               via Human Pose Estimation. 
+            </blockquote>
+            <p>
+               As our project is a realisation of
+               a proof of concept,
+               we decided to focus on creating a 
+               gesture detection model that detects
+               emergency Australian Sign Language signs.
+            </p>
+         </div>
+         <div class="divider"></div>
+         <div id="features" class="section container scrollspy">
+            <h3> Features </h3>
+            <p>
+            <ul>
+               <li style="list-style-type: circle !important"> Able to detect up to </li>
+               <li style="list-style-type: circle !important"> Web Application with live camera feed for sign recognition</li>
+            </ul>
+            </p>
+         </div>
+         <div class="divider"></div>
+         <div id="datasetprocessing" class="section container scrollspy">
             <h4> Dataset Processing </h4>
             <p>
-                We started out doing...
-                Blah blah
+               We started out doing...
+               Blah blah
             </p>
+         </div>
+         <div class="divider"></div>
+         <div id="modeldevelopment" class="section container scrollspy">
             <h4> Model Development </h4>
             <p>
-                We are using LSTM, Long Short Term Memory, blah blah...
+               We are using LSTM, Long Short Term Memory, blah blah...
             </p>
+         </div>
+         <div class="divider"></div>
+         <div id="applicationdeployment" class="section container scrollspy">
             <h4> Application Deployment </h4>
             <p>
-                We have a web application blah blah (App architecture to be updated)
+               We have a web application blah blah (App architecture to be updated)
             </p>
-            <img class="materialboxed" style="height:500px;" src="images/app2.png">
-          <div class="divider"></div>
-        </div>
-      </div>
-
-      <div class="section container">
-        <h3> Acknowledgements </h3>
-        <p>
-            We would like to thank Professor Jonathan, who has 
-            supervised us in our project with great guidance and help.
-
-            We would also like to extend our gratitude to Lucas Barbuto, 
-            in helping us set up our MSE-IT Virtual Machine in order 
-            to provide us with computational resource and power to 
-            train and deploy our AI model.
-        </p>
-      </div>
-
-      <div class="container">
-        <a class="waves-effect waves-light btn" href="index.html">
+            <img id="app_architecture" class="materialboxed" style="max-width: 100%;" src="images/app2.png">
+         </div>
+         <div class="divider"></div>
+         <div id="acknowledgements" class="section container scrollspy">
+            <h3> Acknowledgements </h3>
+            <p>
+               We would like to thank Professor Jonathan, who has 
+               supervised us in our project with great guidance and help.
+               <br><br>
+               We would also like to extend our gratitude to Lucas Barbuto, 
+               in helping us set up our MSE-IT Virtual Machine in order 
+               to provide us with computational resource and power to 
+               train and deploy our AI model.
+            </p>
+         </div>
+         <div class="container">
+            <a class="waves-effect waves-light btn" href="index.html">
             <i class="material-icons left">undo</i>
             Back to Homepage
-          </a>
+            </a>
+         </div>
+         <br>
       </div>
-
-      <br>
-      </div>
-    </div>
-
-     <script src="js/docs.js"></script>
-  </body>
-
+      <script src="js/docs.js"></script>
+   </body>
 </html>
