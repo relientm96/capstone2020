@@ -8,7 +8,6 @@ function fileToMarked(file, element){
             request.setRequestHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type");
         },
         success: function(response){
-            console.log(JSON.parse(response))
             element.innerhtml = data;
         }
     })
