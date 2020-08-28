@@ -9,6 +9,7 @@ function fileToMarked(file, element){
         },
         success: function(response){
             element.innerHTML = marked(response);
+            $(`#${element.id} ul`).addClass("browser-default");
         }
     })
 }
@@ -42,4 +43,3 @@ $(document).ready(function(){
         }
     }  
 });
-
