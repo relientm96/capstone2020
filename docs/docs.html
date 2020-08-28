@@ -22,7 +22,17 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
       <!-- Marked Library, to import markdown into HTML -->
       <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-      
+
+      <!-- Highlight JS -->
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.2/build/styles/default.min.css">
+      <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.2/build/highlight.min.js"></script>
+
+      <style>
+         pre {
+            background-color: #ededed;
+         }
+      </style>
+
    </head>
    <body>
       <div class="row">
@@ -37,6 +47,9 @@
             </li>
             <li>
                <div class="divider"></div>
+            </li>
+            <li class="active">
+               <a href="#introduction" class="waves-effect waves-teal">Introduction</a>
             </li>
             <li class="active">
                <a href="#overview" class="waves-effect waves-teal">Overview</a>            
@@ -61,89 +74,34 @@
       </div>   
 
       <div class="col s10 m10 l10">
-         <!-- Over View Section -->
-         <div id="overview" class="section container scrollspy">
 
-            <!--
-            <h3> Overview </h3>
-            <p>
-              Funnel:
-              - Talk about human motion capture
-              - Talk about techniques, particularly using AI
-              - Talk about the benefits of using ai human pose detection
-              - Talk about the impact it can make in our application, sign language
-               Sign language is primarily used in facilitating 
-               communication between the hearing impaired and the rest
-               of the society. As speaking is detri
-               <br><br>
-               <b>Primarly, our Project aims to:</b>
-            </p>
-            <blockquote>
-               Explore the possibility of performing 
-               Real Time Sign Language Detection
-               via Human Pose Estimation. 
-            </blockquote>
-            <p>
-               As our project is a realisation of
-               a proof of concept,
-               we decided to focus on creating a 
-               gesture detection model that detects
-               emergency Australian Sign Language signs.
-            </p>
-            -->
-         </div>
+         <div id="introduction" class="section container scrollspy"></div>
          <div class="divider"></div>
-         <div id="features" class="section container scrollspy">
-            <h3> Features </h3>
-            <p>
-            <ul>
-               <li style="list-style-type: circle !important"> Able to detect up to </li>
-               <li style="list-style-type: circle !important"> Web Application with live camera feed for sign recognition</li>
-            </ul>
-            </p>
-         </div>
+      
+         <div id="overview" class="section container scrollspy"></div>
          <div class="divider"></div>
-         <div id="datasetprocessing" class="section container scrollspy">
-            <h4> Dataset Processing </h4>
-            <p>
-               We started out doing...
-               Blah blah
-            </p>
-         </div>
+
+         <div id="features" class="section container scrollspy"></div>
          <div class="divider"></div>
-         <div id="modeldevelopment" class="section container scrollspy">
-            <h4> Model Development </h4>
-            <p>
-               We are using LSTM, Long Short Term Memory, blah blah...
-            </p>
-         </div>
+
+         <div id="datasetprocessing" class="section container scrollspy"></div>
          <div class="divider"></div>
-         <div id="applicationdeployment" class="section container scrollspy">
-            <h4> Application Deployment </h4>
-            <p>
-               We have a web application blah blah (App architecture to be updated)
-            </p>
-            <img id="app_architecture" class="materialboxed" style="max-width: 100%;" src="images/app2.png">
-         </div>
+
+         <div id="modeldevelopment" class="section container scrollspy"></div>
          <div class="divider"></div>
-         <div id="acknowledgements" class="section container scrollspy">
-            <h3> Acknowledgements </h3>
-            <p>
-               We would like to thank Professor Jonathan, who has 
-               supervised us in our project with great guidance and help.
-               <br><br>
-               We would also like to extend our gratitude to Lucas Barbuto, 
-               in helping us set up our MSE-IT Virtual Machine in order 
-               to provide us with computational resource and power to 
-               train and deploy our AI model.
-            </p>
-         </div>
+
+         <div id="applicationdeployment" class="section container scrollspy"></div>
+         <div class="divider"></div>
+
+         <div id="acknowledgements" class="section container scrollspy"></div>
+
          <div class="container">
             <a class="waves-effect waves-light btn" href="index.html">
             <i class="material-icons left">undo</i>
             Back to Homepage
             </a>
          </div>
+
          <br>
       </div>
       <script src="js/docs.js"></script>

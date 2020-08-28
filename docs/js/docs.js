@@ -8,10 +8,19 @@ function fileToMarked(file, element){
             request.setRequestHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type");
         },
         success: function(response){
-            console.log(typeof(response));
-            element.innerhtml = response;
+            element.innerHTML = marked(response);
         }
     })
+}
+
+mdFilePaths = {
+    "overview"              : "markdown/overview.md",
+    "features"              : "markdown/features.md",
+    "datasetprocessing"     : "markdown/datasetprocessing.md",
+    "modeldevelopment"      : "markdown/modeldevelopment.md",
+    "applicationdeployment" : "markdown/applicationdeployment.md",
+    "acknowledgements"      : "markdown/acknowledgements.md",
+    "introduction"          : "markdown/introduction.md"
 }
 
 $(document).ready(function(){
@@ -19,6 +28,18 @@ $(document).ready(function(){
     $('.scrollspy').scrollSpy();
     $('.materialboxed').materialbox();
 
-    overview_elem = document.getElementById('overview')
-    fileToMarked("markdown/overview.md", overview_elem);    
+    marked.setOptions({
+        highlight: function(code) {
+          return hljs.highlightAuto(code).value;
+        },
+    })
+    
+    for (var key in mdFilePaths){
+        // check if the property/key is defined in the object itself, not in parent
+        if (mdFilePaths.hasOwnProperty(key)) {           
+            elem = document.getElementById(key)
+            fileToMarked(mdFilePaths[key], elem);
+        }
+    }  
 });
+
