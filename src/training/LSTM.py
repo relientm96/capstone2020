@@ -9,16 +9,20 @@ from hyperopt import fmin, tpe, hp, STATUS_OK, Trials
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, LSTM, Activation
 from tensorflow.keras import backend as keras_backend
-
 import tensorflow as tf
+
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold
-
 
 import sys
 import tracemalloc
 import LSTM_tools as lstm
 import numpy as np
+
+try:
+	import cPickle as pickle
+except ImportError:  # python 3.x
+	import pickle
 
 
 # hardcoding for now;
@@ -96,6 +100,8 @@ def f_nn(params):
 	#get the highest validation accuracy of the training epochs
 	validation_acc = np.amax(result.history['val_accuracy']) 
 	print('Best validation acc of epoch:', validation_acc)
+    # note; we are minmizing negative validation accuracy;
+    # which is equivalent to maximizing the val acc;
 	return {'loss': -validation_acc, 'status': STATUS_OK, 'model': model}
 
 if __name__ == '__main__':
@@ -118,10 +124,9 @@ if __name__ == '__main__':
 		trials = Trials()
 
 	# now; start the tuning;
-	step = 5
-	start = 20
-	end = start*10
-	'''
+	step = 100
+	start = 500
+	end = start*20
 	for i in range(start, end, step):
 		# fmin runs until the trials object has max_evals elements in it, so it can do evaluations in chunks like this
 		best = fmin(f_nn, space, algo=tpe.suggest, trials=trials, max_evals=i)
@@ -130,14 +135,7 @@ if __name__ == '__main__':
 		# each step 'trials' will be updated to contain every result
 		# you can save it to reload later in case of a crash, or you decide to kill the script
 		pickle.dump(trials, open("hyper_results.pkl", "wb"))
-	'''
-	best = fmin(f_nn, space, algo=tpe.suggest, trials=trials, max_evals=1)
-	# each step 'best' will be the best trial so far
-	print(best)
-	# each step 'trials' will be updated to contain every result
-	# you can save it to reload later in case of a crash, or you decide to kill the script
-	pickle.dump(trials, open("hyper_results.pkl", "wb"))
-
+	
 
 
 	
