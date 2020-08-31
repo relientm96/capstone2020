@@ -194,6 +194,8 @@ def get_frame_count_CV(input):
 	total_frames = int(cap.get(7))
 	print("CV2; input_fps ", input_fps)
 	print("CV2; frame count ", total_frames)
+	cap.release()
+	cv2.destroyAllWindows()
 	return total_frames
 
 def get_frame_count_MP(input):
@@ -208,6 +210,10 @@ def get_frame_count_MP(input):
 	clip = mp.VideoFileClip(input)
 	num_frames = len(list(clip.iter_frames()))
 	print("movidepy; num_frames: ", num_frames)
+	
+	del clip.reader
+	del clip
+
 	return num_frames
 
 def lstm_window_check(input_list):
@@ -264,7 +270,6 @@ def grab_frames(input):
 		if(count_frame > total_frames-1):
 			break
 	cap.release()
-	cv2.destroyAllWindows()
 	return store	
 
 def frames2video(input_list, output, size):
@@ -285,6 +290,7 @@ def frames2video(input_list, output, size):
 		# writing to a image array
 		out.write(input_list[i])
 	out.release()
+	
 
 def video_flip(input, output):
 	'''
@@ -300,6 +306,9 @@ def video_flip(input, output):
 	out = video.fx(vfx.mirror_x)
 	out.write_videofile(output)
 	print("the flipped video has been saved to: ", output)
+	del video.reader
+	del video
+
 	
 def video_rotate(input, output, degree):
 	'''
@@ -317,6 +326,9 @@ def video_rotate(input, output, degree):
 	newclip = (clip.fx( vfx.rotate, degree))
 	newclip.write_videofile(output)
 	print('the rotated video has been saved to : ', output)
+	del clip.reader
+	del clip
+
 
 def slow_video(input, output, speed):
 	'''
@@ -356,6 +368,10 @@ def slow_video(input, output, speed):
 	# done? write it;
 	frames2video(extract, output, size)
 	print("the slowed-video has been saved to: ", output)
+	# done? clean up;
+	# src - https://github.com/Zulko/moviepy/issues/57
+	del clip.reader
+	del clip
 
 def fast_video(input, output, speed):
 	'''
@@ -383,6 +399,11 @@ def fast_video(input, output, speed):
 	# done? write it;
 	frames2video(input_list, output, size)
 	print("the fast-video has been saved to: ", output)
+	# clean up;
+	# src - https://github.com/Zulko/moviepy/issues/57
+	del clip.reader
+	del clip
+
 
 def video_speed(input, output, speed):
 	'''
@@ -427,9 +448,9 @@ if __name__ == '__main__':
 	'''
 	# test 04
 	PREFIX = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\"
-	input = PREFIX + "translation.mp4"
+	input = PREFIX + "fullbody.mp4"
 	output = PREFIX + "output_test.mp4"
-	video_speed(input, output, 2)
+	slow_video(input, output, 0.8)
 	
 	'''
 	# test 05;

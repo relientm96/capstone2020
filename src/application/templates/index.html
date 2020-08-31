@@ -22,11 +22,13 @@
             <div class='col s12 m12 l6'>
                 <canvas id="canvasOutput"></canvas>
                 <video autoplay="true" id="videoElement" style="display: none;"></video>
+                <p> Your Camera </p>
             </div>
             <div class='col s12 m12 l6'>
                 <div class='video'>
                     <img id="image">
                 </div>
+                <p> Model Output </p>
             </div>
         </div>
     </div>
@@ -34,12 +36,17 @@
     <script>
 
         // Hardcoded Pixel Values
-        var videoWidth = 500;
-        var videoHeight = 400;
+        var videoWidth = 620;
+        var videoHeight = 480;
 
         const video = document.querySelector("#videoElement");
         video.width = videoWidth; 
-        video.height = videoHeight; ;
+        video.height = videoHeight; 
+
+        // Canvas details
+        var canvas = document.getElementById('canvasOutput')
+        canvas.width = videoWidth
+        canvas.height = videoHeight
 
         // Handle User Media
         navigator.getUserMedia = navigator.getUserMedia ||
@@ -66,14 +73,15 @@
             document.getElementById('status').innerHTML = responseText;
         });
 
-        const FPS = 20;
+        setInterval(() =>{
+            canvas.getContext('2d').drawImage(video, 0, 0, video.width, video.height);
+        }, 1000/20)
+
+        const FPS = 5.5;
         setInterval(() => {
             // This function runs according to FPS rate
             // Takes image from webcam, sends it to server for processing
-            var canvas = document.getElementById('canvasOutput')
-            canvas.width = videoWidth
-            canvas.height = videoHeight
-            canvas.getContext('2d').drawImage(video, 0, 0);
+            //canvas.getContext('2d').drawImage(video, 0, 0, video.width, video.height);
             var data = canvas.toDataURL("image/png");
             data = data.replace('data:' + "image/png" + ';base64,', ''); 
             socket.emit('imageSend', data);

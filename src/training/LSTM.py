@@ -9,7 +9,6 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, LSTM, Activation
 from tensorflow.keras import backend as keras_backend
 import tensorflow as tf
-from tensorflow.keras import backend as keras_backend
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold
 
@@ -19,8 +18,8 @@ import numpy as np
 import sys
 
 # global variables
-xtrain_path = "./training_files/X_train.txt"
-ytrain_path = "./training_files/Y_train.txt"
+xtrain_path = "./training-files/X_train.txt"
+ytrain_path = "./training-files/Y_train.txt"
 
 def data_feed():
 	"""
@@ -29,8 +28,8 @@ def data_feed():
 	This function is separated from create_model() so that hyperopt
 	won't reload data for each evaluation run.
 	"""
-	xtrain_path = "./training_files/X_train.txt"
-	ytrain_path = "./training_files/Y_train.txt"
+	xtrain_path = "./training-files/X_train.txt"
+	ytrain_path = "./training-files/Y_train.txt"
 
 	X_data = lstm.load_X(xtrain_path)
 	Y_data = lstm.load_Y(ytrain_path)

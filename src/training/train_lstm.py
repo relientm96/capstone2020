@@ -25,6 +25,7 @@ from sklearn.metrics import mean_squared_error
 import numpy as np
 from tensorflow.keras.callbacks import ModelCheckpoint
 import os
+import sys
 
 try:
 	import cPickle as pickle
@@ -42,8 +43,8 @@ import nebulaM78 as ultraman
 # 3. X_test.txt; for offline evaluation;
 # #----------------------------------------------------------------------
 #PATH = "C:\\CAPSTONE\\capstone2020\\src\\training_files\\"
-X_TRAIN_PATH =  "./training_files/X_train.txt"
-Y_TRAIN_PATH =  "./training_files/Y_train.txt"
+X_TRAIN_PATH =  "./training-files/X_train.txt"
+Y_TRAIN_PATH =  "./training-files/Y_train.txt"
 
 # note this text file is generated manually;
 # make sure the #frames is multiple of 75;
@@ -114,6 +115,10 @@ print("building the model")
 # 1. Define Model
 model = Sequential()
 #model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True, unit_forget_bias=1.0))
+print("x_train.shape[1]: ",x_train.shape[1])
+print("x_train.shape[2]: ",x_train.shape[2])
+sys.exit("BREAK")
+
 model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True))
 model.add(Dropout(0.2))
 #model.add(LSTM(n_hidden, activation='relu'))

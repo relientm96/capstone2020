@@ -4,76 +4,172 @@ import os
 from sys import platform
 import argparse
 import time
+import numpy as np
+import pprint as pp
 
 #### Tensorflow Imports ####
+
 # Here, we can import tensorflow + keras + Machine Learning Libraries to load models
 import tensorflow as tf
+
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+	try:
+		# Currently, memory growth needs to be the same across GPUs
+		for gpu in gpus:
+		  tf.config.experimental.set_memory_growth(gpu, True)
+		logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+		print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+	except RuntimeError as e:
+		# Memory growth must be set before GPUs have been initialized
+		print(e)
+
 from tensorflow import keras
+from keras.models import load_model
+
+'''
+Rolling Window Data Structure
+'''
+# Note numb joints here means both x,y values, (eg: if BODY_25 we have 25*2 numb joints)
+numbJoints   = 98
+window_Width = 75
+
+class RollingWindow:
+	def __init__(self, window_Width, numbJoints):
+		self.window_Width   = window_Width
+		self.numbJoints     = numbJoints
+		# Create a 2D Matrix with dimensions
+		# window_Width X number of joints
+		self.points         = np.zeros(shape=(window_Width,numbJoints))
+	
+	def getPoints(self):
+		# Return the 2D matrix of points
+		return self.points
+	
+	def getWindow_Width(self):
+		return self.window_Width
+
+	def getNumbJoints(self):
+		return self.numbJoints
+
+	def addPoint(self, arr):
+		# Check for same number of joints in input array before we insert
+		if ( len(arr) != self.numbJoints ):
+			print("Error! Number of items not equal to numbJoints = ", self.numbJoints)
+			return False
+		# Pop out last row in points first
+		self.points = np.delete(self.points, self.window_Width-1, 0)
+		# Now insert this row to the front of points
+		self.points = np.vstack([arr, self.points])
+		return True
+
+	def printPoints(self):
+		pp.pprint(self.points)
+
+# Instantiate the rolling window for use later
+print("Creating Rolling Window")
+r = RollingWindow(window_Width,numbJoints)
+print("Finished Created Rolling Window, Window Width = {} & NumbJoints = {}".format(window_Width, numbJoints))
+
+########## KERAS IMPORT ############
+
+# Signs that define output
+dictOfSigns = {
+	0:"ambulance", 
+	1:"help", 
+	2:"hospital", 
+	3:"pain"
+}
+# Reference object for LSTM Model
+lstm     = None
 
 def initOpenPoseLoad():
-    '''
-    Import OpenPose Library to use datum API
-    '''
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    try:
-        # Windows Import
-        if platform == "win32":
-            # Change these variables to point to the correct folder (Release/x64 etc.)
-            sys.path.append(dir_path + '/../openpose-python/Release')
-            os.environ['PATH']  = os.environ['PATH']  + ';' +  dir_path + "/../openpose-python" + ';' + dir_path + "/../openpose-python/bin" 
-            import pyopenpose as op
-    except ImportError as e:
-        print('Error: OpenPose library could not be found. Did you enable `BUILD_PYTHON` in CMake and have this Python script in the right folder?')
-        raise e
-    except Exception as e:
-        print(e)
-        sys.exit(-1)
+	'''
+	Import OpenPose Library to use datum API
+	'''
+	dir_path = os.path.dirname(os.path.realpath(__file__))
+	try:
+		# Windows Import
+		if platform == "win32":
+			# Change these variables to point to the correct folder (Release/x64 etc.)
+			sys.path.append(dir_path + '/../openpose-python/Release')
+			os.environ['PATH']  = os.environ['PATH']  + ';' +  dir_path + "/../openpose-python" + ';' + dir_path + "/../openpose-python/bin" 
+			import pyopenpose as op
 
-######################## Some Helper Functions #########################
-# @params : datum = OpenPose Datum Object to access keypoints
-# @return : 2D array of OpenPose Body outputs 
-# (refer https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md)
-def getBodyKeyPoints(datum):
-    return datum.poseKeyPoints
+	except ImportError as e:
+		print('Error: OpenPose library could not be found. Did you enable `BUILD_PYTHON` in CMake and have this Python script in the right folder?')
+		raise e
+	except Exception as e:
+		print(e)
+		sys.exit(-1)
 
-# Output Keypoints of Hand from OpenPose
-# @params : datum = OpenPose Datum Object to access keypoints
-# @params : whichHand = 0 for LeftHand, 1 for RightHand 
-def handKeyPoints(datum, whichHand):
-    if (whichHand > 1) and ( whichHand < 0):
-        print("Wrong Argument Value on Choosing Which Hand!")
-        return None
-    else:
-        # Return chosen hand's keypoints
-        return datum.handKeypoints[whichHand]
+def loadModel():
+	global lstm
+	try:
+		lstm = keras.models.load_model('saved_model.h5', compile=False)
+		lstm.summary()
+	except Exception as e:
+		print("Error In Loading Model", e)
+		raise e
 
-# Print all keypoints
-# @params : datum = OpenPose Datum Object to access keypoints
-def printKeyPoints(datum):
-    print("Body keypoints: \n" + str(datum.poseKeypoints))
-    print("Left hand keypoints: \n" + str(datum.handKeypoints[0]))
-    print("Right hand keypoints: \n" + str(datum.handKeypoints[1]))
-########################################################################
+def removeConfidenceLevels(data, limit, outputlist,):
+	xycounter = 0
+	for i in range(0,limit):
+		if xycounter < 2:
+			'''
+			if xycounter == 0:
+				value = data[i] - currentNoseX
+			else:
+				value = data[i] - currentNoseY
+			'''
+			value = data[i]
+			outputlist.append(np.float(value))
+			xycounter += 1
+		else:
+			xycounter = 0
+	return outputlist
 
 # Translation Module
 def translate(datum):
-    # Output String Variable of Translated word (sentence in future)
-    word = "Hold Translated Word"
-    #############################
-    # PERFORM TRANSLATION HERE  #
-    # --> Input your datum keypoints to your model 
-    # --> Get output prediction from model
-    # --> Set your output under the "word" string variable
-    
-    # Run test program to check
-    #printKeyPoints(datum)
-    # Use Nose Coordinates to change word (for now)
-    noseCoordinatesX,noseCoordinatesY,noseConfidence  = datum.poseKeypoints[0][0]
+	# Output String Variable of Translated word (sentence in future)
+	word = "Test"
 
-    if ( noseCoordinatesX < 250 ):
-        word = "Capstone"
-    else:
-        word = "2020"
+	'''
+	Converting Input Keypoints as numpy array in Yick's GitHub dataset format
+	'''
 
-    ############################
-    return word
+	# We use 0 index for the first person in frame, ignore the others
+	kp = []
+	
+	# Read in nose X and Y positions:
+	#currentNoseX = datum.poseKeypoints[0][0][0]
+	#currentNoseY = datum.poseKeypoints[0][0][1]
+	#print('Current Nose XY:',currentNoseX, currentNoseY)
+
+	# Flatten as one row vector and remove confidence levels
+	pose      = removeConfidenceLevels(datum.poseKeypoints[0].flatten(), 24, kp) 
+	# Flatten as one row vector and remove confidence levels
+	lefthand  = removeConfidenceLevels(datum.handKeypoints[0][0].flatten(), 61, kp) 
+	# Flatten as one row vector and remove confidence levels
+	righthand = removeConfidenceLevels(datum.handKeypoints[1][0].flatten(), 61, kp) 
+	
+	# Add to rolling window
+	if r.addPoint(kp) == False:
+		# Unable to append to keypoints as issue with data shape
+		return 'Fail'
+
+	#print(r.getPoints().shape)
+	#print(r.getPoints())
+
+	# Reshape for model to read
+	reshaped_keypoints = r.getPoints().reshape((1, window_Width, numbJoints))
+	
+	# Load Keras Model
+	global lstm
+	predictions = lstm.predict([reshaped_keypoints])
+	print(predictions)
+	guess = np.argmax(predictions)
+	word = dictOfSigns[guess] + "-" + str(round(float(np.max(predictions)),2))
+	#print(word)
+	return word
+
