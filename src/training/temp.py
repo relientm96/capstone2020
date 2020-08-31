@@ -10,10 +10,11 @@ from tensorflow.keras.layers import Dense, Dropout, LSTM, Activation
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold
+
+import sys
 import tracemalloc
 import LSTM_tools as lstm
 import numpy as np
-import sys
 
 
 # hardcoding for now;
