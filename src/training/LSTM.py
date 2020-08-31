@@ -8,9 +8,12 @@ from hyperopt import fmin, tpe, hp, STATUS_OK, Trials
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, LSTM, Activation
+from tensorflow.keras import backend as keras_backend
+
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold
+
 
 import sys
 import tracemalloc
