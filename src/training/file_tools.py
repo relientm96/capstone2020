@@ -2,7 +2,7 @@
 # auxiliary tool set for file checking purposes;
 # created by nebulaM78 team; capstone 2020;
 
-
+import numpy as np
 from pprint import pprint
 import glob, os
 # needed to save non-string python object; eg dictionary;
@@ -122,6 +122,13 @@ def check_newfile(file_path):
 			print("An error occured", e)
 			sys.exit(-1)
 
+
+# save and load the huge numpy array;
+def npy_write(data, filename):
+    np.save(filename, data)
+
+def npy_read(filename):
+    return np.load(filename)
 
 # test driver;
 if __name__ == '__main__':

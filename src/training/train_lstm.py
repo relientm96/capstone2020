@@ -49,16 +49,22 @@ import LSTM_tools as lstm_tools
 n_hidden = 64 # hidden layer number of features;
 n_classes = 5  # number of sign classes;
 batch_size = 150
-
 X_TEST_PATH =  "./training_files/X_test.txt"
 
-# make sure you run process_numpy.py;
-X_monstar = npy_read('X_np')
-Y_monstar = npy_read('Y_np')
 
-#X_monstar, Y_monstar = lstm_tools.patch_nparrays(txt_directory)
+# avoid redoing all the numpy computation;
+# save and load it;
+np_path = 'X_np.npy'
+if os.path.isfile(np_path) and os.access(np_path, os.R_OK):
+    X_monstar = lstm_tools.npy_read('X_np.npy')
+    Y_monstar = lstm_tools.npy_read('Y_np.npy')
+else:
+    X_monstar, Y_monstar = lstm_tools.patch_nparrays(txt_directory)
+    lstm_tools.npy_write(X_monstar, 'X_np.npy')
+    lstm_tools.npy_write(Y_monstar, 'Y_np.npy')
+
+# load the np arrays and split rhem into val and train sets;
 x_train, x_val, y_train, y_val =  train_test_split(X_monstar, Y_monstar, test_size=0.2, random_state=42, shuffle = True, stratify = Y_monstar)
-
 
 print('------ LSTM Model ---------')
 #--------------------------------------------------
