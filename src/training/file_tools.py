@@ -10,7 +10,7 @@ try:
 	import cPickle as pickle
 except ImportError:  # python 3.x
 	import pickle
-
+import LSTM_tools as lstm
 
 # functions:
 # 1. update_dict()
@@ -137,12 +137,13 @@ def patch_nparrays(txt_directory):
 	for root, dirs, files in os.walk(txt_directory, topdown=False):
 		for index, name in enumerate(files):
 			src_path = os.path.join(root, name)
+			print("src path: ", src_path)
 			# the X file;
 			if(index == 0):
-				dataset = load_X(src_path)
+				dataset = lstm.load_X(src_path)
 			# the Y label;
 			else:
-				dataset = load_Y(src_path)
+				dataset = lstm.load_Y(src_path)
 			# done selecting the files?
 			PATCH[index].append(dataset)
 
@@ -153,17 +154,19 @@ def patch_nparrays(txt_directory):
 
 # save and load the huge numpy array;
 def npy_write(data, filename):
-    np.save(filename, data)
+	np.save(filename, data)
 
 def npy_read(filename):
-    return np.load(filename)
+	return np.load(filename)
 
 # test driver;
 if __name__ == '__main__':
 	
-    # patch_nparrays;
-	txt_directory = "C:\\Users\\yongw4\\Desktop\\FATE\\speed-01"
-	#X_monstar, Y_monstar = patch_nparrays(txt_directory)
-	#print(X_monstar.shape)
-	#print(Y_monstar.shape)
+	Y_monstar = npy_read('Y_np.npy')
+	print(Y_monstar)
 	
+	a_file = open("np2txt.txt", "w")
+	for row in Y_monstar:
+		np.savetxt(a_file, row)
+
+	a_file.close()
