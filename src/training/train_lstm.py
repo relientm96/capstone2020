@@ -12,7 +12,9 @@ from tensorflow import keras
 import matplotlib.pyplot as plt
 import math
 from tensorflow.keras import Sequential
-from tensorflow.keras.layers import Dense, Dropout, LSTM
+from tensorflow.keras.layers import Dense, Dropout
+from keras.layers import CuDNNLSTM 
+
 
 # known issue: keras version mismatch;
 # solution src - https://stackoverflow.com/questions/53183865/unknown-initializer-glorotuniform-when-loading-keras-model
@@ -24,6 +26,8 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 import numpy as np
 from tensorflow.keras.callbacks import ModelCheckpoint
+from sklearn.model_selection import train_test_split
+
 import os
 import sys
 
@@ -34,44 +38,6 @@ except ImportError:  # python 3.x
 
 # own modules;
 import LSTM_tools as lstm_tools
-import nebulaM78 as ultraman
-
-#----------------------------------------------------------------------
-# NEED TO CHANGE THE FOLLOWING TO YOUR OWN REFRENCE;
-# 1. X_train.txt; the training set;
-# 2. Y_train.txt; the labels for the training;
-# 3. X_test.txt; for offline evaluation;
-# #----------------------------------------------------------------------
-#PATH = "C:\\CAPSTONE\\capstone2020\\src\\training_files\\"
-X_TRAIN_PATH =  "./training-files/X_train.txt"
-Y_TRAIN_PATH =  "./training-files/Y_train.txt"
-
-# note this text file is generated manually;
-# make sure the #frames is multiple of 75;
-# the video source is at :
-# C:\CAPSTONE\capstone2020\src\training\auslan-videos\testing.mp4
-# check "edited_testing.mp4" as well
-X_TEST_PATH =  "./training_files/X_test.txt"
-
-#----------------------------------------------------------------------
-# SET-UP
-# # - showing some information
-# - Constants for data processing and model training
-# #----------------------------------------------------------------------
-try:
-	with open('saved_counter_train.p', 'rb') as fp:
-		   counter_track = pickle.load(fp)
-		   print('the counter has been loaded\n', counter_track)  
-except OSError as e:
-		print("error in loading the counter: ", e)
-		print("\n")
-
-dummy_str = "{1:<15}{0:^10}{2:>15}\n".format("SIGN(s)","",  'COUNT')
-for key,value in counter_track.items():
-	dummy_str = dummy_str + "{1:<15}{0:^10}{2:>15}\n".format(str(key), "", str(2*value)) 
-
-# wake the user up!!
-ultraman.alert_popup("Capstone's Fate Decider", "our model has been trained on:\n", dummy_str + "*frame length per video = 75\n *total # keypoints per frame = 98")
 
 #----------------------------------------------------------------------
 # LOADING THE DATA:
@@ -79,30 +45,16 @@ ultraman.alert_popup("Capstone's Fate Decider", "our model has been trained on:\
 # - Y.txt; the corresponding labels;
 #----------------------------------------------------------------------
 
-x_train = lstm_tools.load_X(X_TRAIN_PATH)
-y_train = lstm_tools.load_Y(Y_TRAIN_PATH)
-print('shape of X_train: ', x_train.shape)
-print('shape of Y_train: ', y_train.shape)
-
-#----------------------------------------------------------------------
-# BUILDING THE MODEL;
-# 1. defining the model;
-# 2. setting up the optimizer;
-# 3. setting checkpoints to save the model during training;
-# 4. initialze and build the model
-# 5. training the model;
-# note(s) - https://stackoverflow.com/questions/46308374/what-is-validation-data-used-for-in-a-keras-sequential-model?fbclid=IwAR0q5jS4KZqGl36b-G64dwrr51ebZ1hAv4fFyjyjGjnvwA5sMkNhRCiX7IE
-# source - https://github.com/SmitSheth/Human-Activity-Recognition/blob/master/train.ipynb
-# src - https://stackoverflow.com/questions/40331510/how-to-stack-multiple-lstm-in-keras
-# src - https://keras.io/guides/sequential_model/
-# src - https://machinelearningmastery.com/stacked-long-short-term-memory-networks/
-# src - https://github.com/keras-team/keras/issues/3522
-#----------------------------------------------------------------------
-
-n_hidden = 30 # hidden layer number of features;
-n_classes = 4  # number of sign classes;
+n_hidden = 64 # hidden layer number of features;
+n_classes = 5  # number of sign classes;
 batch_size = 150
-#batch_size = 150
+
+X_TEST_PATH =  "./training_files/X_test.txt"
+txt_directory = "C:\\Users\\yongw4\\Desktop\\FATE\\txt-files\\speed-01"
+X_monstar, Y_monstar = lstm_tools.patch_nparrays(txt_directory)
+
+x_train, x_val, y_train, y_val =  train_test_split(X_monstar, Y_monstar, test_size=0.2, random_state=42, shuffle = True, stratify = Y_monstar)
+
 
 print('------ LSTM Model ---------')
 #--------------------------------------------------
@@ -117,37 +69,27 @@ model = Sequential()
 #model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True, unit_forget_bias=1.0))
 print("x_train.shape[1]: ",x_train.shape[1])
 print("x_train.shape[2]: ",x_train.shape[2])
-sys.exit("BREAK")
 
-model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True))
+model.add(CuDNNLSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activity_regularizer='relu', return_sequences=True))
 model.add(Dropout(0.2))
-#model.add(LSTM(n_hidden, activation='relu'))
-model.add(LSTM(n_hidden, activation='relu', return_sequences=True))
+model.add(CuDNNLSTM(n_hidden, activity_regularizer='tanh', return_sequences=True))
 model.add(Dropout(0.2))
-model.add(LSTM(n_hidden, activation='relu'))
+model.add(CuDNNLSTM(n_hidden, activity_regularizer='tanh'))
 model.add(Dropout(0.2))
-model.add(Dense(n_classes, activation='softmax'))
+model.add(Dense(n_classes, activity_regularizer ='softmax'))
 
 # 2. Optimizer
 #opt = tf.keras.optimizers.Adam(lr=1e-3, decay=1e-5)
 opt = tf.keras.optimizers.Adam(lr=1e-4, decay=1e-5)
 
-
-# 3. defining checkpoints to save the model during training;
-# reminder - shall study the source below;
-# src - https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/ModelCheckpoint
-# src - https://stackoverflow.com/questions/45393429/keras-how-to-save-model-and-continue-training
-
-# have we trained the model?
-final_path = "./training_files/final_lstm.h5"
-filepath = "./training_files/saved_model.h5"
+final_path = "./training_files/cudnnlstm.h5"
 	
 RETRAIN =True
 if ((not os.path.exists(final_path)) or RETRAIN):
 	print("training the model")
-	filepath = "saved_model.h5"
+	filepath = "cudnnlstm_saved_model.h5"
 	# defining the checkpoint using the "loss"
-    # total epochs run = 100
+	# total epochs run = 100
 	checkpoint = ModelCheckpoint(filepath,monitor='acc', verbose=1, save_best_only=True, mode='max')
 	callbacks_list = [checkpoint]
 
@@ -155,8 +97,8 @@ if ((not os.path.exists(final_path)) or RETRAIN):
 	model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
 	# 5. Training the model
-	model.fit(x_train, y_train, epochs=100, batch_size = batch_size, callbacks = callbacks_list)
-
+	model.fit(x_train, y_train, epochs=70, batch_size = batch_size, callbacks = callbacks_list, validation_data = (x_val, y_val))
+   
 	# Save the final model with a more fitting name
 	model.save(final_path)
 	print("the final trained model has been saved as: ", final_path)
@@ -167,8 +109,6 @@ else:
 
 # Print summary
 model.summary()
-
-
 
 
 
@@ -186,16 +126,26 @@ x_test = lstm_tools.load_X(X_TEST_PATH)
 
 # hardcoding for now;
 MAP_DICT = {0:"ambulance", 1:"help", 2:"hospital", 3:"pain"}
+try:
+	with open('saved_dict.p', 'rb') as fp:
+		MAP_DICT = pickle.load(fp)
+		print(DICT)
+	
 
-predictions = model.predict(x_test)
-print("the vector ", predictions)
-print('\n')
+		predictions = model.predict(x_test)
+		print("the vector ", predictions)
+		print('\n')
 
-j = 1
-for i in predictions:
-	index = np.argmax(i)
-	prob = np.max(i)
-	predicted = MAP_DICT[index]
-	print(j, ': Guessed Sign:', predicted, '; probability:', prob)
-	j = j + 1
+		j = 1
+		for i in predictions:
+			index = np.argmax(i)
+			prob = np.max(i)
+			# minus to conform to the zero-indexed;
+			predicted = (MAP_DICT[index-1])
+			print(j, ': Guessed Sign:', predicted, '; probability:', prob)
+			j = j + 1
+
+except OSError as e:
+	print("error in loading the counter: ", e)
+	print("\n")
 
