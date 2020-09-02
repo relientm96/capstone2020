@@ -18,8 +18,8 @@ def nullify_keypoints(input_list):
 		if ((abs(index - fixed)%3) == 0):
 			confidence = input_list[index]
 			if(confidence <= 0.1):
-				ls[index-1] = 0
-				ls[index-2] = 0
+				ls[index-1] = -1
+				ls[index-2] = -1
 	return ls
 
 def offset_translation(input_list, reference):
