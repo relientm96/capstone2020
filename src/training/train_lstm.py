@@ -27,6 +27,7 @@ from sklearn.metrics import mean_squared_error
 import numpy as np
 from tensorflow.keras.callbacks import ModelCheckpoint
 from sklearn.model_selection import train_test_split
+from joblib import Memory
 
 import os
 import sys
@@ -50,9 +51,12 @@ n_classes = 5  # number of sign classes;
 batch_size = 150
 
 X_TEST_PATH =  "./training_files/X_test.txt"
-txt_directory = "C:\\Users\\yongw4\\Desktop\\FATE\\txt-files\\speed-01"
-X_monstar, Y_monstar = lstm_tools.patch_nparrays(txt_directory)
 
+# make sure you run process_numpy.py;
+X_monstar = npy_read('X_np')
+Y_monstar = npy_read('Y_np')
+
+#X_monstar, Y_monstar = lstm_tools.patch_nparrays(txt_directory)
 x_train, x_val, y_train, y_val =  train_test_split(X_monstar, Y_monstar, test_size=0.2, random_state=42, shuffle = True, stratify = Y_monstar)
 
 
@@ -63,20 +67,21 @@ print('------ LSTM Model ---------')
 # ... no further improvements;
 # need to study ML literatures;
 #--------------------------------------------------
+
+# SRC - https://arxiv.org/pdf/1207.0580.pdf
+    
 print("building the model")
 # 1. Define Model
 model = Sequential()
-#model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True, unit_forget_bias=1.0))
-print("x_train.shape[1]: ",x_train.shape[1])
-print("x_train.shape[2]: ",x_train.shape[2])
-
-model.add(CuDNNLSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activity_regularizer='relu', return_sequences=True))
+model.add(CuDNNLSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), return_sequences=True))
 model.add(Dropout(0.2))
-model.add(CuDNNLSTM(n_hidden, activity_regularizer='tanh', return_sequences=True))
+model.add(CuDNNLSTM(n_hidden, return_sequences=True))
+model.add(Dense(n_hidden, activation ='sigmoid'))
 model.add(Dropout(0.2))
-model.add(CuDNNLSTM(n_hidden, activity_regularizer='tanh'))
+model.add(CuDNNLSTM(n_hidden))
+model.add(Dense(n_hidden, activation ='sigmoid'))
 model.add(Dropout(0.2))
-model.add(Dense(n_classes, activity_regularizer ='softmax'))
+model.add(Dense(n_classes, activation ='softmax'))
 
 # 2. Optimizer
 #opt = tf.keras.optimizers.Adam(lr=1e-3, decay=1e-5)
