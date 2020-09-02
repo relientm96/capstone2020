@@ -52,6 +52,9 @@ def PARAMS():
 
 def openpose_driver(signvideodirectory, path_X, path_Y):
 	gpus = tf.config.experimental.list_physical_devices('GPU')
+	if(len(gpus) ==0):
+		sys.exit("NO GPU is found!")
+
 	if gpus:
 		try:
 			# Currently, memory growth needs to be the same across GPUs
