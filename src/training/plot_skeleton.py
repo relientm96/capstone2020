@@ -253,7 +253,7 @@ if __name__ == '__main__':
 
 	filestr = filestr2
 	clean_output = read_openpose_json(filestr, 0, 0)   
-	augment_output = read_openpose_json(filestr2, 1, 0)
+	augment_output = read_openpose_json(filestr2, 0, 1)
 
 	# body keypoints
 	# note the skeleton is upside down ...
