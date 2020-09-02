@@ -30,7 +30,7 @@ PREFIX =  "C:\\Users\\yongw4\\Desktop\\OP_VIDEOS\\"
 json_path =  "C:\\Users\\yongw4\\Desktop\\JSON\\"
 op_videopath = PREFIX +  "result.avi"
 # where to save your recording?
-raw_videopath = PREFIX + 'hello_world.avi'
+raw_videopath = PREFIX + '.avi'
 
 def offline_predict(PREFIX, write_vname, write_OP_name, json_path, signtime = 3, saved_model = 'saved_model.h5'):
 	'''
@@ -113,7 +113,7 @@ def offline_predict(PREFIX, write_vname, write_OP_name, json_path, signtime = 3,
 		params["net_resolution"]      = "336x336"
 		params["hand_net_resolution"] = "328x328"
 		params["model_pose"]          = "BODY_25"
-		params['keypoint_scale']      = 3
+		params['keypoint_scale']      = 4
 		params['number_people_max']   = 1
 
 		#params['frame_flip']            = True
@@ -178,7 +178,7 @@ def offline_predict(PREFIX, write_vname, write_OP_name, json_path, signtime = 3,
 	model.summary()
 
 	# hardcode for now;
-	dictOfSigns = {0:"ambulance", 1:"help", 2:"hospital", 3:"pain"}
+	dictOfSigns = {0:"ambulance", 2:"help", 3:"hospital", 1:"pain",4:"thumbs"}
 	window_Width = 75
 	numbJoints = 98
 
@@ -275,14 +275,16 @@ if __name__ == '__main__':
 	
 	PREFIX =  "C:\\Users\\yongw4\\Desktop\\OP_VIDEOS\\"
 	json_path =  "C:\\Users\\yongw4\\Desktop\\JSON\\"
-	write_OP_name =  "result.avi"
-	write_vname = 'hello_world.avi'
+	write_OP_name =  "cudnnlstm_op.avi"
+	write_vname = 'cudnnlstm_vid.avi'
 	
 	# how long do you want to capture the actual sign;
-	signtime = 12
+	signtime = 10
 	# import the pretrained model;
-	saved_model = 'saved_model.h5'
 
+	#saved_model = './training-files/cudnnlstm_saved_model_01.h5'
+	saved_model = "lstm_saved_model.h5"
+    #cudnnlstm_saved_model.h5
 	FUTURE_LIST = offline_predict(PREFIX, write_vname, write_OP_name, json_path, signtime, saved_model)
 	
 	# a wrap around;
