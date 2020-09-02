@@ -45,11 +45,12 @@ x_train, x_val, y_train, y_val =  train_test_split(X_monstar, Y_monstar, test_si
 # so we will have an infinite-dimensional search space;
 # it's most likely we are able to cover a depressingly tiny-fraction of the space;
 # discretise the hyperparameters;
+'''
 space = {'choice': hp.choice('num_layers',
 					[ {'layers':'two', },
 					{'layers':'three',
 					'units3': hp.choice('units3', [32, 64,128,256,512,1024]),
-					'dropout3': hp.choice('dropout3',[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1])}
+					'dropout3': hp.choice('dropout3',[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9])}
 					]),
 			'units1': hp.choice('units1', [32, 64, 128, 256, 512, 1024]),
 			'dropout1': hp.choice('dropout1', [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]),
@@ -57,24 +58,38 @@ space = {'choice': hp.choice('num_layers',
 			'nb_epochs' :  hp.choice('epochs', [50, 70, 80, 100]),
 			'activation': hp.choice('activation', ['tanh', 'sigmoid', 'relu'])
 		}
+'''
+
+# smaller search space;
+space = {'choice': hp.choice('num_layers',
+					[ {'layers':'two', },
+					{'layers':'three',
+					'units3': hp.choice('units3', [32, 64,128,256,512]),
+					'dropout3': hp.choice('dropout3',[0.1,0.2,0.3,0.4,0.5])}
+					]),
+			'units1': hp.choice('units1', [32, 64, 128, 256, 512]),
+			'dropout1': hp.choice('dropout1', [0.1,0.2,0.3,0.4,0.5]),
+			'batch_size' : hp.choice('batch_size', [32, 64, 128]),
+			'nb_epochs' :  hp.choice('epochs', [50, 70, 80, 100]),
+		}
 
 # the objective function to be minimized for the search space;
 def f_nn(params):   
-	
+	# fixed tanh as the activation since we normalize the dataset to (-1,1);
 	model = Sequential()
 	model.add(LSTM(32, input_shape=(x_train.shape[1], x_train.shape[2]), return_sequences=True))
-	model.add(Activation(params['activation']))
+	model.add(Activation('tanh'))
 	model.add(Dropout(params['dropout1']))
 	
 	# If we choose 'three', add an additional third layer
 	if (params['choice']['layers']== 'three'):
 		model.add(LSTM(int(params['choice']['units3']), return_sequences=True))
-		model.add(Activation(params['activation']))
+		model.add(Activation('tanh'))
 		model.add(Dropout(params['choice']['dropout3']))
 	
 	# last layer;
 	model.add(LSTM(params['units1']))
-	model.add(Activation(params['activation']))
+	model.add(Activation('tanh'))
 	model.add(Dropout(params['dropout1']))
 	model.add(Dense(n_classes, activation='softmax'))
 	
