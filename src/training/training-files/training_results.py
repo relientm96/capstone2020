@@ -1,5 +1,5 @@
 #/usr/bin/env/python
-# created by matthew; nebulaM78 team; capstone 2020;
+# created by nebulaM78 team; capstone 2020;
 # to visualize the results of the model training;
 
 from tensorflow.keras.models import load_model
@@ -23,7 +23,7 @@ model.summary()
 print("\n -------- The classes we have trained so far.-------------")
 try:
 	# get the dictionary;
-	with open('C:\\CAPSTONE\\capstone2020\\src\\training\\saved_dict.p', 'rb') as fp:
+	with open('C:\\CAPSTONE\\capstone2020\\src\\training\\saved_counter_train.p', 'rb') as fp:
 		MAP_DICT = pickle.load(fp)
 		print(MAP_DICT)
 except OSError as e:
