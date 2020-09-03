@@ -29,6 +29,21 @@ except ImportError:  # python 3.x
 # file format;
 FILE_FORMAT = "json"
 
+def print_pickle(path):
+	   '''
+			args 
+				1. path, where the pickle object is saved?
+		   return 
+				- none
+			function
+				- print the pickle content
+			'''
+	with open(path, 'rb') as fp:
+		   dict = pickle.load(fp)
+		   print('the pickle object has been loaded\n', dict)
+		   print(dict)
+
+
 def update_dict(src_path, saved_path = "", save_name = 'saved_dict.p'):
 	'''
 	args 
