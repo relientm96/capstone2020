@@ -1,6 +1,8 @@
 // Hardcoded Pixel Values
-var videoWidth = 620;
-var videoHeight = 480;
+//var videoWidth  = 620;
+//var videoHeight = 480;
+var videoWidth = 800;
+var videoHeight = 600;
 // Canvas details
 var canvas = document.getElementById("canvasOutput");
 canvas.width = videoWidth;
@@ -30,7 +32,7 @@ var clientNumber = 0;
 // Flag to indicate if total number of clients connected is not too many
 var isOneClient = 1;
 // Max number of clients
-const maxClients = 2;
+const maxClients = 5;
 // Model
 var model;
 // Signs that define output
@@ -59,6 +61,10 @@ class RollingWindow {
     }
     getPoints(){
         return this.points;
+    }
+    getLastPoint(){
+        // Get Earliest Point Added
+        return this.points[this.points.length -1]
     }
     addPoint(incomingKp){
         if (incomingKp.length != this.numbJoints){
@@ -139,25 +145,45 @@ async function loadVideo() {
     return video;
 }
 
+async function drawKeypointsFromOP(array){
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "white";
+    var currentX = null;
+    for(let i = 0; i < array.length; i++){
+        if (currentX == null){
+            currentX = array[i]
+        }
+        else {
+            if ( (currentX > 0.01) && (array[i]*videoHeight > 0.01) ) {
+                ctx.fillRect(currentX*videoWidth, array[i]*videoHeight, 10, 10);
+            }
+            currentX = null;
+        }
+    }
+    
+}   
+
 // Detects poses in real time with a WebCam Stream
 function detectPoseInRealTime(video) {
     // Canvas used
     const ctx = canvas.getContext("2d");
     canvas.width = videoWidth;
     canvas.height = videoHeight;
+    ctx.font = "30px Arial";
+    ctx.fillStyle = "white";
     async function getPose() {
         if (isOneClient) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.save();
+            //ctx.clearRect(0, 0, canvas.width, canvas.height);
+            //ctx.save();
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            ctx.restore();
-            ctx.font = "30px Arial";
-            ctx.fillStyle = "white";
+            //ctx.restore();
+            // Add text for result of current word and probability
             ctx.fillText(word + " - " + probability, 20, 50);
+            
             if (frameCount > frameThresholdCount) {
                 // Transmit image to backend for processing
                 let format = "image/jpeg";
-                var data = canvas.toDataURL(format, 0.2); // lossy compression at 50%
+                var data = canvas.toDataURL(format, 0.15); // lossy compression at 15%
                 data = data.replace("data:" + format + ";base64,", "");
                 if (isSkeleton) {
                     socket.emit("imageSend", data);
@@ -175,7 +201,11 @@ function detectPoseInRealTime(video) {
                 }
                 frameCount = 0;
             }
+
+            // Increment current frame count
             frameCount += 1;
+
+            // Call this function every 1000/fps times
             setTimeout(() => {
                 window.requestAnimationFrame(getPose);
                 }, 1000 / fps); 
@@ -195,7 +225,7 @@ socket.on("connect", function () {
 socket.on("clientcount", function (responseText) {
     document.getElementById("clientStatus").innerHTML ="Current number of signers: " + responseText;
     clientNumber = parseInt(responseText);
-    console.log(clientNumber);
+    console.log("Number of Current Clients", clientNumber);
     if (clientNumber > maxClients) {
         document.getElementById("status").innerHTML = "We only limit our app usage to one person at a time! Sorry!";
         isOneClient = 0;
@@ -211,7 +241,7 @@ socket.on("response_back", function (image) {
     imageOutput.src = image;
 });
 
-socket.on("no_one_here", function (image) {
+socket.on("no_one_here", function () {
     // This function is called whenever server finishes processing the frame
     // Only used when skeleton is enabled
     word = "No One is In Frame!";
