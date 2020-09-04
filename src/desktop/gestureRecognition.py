@@ -131,7 +131,7 @@ def translate(datum):
 
     # Reshape for model to read
     reshaped_keypoints = r.getPoints().reshape((1, window_Width, numbJoints))
-    
+    pp.pprint(reshaped_keypoints)
     # Load Keras Model
     global lstm
     try:

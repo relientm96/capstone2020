@@ -80,7 +80,6 @@ def removeConfidenceAndShapeAsNumpy(datum):
     Takes in datum object and get pose, and both hand keypoints 
     and returns a numpy array for prediction
     '''
-
     # Test and see if we have anyone in image
     try:
         test   = len(datum.poseKeypoints[0])

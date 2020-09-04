@@ -225,9 +225,11 @@ socket.on("keypoints_recv", function (keypoints) {
     if (rw.addPoint(kp_arr)){
         // Do prediction once we have new updated rolling window from this keypoint
         var keypoint_shaped = tf.tensor3d(rw.getPoints().flat(), [1, windowWidth, numbJoints])
-        var pred_result = model.predict(keypoint_shaped);
-        word = dictOfSigns[pred_result.argMax(1).dataSync()[0]];
-        probability = Math.max.apply(Math, pred_result.dataSync()).toFixed(2);
+        model.predict(keypoint_shaped).data().then((d)=>{
+            let argMax = d.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
+            word = dictOfSigns[argMax];
+            probability = d[argMax].toFixed(2);
+        })
     }
 });
 
