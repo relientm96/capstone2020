@@ -4,7 +4,9 @@
 
 import numpy as np
 from pprint import pprint
-import glob, os
+import glob, os, sys
+import random
+import operator
 # needed to save non-string python object; eg dictionary;
 try:
 	import cPickle as pickle
@@ -55,7 +57,6 @@ def checksubstring(src, substring):
 	prefix = tmp[0]
 	token = (prefix.split('\\'))[-1]
 	return (substring in token)
-
 
 def track_count(src_path, saved_path = "", save_name = 'saved_counter.p'):
 	'''
@@ -113,7 +114,6 @@ def append_file(src, dst):
 			fileX.write(line)
 		print("finished appending\n")
 
-
 # create the file within the temp directory;
 def check_newfile(file_path):
 	if not (os.path.exists(file_path)):
@@ -122,6 +122,53 @@ def check_newfile(file_path):
 		except Exception as e:
 			print("An error occured", e)
 			sys.exit(-1)
+
+def get_class_dist_info(filedirectory):
+	'''
+		args: 
+			filedirectory; where are the text files?
+		return:
+			the class info with the lowest number of samples;
+		function:
+			to find out which class has the lowest number of samples;
+	'''
+	dict = {}
+	for root, dirs, files in os.walk(filedirectory, topdown=False):
+		for index, name in enumerate(files):
+			src_path = os.path.join(root, name)
+			# get the classname;
+			classname = (root.split('\\'))[-1]
+			print("src path: ", src_path)
+			# only the Y labels;
+			if(index == 1):
+				dataset = lstm.load_Y(src_path)			
+				# get the number of rows;
+				dict[classname] = np.size(dataset, 0)
+	print(dict)
+	# get the min;
+	minimum = min(dict.items(), key=operator.itemgetter(1))
+	print('class with the lowest samples: ', minimum)
+	#classmin = minimum[0]
+	#min_num = minimum[1]
+	#ls = [(key, value) for key,value in dict.items() if key != classmin]
+	return minimum
+
+def down_data_sample(dataset, sample_size):
+	'''
+		args:
+			- dataset; the numpy array;
+			- sample_size;
+		return:
+			- the "downsampled" array;
+		function:
+			- to downsample the class samples to sample_size;
+	'''
+	nrows = np.size(dataset, 0)
+	# get a list of unique random int within the sample size;
+	ls = random.sample(range(0, nrows), sample_size)
+	down_arr = dataset[ls,:,:]
+	return down_arr
+
 
 # combine all the np arrays;
 def patch_nparrays(txt_directory):
@@ -133,6 +180,12 @@ def patch_nparrays(txt_directory):
 		returns:
 			a tuple of (X, Y)
 	'''
+	# get all the classes distribution info;
+	# and return the one with the lowest samples;
+	minimum = get_class_dist_info(txt_directory)
+	sample_size = minimum[1]
+
+	# now, patch all the samples across the classes;
 	PATCH = [[],[]]
 	for root, dirs, files in os.walk(txt_directory, topdown=False):
 		for index, name in enumerate(files):
@@ -141,9 +194,18 @@ def patch_nparrays(txt_directory):
 			# the X file;
 			if(index == 0):
 				dataset = lstm.load_X(src_path)
+				print('prior size: ', dataset.shape)
+				# handle imbalanced distribution, if any;
+				dataset = down_data_sample(dataset, sample_size)
+				print("after size: ", dataset.shape)
 			# the Y label;
 			else:
+				# handle imbalanced dist, if any
 				dataset = lstm.load_Y(src_path)
+				print("prior size: ", dataset.shape)
+				dataset = dataset[0:sample_size,:]
+				print("after size: ", dataset.shape)
+				#sys.exit('debug')
 			# done selecting the files?
 			PATCH[index].append(dataset)
 
@@ -159,14 +221,27 @@ def npy_write(data, filename):
 def npy_read(filename):
 	return np.load(filename)
 
+# svae numpy array as text;
+def npy2text(array, filepath):
+	np2file = open(file, 'w')
+	for row in npy_read(array):
+		np.savetxt(np2file, row)
+	np2file.close()
+
+
 # test driver;
 if __name__ == '__main__':
 	
-	Y_monstar = npy_read('Y_np.npy')
-	print(Y_monstar)
-	
-	a_file = open("np2txt.txt", "w")
-	for row in Y_monstar:
-		np.savetxt(a_file, row)
+	prefix = "C:\\Users\\yongw4\\Desktop\\NEW-FATE\\txt-files\\speed-10"
+	sign_dir = prefix+"\\4-hospital-txt\\X_train.txt"
 
-	a_file.close()
+	np_X = lstm.load_X(sign_dir)
+	sample_size = 2664
+	print(np_X.shape)
+	#down_arr = down_data_sample(np_X, sample_size)
+	#print(down_arr.shape)
+
+	(x_monstar, y_monstar) = patch_nparrays(prefix)
+	print(x_monstar.shape)
+	print(y_monstar.shape)
+	
