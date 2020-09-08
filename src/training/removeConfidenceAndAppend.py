@@ -12,6 +12,11 @@ import errno
 import shutil
 import json
 
+def offset_translation(input_list, reference):
+	ls = [(x-reference) if not(i%3) else x for i, x in enumerate(input_list)]
+	return ls
+
+
 def removeConfidenceAndAppend(data):
 	'''
 	args  - json datum
@@ -24,7 +29,7 @@ def removeConfidenceAndAppend(data):
 	# remember, we have (x,y accuracy) for each keypoints;
 	
 	# safe guard;
-    # it's possible that at this frame, the list is empty;
+	# it's possible that at this frame, the list is empty;
 	if(len(data['people']) == 0):
 		print("at current frame, no people are detected, so skipped\n")
 		# a total of 147 keypoints;
@@ -38,6 +43,15 @@ def removeConfidenceAndAppend(data):
 		lefthand_keypoints = data["people"][0]["hand_left_keypoints_2d"] 
 		righthand_keypoints = data["people"][0]["hand_right_keypoints_2d"] 
 		pose_keypoints = upperbody_keypoints + lefthand_keypoints + righthand_keypoints
+
+	# add some guards
+	# centering with respect to the shoulder;
+	# translation invariant;
+	shoulder_center = body_keypoints[3]
+	body_keypoints = offset_translation(body_keypoints, shoulder_center)
+	lefthand_keypoints = offset_translation(lefthand_keypoints, shoulder_center)
+	righthand_keypoints = offset_translation(righthand_keypoints, shoulder_center)
+
 	# pose keypoints are done processed;
 	# ignore the confidence level;
 	number_xy_coor = int((len(pose_keypoints)/3)*2)
@@ -79,4 +93,4 @@ if __name__ == '__main__':
 		kp = removeConfidenceAndAppend(keypoints)
 		print('len kp', len(kp))
 		print('output', kp)
-       
+	   
