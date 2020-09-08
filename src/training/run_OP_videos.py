@@ -10,7 +10,7 @@ import sys
 #SPEED = [1]
 
 # date - 26 aug, 2020;
-SPEED = [0.8]
+SPEED = [1]
 
 def process_one_video(input, path_X, path_Y):
 	for i in range(len(SPEED)):
@@ -19,7 +19,7 @@ def process_one_video(input, path_X, path_Y):
 	
 
 if __name__ == '__main__':
-	signvideodirectory = "C:\\Users\\yongw4\\Desktop\\FATE"
+	signvideodirectory = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\PAIN"
 	
 	path_X = os.path.join(signvideodirectory, "X_train.txt")
 	path_Y = os.path.join(signvideodirectory, "Y_train.txt")

@@ -44,7 +44,7 @@ def PARAMS():
 	params["hand_net_resolution"]       = "328x328"
 	# required for gesture recognition
 	params['frame_flip']                = False
-	params['keypoint_scale']            = 3
+	params['keypoint_scale']            = 4
 	params["frame_first"]               = 0
 	params["frame_last"]                = 74 
 	

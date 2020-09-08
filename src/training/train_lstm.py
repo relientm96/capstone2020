@@ -43,38 +43,44 @@ import file_tools as file_tools
 #----------------------------------------------------------------------
 
 #n_hidden = 30 # hidden layer number of features;
-n_hidden = 30 # hidden layer number of features;
+n_hidden = 32 # hidden layer number of features;
 n_classes = 5  # number of sign classes;
-batch_size = 150
+batch_size = 225
 
 # to test for the prediction;
 X_TEST_PATH =  "./training-files/X_test.txt"
 # the generated training txt files;
-txt_directory = "C:\\Users\\yongw4\\Desktop\\FATE\\txt-files\\speed-01"
-
+#txt_directory = "C:\\Users\\yongw4\\Desktop\\NEW-FATE\\txt-files\\speed-10"
+txt_directory = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\debug_txt_without_nullify"
 
 #----------------------------------------------------------------------
 # LOADING THE DATA:
 # - X.txt; the keypoints;
 # - Y.txt; the corresponding labels;
 #----------------------------------------------------------------------
-
 # avoid redoing all the numpy computation;
 # save and load it;
-np_path = 'X_debug.npy'
-if os.path.isfile(np_path) and os.access(np_path, os.R_OK):
-	X_monstar = file_tools.npy_read('X_debug.npy')
-	Y_monstar = file_tools.npy_read('Y_debug.npy')
+np_X = 'X_train.npy'
+np_Y = 'Y_train.npy'
+if os.path.isfile(np_X) and os.access(np_X, os.R_OK):
+	X_monstar = file_tools.npy_read(np_X)
+	Y_monstar = file_tools.npy_read(np_Y)
 else:
 	X_monstar, Y_monstar = file_tools.patch_nparrays(txt_directory)
-	file_tools.npy_write(X_monstar, 'X_debug.npy')
-	file_tools.npy_write(Y_monstar, 'Y_debug.npy')
+	file_tools.npy_write(X_monstar, np_X)
+	file_tools.npy_write(Y_monstar, np_Y)
 
 #sys.exit("DEBUGG")
 # load the np arrays and split them into val and train sets;
 #x_train, x_val, y_train, y_val =  train_test_split(X_monstar, Y_monstar, test_size=0.2, random_state=42, shuffle = True, stratify = Y_monstar)
 x_train = X_monstar
 y_train = Y_monstar
+
+'''
+prefix = "C:\\CAPSTONE\\training-files\\old\\"
+x_train = lstm_tools.load_X(prefix+"X_train.txt")
+y_train = lstm_tools.load_Y(prefix+"Y_train.txt")
+'''
 #----------------------------------------------------------------------
 # check for gpu access;
 #----------------------------------------------------------------------
@@ -109,21 +115,15 @@ model = Sequential()
 history = History()
 model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), return_sequences=True))
 model.add(Dropout(0.2))
-#model.add(LSTM(n_hidden, return_sequences=True))
-#model.add(Dense(n_hidden, activation ='sigmoid'))
-model.add(Dropout(0.2))
 model.add(LSTM(n_hidden))
-#model.add(Dense(n_hidden, activation ='sigmoid'))
 model.add(Dropout(0.2))
 model.add(Dense(n_classes, activation ='softmax'))
 '''
-
-model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True))
+model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), activation='tanh', return_sequences=True))
 model.add(Dropout(0.2))
-#model.add(LSTM(n_hidden, activation='relu'))
-model.add(LSTM(n_hidden, activation='relu', return_sequences=True))
+model.add(LSTM(n_hidden, activation='tanh', return_sequences=True))
 model.add(Dropout(0.2))
-model.add(LSTM(n_hidden, activation='relu'))
+model.add(LSTM(n_hidden, activation='tanh'))
 model.add(Dropout(0.2))
 model.add(Dense(n_classes, activation='softmax'))
 '''
@@ -133,7 +133,7 @@ model.add(Dense(n_classes, activation='softmax'))
 opt = tf.keras.optimizers.Adam(lr=1e-4, decay=1e-5)
 
 # where to save the trained mdoel?
-filepath = "cudnnlstm_saved_model.h5"
+filepath = "FUCK.h5"
 	
 RETRAIN = True
 print("to retrain?: ", RETRAIN)
@@ -177,3 +177,12 @@ except OSError as e:
 	print("error in loading the saved training results: ", e)
 	print("\n")
 
+# display the class order;
+try:
+	# get the dictionary;
+	with open('saved_dict.p', 'rb') as fp:
+		stats = pickle.load(fp)
+		print(stats)
+except OSError as e:
+	print("error in loading the saved dictionary: ", e)
+	print("\n")
