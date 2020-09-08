@@ -6,7 +6,7 @@
 
 import json
 from pprint import pprint
-import glob, os
+import glob, os, sys
 
 # if the confidence value for the keypoint is very low;
 # no point using it;
@@ -85,12 +85,6 @@ def json_video2txt(jsondata_path, output_path, func):
 				body_keypoints = offset_translation(body_keypoints, shoulder_center)
 				lefthand_keypoints = offset_translation(lefthand_keypoints, shoulder_center)
 				righthand_keypoints = offset_translation(righthand_keypoints, shoulder_center)
-
-				# nullify the keypoint to a fixed constant if 
-				# its associated confidence level is very low (<= 0.1);
-				body_keypoints  = nullify_keypoints(body_keypoints)
-				lefthand_keypoints  = nullify_keypoints(lefthand_keypoints)
-				righthand_keypoints  = nullify_keypoints(righthand_keypoints)
 
 				# do some extra stuff with the function passed;
 				body_keypoints  = func(body_keypoints)
