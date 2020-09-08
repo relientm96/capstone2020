@@ -133,7 +133,11 @@ def get_class_dist_info(filedirectory):
 			to find out which class has the lowest number of samples;
 	'''
 	dict = {}
+	if not(os.path.isdir(filedirectory)):
+		sys.exit("the directory is not valid;")
+	print('directory: ', filedirectory)
 	for root, dirs, files in os.walk(filedirectory, topdown=False):
+		print("files: ", files)
 		for index, name in enumerate(files):
 			src_path = os.path.join(root, name)
 			# get the classname;
@@ -188,6 +192,7 @@ def patch_nparrays(txt_directory):
 	# now, patch all the samples across the classes;
 	PATCH = [[],[]]
 	for root, dirs, files in os.walk(txt_directory, topdown=False):
+		print("files: ", files)
 		for index, name in enumerate(files):
 			src_path = os.path.join(root, name)
 			print("src path: ", src_path)
@@ -218,13 +223,14 @@ def patch_nparrays(txt_directory):
 def npy_write(data, filename):
 	np.save(filename, data)
 
-def npy_read(filename):
-	return np.load(filename)
+# read np array;
+def npy_read(path):
+	return np.load(path)
 
 # svae numpy array as text;
 def npy2text(array, filepath):
-	np2file = open(file, 'w')
-	for row in npy_read(array):
+	np2file = open(filepath, 'w')
+	for row in np.load(array):
 		np.savetxt(np2file, row)
 	np2file.close()
 
@@ -235,13 +241,15 @@ if __name__ == '__main__':
 	prefix = "C:\\Users\\yongw4\\Desktop\\NEW-FATE\\txt-files\\speed-10"
 	sign_dir = prefix+"\\4-hospital-txt\\X_train.txt"
 
-	np_X = lstm.load_X(sign_dir)
-	sample_size = 2664
-	print(np_X.shape)
+	#np_X = lstm.load_X(sign_dir)
+	#sample_size = 2664
+	#print(np_X.shape)
 	#down_arr = down_data_sample(np_X, sample_size)
 	#print(down_arr.shape)
 
-	(x_monstar, y_monstar) = patch_nparrays(prefix)
-	print(x_monstar.shape)
-	print(y_monstar.shape)
+	#(x_monstar, y_monstar) = patch_nparrays(prefix)
+	#print(x_monstar.shape)
+	#print(y_monstar.shape)
+	arr = "Y_train.npy"
+	npy2text(arr, 'np2txt.txt')
 	
