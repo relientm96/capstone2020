@@ -174,11 +174,14 @@ def offline_predict(PREFIX, write_vname, write_OP_name, json_path, signtime = 3,
 	from keras.models import load_model
 	from keras.layers import Dense, Dropout, LSTM
 	#saved_model = 'saved_model.h5'
-	model = keras.models.load_model(saved_model, compile=False)
+	model = keras.models.load_model(saved_model, compile=True)
 	model.summary()
 
 	# hardcode for now;
-	dictOfSigns = {0:"ambulance",1:"pain", 2:"help", 3:"hospital"}
+	#dictOfSigns = {0:"ambulance",1:"pain", 2:"help", 3:"hospital", 4:"thumbs"}
+	#dictOfSigns = {0:"ambulance",1:"pain", 3:"hospital", 4:"thumbs"}
+	dictOfSigns = {0:"ambulance",1:"help", 3:"hospital", 2:"pain", 4:"thumbs"}
+	
 	window_Width = 75
 	numbJoints = 98
 
@@ -279,12 +282,12 @@ if __name__ == '__main__':
 	write_vname = 'cudnnlstm_vid.avi'
 	
 	# how long do you want to capture the actual sign;
-	signtime = 5
+	signtime = 4
 	# import the pretrained model;
 
 	#saved_model = './training-files/cudnnlstm_saved_model_01.h5'
-	saved_model = "cudnnlstm_saved_model.h5"
-    #cudnnlstm_saved_model.h5
+	saved_model = "FUCK.h5"
+	#cudnnlstm_saved_model.h5
 	FUTURE_LIST = offline_predict(PREFIX, write_vname, write_OP_name, json_path, signtime, saved_model)
 	
 	# a wrap around;
