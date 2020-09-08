@@ -19,7 +19,8 @@ import file_tools as ftools
 import openpose_setup as OP_SET
 
 # global var;
-DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
+#DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
+DEGREE = [0]
 
 	
 def assign_video_locations(input_list, prefix, classname, identity, henshin_type):
@@ -195,8 +196,8 @@ def pass_keypoints(input_list):
 def perturb_keypoints(input_list):
 	# loc = mean;
 	# scale = standard deviation
-	noise = random.normal(loc = 0, scale = 0.003)
-	noise2 = random.normal(loc = 0, scale = 0.003)
+	noise = random.normal(loc = 0, scale = 0.0005)
+	noise2 = random.normal(loc = 0, scale = 0.0005)
 	ls = input_list
 	length = len(input_list)
 	fixed = 2
