@@ -18,43 +18,9 @@ FEATURE = 98
 HALF = int(CUT_FRAMES/2)
 
 # write a np array into txt;
-def write2text(array, filepath):
-	with open(filepath, 'a+') as fp:
-		print(array)
-		print(array.shape)
-		nrows = array.shape[0]
-		tmp = np.dstack(array)
-		for row in tmp:
-			print(row)
-			print(row.shape)
-			np.savetxt(filepath, row)
-		'''
-		i = 0
-		while i <=nrows:
-			row = array[i]
-			print(row)
-			print(row.shape)
-			# convert it from np to list;
-			ls = [list(row)]
-			print(ls)
-			sys.exit('debug')
-			# convert float type to string type;
-			tmp = []
-			for j, elem in enumerate(ls):	
-				if j == FEATURE:
-					add = str(elem)
-				else:
-					add = str(elem) + ","
-				tmp.append(add)
-			print(tmp)
-			sys.exit('debug')
-			ls = [str(i) for i in enumerate(ls)]
-			print(ls)
-			fp.writelines(ls)
-			sys.exit('debug')
-			i = i+1
-		'''
-			
+def save_arr(array, filepath):
+	with open(filepath, 'ab') as fp:
+		np.save()
 
 # for unit testing
 def load_test(X_path, n_steps):
@@ -109,7 +75,7 @@ def split_half(arr, meet_size = HALF):
 	# split them
 	out1 = arr[0::2]
 	out2 = arr[1::2]
-    return(out1, out2)
+	return(out1, out2)
 
 def make_up(arr, meet_size = 35):
 	'''
@@ -125,10 +91,11 @@ def make_up(arr, meet_size = 35):
 	# get the number of rows and columns;
 	nrows = arr.shape[0]
 	ncol = arr.shape[1]
+	print('nrows: ', nrows)
 	diff = meet_size - nrows
 	
 	# no point proceed;
-	assert diff>0, "the number of rows is larger than the specified size"
+	assert diff>=0, "the number of rows is larger than the specified size"
 	
 	init = np.zeros((diff, ncol), dtype=np.float32)
 	# append at the end;
@@ -148,7 +115,7 @@ def random_sample(arr, meet_size = HALF):
 
 	# get the number of rows;
 	nrows = arr.shape[0]
-	print(nrows)
+	#print(nrows)
 	assert nrows > 0, "make sure the array is non-empty!!"
 	# generate a list of random numbers within a range;
 	# this function makes sure there's no replacement, which is important;
@@ -162,30 +129,29 @@ def random_sample(arr, meet_size = HALF):
 
 	return(output)
 
-
 def reshape(arr, extra = [], meeting_size = HALF):
-    '''
-        function:
-                return as np of dimension: (1,35,98) if there's only one arr passed;
-                return as np of dimension: (2,35,98) if there are two arrs passed;
-        
-        args: arr; np array;
-        extra: a list of one np array;
-        meeting_size; dimension = 35;
-    '''
+	'''
+		function:
+				return as np of dimension: (1,35,98) if there's only one arr passed;
+				return as np of dimension: (2,35,98) if there are two arrs passed;
+		
+		args: arr; np array;
+		extra: a list of one np array;
+		meeting_size; dimension = 35;
+	'''
 
-    tmp = np.empty((0, meeting_size, FEATURE), dtype = np.float32)
-    tmp = np.insert(tmp, 0 , arr, axis=0)
-    
-    # extra argument invoked;
-    length = len(extra)
-    assert length == 1, 'there should be only one np array as element'
-    if(length > 0):
-        tmp = np.insert(tmp, 0 , extra[0], axis=0)
-    
-    # here, we have either (1,35,98) or (2,35,98) np array;
-    return(tmp)
-    
+	tmp = np.empty((0, meeting_size, FEATURE), dtype = np.float32)
+	tmp = np.insert(tmp, 0 , arr, axis=0)
+	
+	# extra argument invoked;
+	length = len(extra)
+	#print(length)
+	if(length > 0):
+		assert length == 1, 'there should be only one np array as element'
+		tmp = np.insert(tmp, 1 , extra[0], axis=0)
+	# here, we have either (1,35,98) or (2,35,98) np array;
+	return(tmp)
+	
 
 # execution order;
 # 1. cut down the 75-frame txt to 70-frame;
@@ -197,49 +163,85 @@ def reshape(arr, extra = [], meeting_size = HALF):
 #       else:
 #           too small to split it into 35-35;
 #           randomly sample 35 from it twice to have two 35's;
-def down_sampling(arr):
+def down_sampling(arr, meet_size = HALF):
+	# step (1)
 	if (arr.shape[0] == 75):
 		arr = strip_five(arr)
-
+	# step (2)
 	arr = remove_zero_rows(arr)
-	shape = arr.shape[1]
+
+	# get the number of rows;
+	shape = arr.shape[0]
+	#print(shape)
+	
+	# step (3)
 	if(shape == 70):
 		 output = split_half(arr)
-		 return(output)
+		 return(reshape(output))
+	# step (4)
 	else:
-		if(int(shape/2) >= 30):
+		print("shape: ", shape)
+		if((int(shape/2) < 35) and (int(shape/2) >= 30)):
 			first_half, second_half = split_half(arr)
 			first_half = make_up(first_half, meet_size = 35)
 			second_half = make_up(second_half, meet_size = 35)
-			return(first_half, second_half)
+			return(reshape(first_half, [second_half]))
+		elif((int(shape/2) < 30) and (shape >=35)):
+			first_half = random_sample(arr, meet_size = 35)
+			second_half = random_sample(arr, meet_size = 35)
+			return(reshape(first_half, [second_half]))
 		else:
-			first_half = random_sample(arr, size = 35)
-			second_half = random_sample(arr, size = 35)
-			return(first_half, second_half)
+			# here, it must have an original size less than 30;
+			# but concatenate it twice so that we have consistency throughout
+			tmp = make_up(arr)
+			return(reshape(tmp, [tmp]))
 
-def reshape_np(arr, *args):
+# process one txt file;
+def process_one(filepath):
+	# initialize an empty np;
+	output = np.empty((0, HALF, FEATURE), dtype = np.float32)
 
+	# load the training X files;
+	X_load = lstm.load_X(filepath)
+	nsample = X_load.shape[0]
+	print('number of samples: ', nsample)
 
+	# run through all the samples;
+	i = 0
+	while(i < nsample):
+		# down sample the current 75-chunk;
+		processed = down_sampling(X_load[i])
+		print("sanity check\n the processed chunk has a dimension of: ", processed.shape)
+		# insert it into output;
+		output = np.insert(output, 0 , processed, axis=0)
+		i = i+1
+	# end?
+	print(output.shape)
 
 # test driver;
 if __name__ == '__main__':
+	TEST_PATH = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train.txt"
+	process_one(TEST_PATH)
 	'''
 	# txt file with 69 rows;
-	TEST_PATH_03 = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train_03.txt"
-	arrx = load_test(TEST_PATH_03, 69)
+	TEST_PATH_03 = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train_04.txt"
+	arrx = load_test(TEST_PATH_03, 58)
 	test = arrx[0]
 	print(test.shape)
 
-	first_half, second_half = down_sampling(test)
-
+	dum = down_sampling(test)
+	print(dum.shape)
+	'''
+	'''
 	print(first_half.shape)
 	print(second_half.shape)
+	dum = reshape(first_half, [second_half])
+	print(dum.shape)
 	
-	prefix = "C:\\Users\\yongw4\\Desktop\\down-sampling"
-	writep = prefix+"\\test123.txt"
-	write2text(first_half, writep)
+	#prefix = "C:\\Users\\yongw4\\Desktop\\down-sampling"
+	#writep = prefix+"\\test123.txt"
+	#write2text(first_half, writep)
 	'''
-
 	'''
 	ft.npy2text(first_half, writep)
 	ft.npy2text(second_half, writep)
@@ -273,7 +275,7 @@ if __name__ == '__main__':
 	print(sub01.shape)
 	print(sub02.shape)
 	'''
-
+	'''
 	TEST_PATH_03 = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train_03.txt"
 	arrx = load_test(TEST_PATH_03, 69)
 	test = arrx[0]
@@ -285,4 +287,5 @@ if __name__ == '__main__':
 	
 	#test = split_half(test)
 	print(test.shape)
+	'''
 	
