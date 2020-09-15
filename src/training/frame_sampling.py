@@ -106,13 +106,10 @@ def split_half(arr, meet_size = HALF):
 		sub-sample the array at odd and even;
 	'''
 
-	 # return as np of dimension: (2,35,98);
+	# split them
 	out1 = arr[0::2]
 	out2 = arr[1::2]
-	tmp = np.empty((0, meet_size, FEATURE), dtype = np.float32)
-	tmp = np.insert(tmp, 0 , out1, axis=0)
-	tmp = np.insert(tmp, 1 , out2, axis=0)
-	return(tmp)
+    return(out1, out2)
 
 def make_up(arr, meet_size = 35):
 	'''
@@ -138,12 +135,9 @@ def make_up(arr, meet_size = 35):
 	output = np.vstack([arr, init])
 	assert output.shape[0] == meet_size, "makeup: np dimension should be different"
 
-	# return as np of dimension: (1,35,98);
-	tmp = np.empty((0, meet_size, FEATURE), dtype = np.float32)
-	tmp = np.insert(tmp, 0 , output, axis=0)
-	return(tmp) 
+	return(output)
 
-def random_sample(arr, size = HALF):
+def random_sample(arr, meet_size = HALF):
 	'''
 	arg:
 		np array;
@@ -159,18 +153,39 @@ def random_sample(arr, size = HALF):
 	# generate a list of random numbers within a range;
 	# this function makes sure there's no replacement, which is important;
 	# (IMPORTANT!!) sort it 
-	numbers = sorted(random.sample(range(0, nrows), size))
+	numbers = sorted(random.sample(range(0, nrows), meet_size))
 	
 	idx = np.array(numbers)
 	# now, randomly sample the frames;
 	output = arr[idx,:]
-	assert output[0] == meet_size, "random sampler: np dimension should be different"
+	assert output.shape[0] == meet_size, "random sampler: np dimension should be different"
 
-	# return as np of dimension: (1,35,98);
-	tmp = np.empty((0, HALF, FEATURE), dtype = np.float32)
-	tmp = np.insert(tmp, 0 , output, axis=0)
+	return(output)
 
-	return(tmp)
+
+def reshape(arr, extra = [], meeting_size = HALF):
+    '''
+        function:
+                return as np of dimension: (1,35,98) if there's only one arr passed;
+                return as np of dimension: (2,35,98) if there are two arrs passed;
+        
+        args: arr; np array;
+        extra: a list of one np array;
+        meeting_size; dimension = 35;
+    '''
+
+    tmp = np.empty((0, meeting_size, FEATURE), dtype = np.float32)
+    tmp = np.insert(tmp, 0 , arr, axis=0)
+    
+    # extra argument invoked;
+    length = len(extra)
+    assert length == 1, 'there should be only one np array as element'
+    if(length > 0):
+        tmp = np.insert(tmp, 0 , extra[0], axis=0)
+    
+    # here, we have either (1,35,98) or (2,35,98) np array;
+    return(tmp)
+    
 
 # execution order;
 # 1. cut down the 75-frame txt to 70-frame;
@@ -189,9 +204,8 @@ def down_sampling(arr):
 	arr = remove_zero_rows(arr)
 	shape = arr.shape[1]
 	if(shape == 70):
-		 first_half, second_half = split_half(arr)
-		 assert (first_half[0], second_half[0]) == (35, 35), "np dimension should be (35, 35)"
-		 return(first_half, second_half)
+		 output = split_half(arr)
+		 return(output)
 	else:
 		if(int(shape/2) >= 30):
 			first_half, second_half = split_half(arr)
@@ -202,6 +216,10 @@ def down_sampling(arr):
 			first_half = random_sample(arr, size = 35)
 			second_half = random_sample(arr, size = 35)
 			return(first_half, second_half)
+
+def reshape_np(arr, *args):
+
+
 
 # test driver;
 if __name__ == '__main__':
@@ -256,13 +274,15 @@ if __name__ == '__main__':
 	print(sub02.shape)
 	'''
 
-	TEST_PATH_03 = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train.txt"
-	arrx = load_test(TEST_PATH_03, 75)
+	TEST_PATH_03 = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train_03.txt"
+	arrx = load_test(TEST_PATH_03, 69)
 	test = arrx[0]
 	print(test.shape)
 	
-	#test = make_up(test, meet_size = 35)
-	test = strip_five(test)
-	test = split_half(test)
+	#test = make_up(test, meet_size = 80)
+	#test = strip_five(test)
+	#test = random_sample(test)
+	
+	#test = split_half(test)
 	print(test.shape)
 	
