@@ -6,13 +6,55 @@
 
 import numpy as np
 import random
+import sys
 import LSTM_tools as lstm
+import file_tools as ft
+
 TEST_PATH = "C:\\Users\\yongw4\\Desktop\\X_train.txt"
 # global constants;
 FRAMES = 75
 CUT_FRAMES = 70
 FEATURE = 98
-HALF = CUT_FRAMES/2
+HALF = int(CUT_FRAMES/2)
+
+# write a np array into txt;
+def write2text(array, filepath):
+	with open(filepath, 'a+') as fp:
+		print(array)
+		print(array.shape)
+		nrows = array.shape[0]
+		tmp = np.dstack(array)
+		for row in tmp:
+			print(row)
+			print(row.shape)
+			np.savetxt(filepath, row)
+		'''
+		i = 0
+		while i <=nrows:
+			row = array[i]
+			print(row)
+			print(row.shape)
+			# convert it from np to list;
+			ls = [list(row)]
+			print(ls)
+			sys.exit('debug')
+			# convert float type to string type;
+			tmp = []
+			for j, elem in enumerate(ls):	
+				if j == FEATURE:
+					add = str(elem)
+				else:
+					add = str(elem) + ","
+				tmp.append(add)
+			print(tmp)
+			sys.exit('debug')
+			ls = [str(i) for i in enumerate(ls)]
+			print(ls)
+			fp.writelines(ls)
+			sys.exit('debug')
+			i = i+1
+		'''
+			
 
 # for unit testing
 def load_test(X_path, n_steps):
@@ -54,7 +96,7 @@ def remove_zero_rows(arr):
 	return(arr[~np.all(arr == 0, axis=1)])
 
 # this assumes the dimension = (70, 95);
-def split_half(arr):
+def split_half(arr, meet_size = HALF):
 	'''
 	arg:
 		np array of dimension (70, 98)
@@ -63,7 +105,14 @@ def split_half(arr):
 	function:
 		sub-sample the array at odd and even;
 	'''
-	return (arr[0::2], arr[1::2]) 
+
+	 # return as np of dimension: (2,35,98);
+	out1 = arr[0::2]
+	out2 = arr[1::2]
+	tmp = np.empty((0, meet_size, FEATURE), dtype = np.float32)
+	tmp = np.insert(tmp, 0 , out1, axis=0)
+	tmp = np.insert(tmp, 1 , out2, axis=0)
+	return(tmp)
 
 def make_up(arr, meet_size = 35):
 	'''
@@ -88,9 +137,13 @@ def make_up(arr, meet_size = 35):
 	# append at the end;
 	output = np.vstack([arr, init])
 	assert output.shape[0] == meet_size, "makeup: np dimension should be different"
-	return(output) 
 
-def random_sample(arr, size = 35):
+	# return as np of dimension: (1,35,98);
+	tmp = np.empty((0, meet_size, FEATURE), dtype = np.float32)
+	tmp = np.insert(tmp, 0 , output, axis=0)
+	return(tmp) 
+
+def random_sample(arr, size = HALF):
 	'''
 	arg:
 		np array;
@@ -112,7 +165,12 @@ def random_sample(arr, size = 35):
 	# now, randomly sample the frames;
 	output = arr[idx,:]
 	assert output[0] == meet_size, "random sampler: np dimension should be different"
-	return output
+
+	# return as np of dimension: (1,35,98);
+	tmp = np.empty((0, HALF, FEATURE), dtype = np.float32)
+	tmp = np.insert(tmp, 0 , output, axis=0)
+
+	return(tmp)
 
 # execution order;
 # 1. cut down the 75-frame txt to 70-frame;
@@ -145,26 +203,38 @@ def down_sampling(arr):
 			second_half = random_sample(arr, size = 35)
 			return(first_half, second_half)
 
-		
-
-
-
-	
-
 # test driver;
 if __name__ == '__main__':
-
+	'''
 	# txt file with 69 rows;
-	TEST_PATH_03 = "C:\\Users\\yongw4\\Desktop\\X_train_03.txt"
+	TEST_PATH_03 = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train_03.txt"
 	arrx = load_test(TEST_PATH_03, 69)
 	test = arrx[0]
 	print(test.shape)
 
 	first_half, second_half = down_sampling(test)
+
 	print(first_half.shape)
 	print(second_half.shape)
+	
+	prefix = "C:\\Users\\yongw4\\Desktop\\down-sampling"
+	writep = prefix+"\\test123.txt"
+	write2text(first_half, writep)
+	'''
 
+	'''
+	ft.npy2text(first_half, writep)
+	ft.npy2text(second_half, writep)
 
+	prefix = "C:\\Users\\yongw4\\Desktop\\down-sampling"
+	writep = prefix+"\\first.txt"
+	ft.npy2text(first_half, writep)
+	
+	prefix = "C:\\Users\\yongw4\\Desktop\\down-sampling"
+	writep = prefix+"\\second.txt"
+	ft.npy2text(second_half, writep)
+
+	'''
 
 	'''
 	# txt file with alot of zero rows;
@@ -186,16 +256,13 @@ if __name__ == '__main__':
 	print(sub02.shape)
 	'''
 
-	'''
-	# txt file with 69 rows;
-	TEST_PATH_03 = "C:\\Users\\yongw4\\Desktop\\X_train_03.txt"
-	arrx = load_test(TEST_PATH_03, 69)
+	TEST_PATH_03 = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train.txt"
+	arrx = load_test(TEST_PATH_03, 75)
 	test = arrx[0]
 	print(test.shape)
 	
-	
-	#test = make_up(test, meet_size = 75)
-	test = random_sample(test)
+	#test = make_up(test, meet_size = 35)
+	test = strip_five(test)
+	test = split_half(test)
 	print(test.shape)
-	'''
-
+	
