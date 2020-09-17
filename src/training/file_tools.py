@@ -123,10 +123,11 @@ def check_newfile(file_path):
 			print("An error occured", e)
 			sys.exit(-1)
 
-def get_class_dist_info(filedirectory):
+def get_class_dict_info(filedirectory, search_term):
 	'''
 		args: 
 			filedirectory; where are the text files?
+			search_term; txt format or npy format;
 		return:
 			the class info with the lowest number of samples;
 		function:
@@ -137,17 +138,21 @@ def get_class_dist_info(filedirectory):
 		sys.exit("the directory is not valid;")
 	print('directory: ', filedirectory)
 	for root, dirs, files in os.walk(filedirectory, topdown=False):
-		print("files: ", files)
-		for index, name in enumerate(files):
-			src_path = os.path.join(root, name)
-			# get the classname;
-			classname = (root.split('\\'))[-1]
-			print("src path: ", src_path)
-			# only the Y labels;
-			if(index == 1):
-				dataset = lstm.load_Y(src_path)			
+		# need to make sure the file is "upper-capitalized";
+		loc = os.path.join(root, "Y*."+search_term)
+		for search_file in sorted(glob.glob(loc)):
+			print(search_file)
+			# txt format;
+			if(search_term == "txt"):
+				dataset = lstm.load_Y(search_file)	
+				classname = dataset[0][0]
 				# get the number of rows;
 				dict[classname] = np.size(dataset, 0)
+			# in npy format; 
+			else:
+				nparray = np.load(search_file)
+				classname = nparray[0][0]
+				dict[classname] = nparray.shape[0]
 	print(dict)
 	# get the min;
 	minimum = min(dict.items(), key=operator.itemgetter(1))
@@ -157,7 +162,7 @@ def get_class_dist_info(filedirectory):
 	#ls = [(key, value) for key,value in dict.items() if key != classmin]
 	return minimum
 
-def down_data_sample(dataset, sample_size):
+def balance_data_sample(dataset, sample_size):
 	'''
 		args:
 			- dataset; the numpy array;
@@ -175,72 +180,110 @@ def down_data_sample(dataset, sample_size):
 
 
 # combine all the np arrays;
-def patch_nparrays(txt_directory):
+def patch_nparrays(txt_directory, search_term):
 	'''
 		task:
 			load all the generated txt files as np arrays and combine into one;
 		args:
 			txt_directory; the directory where all the txt files are stored;
+			search_term; txt format or npy format;
 		returns:
 			a tuple of (X, Y)
 	'''
 	# get all the classes distribution info;
 	# and return the one with the lowest samples;
-	minimum = get_class_dist_info(txt_directory)
+	minimum = get_class_dict_info(txt_directory, search_term)
 	sample_size = minimum[1]
 
 	# now, patch all the samples across the classes;
 	PATCH = [[],[]]
 	for root, dirs, files in os.walk(txt_directory, topdown=False):
-		print("files: ", files)
-		for index, name in enumerate(files):
-			src_path = os.path.join(root, name)
-			print("src path: ", src_path)
-			# the X file;
-			if(index == 0):
-				dataset = lstm.load_X(src_path)
-				print('prior size: ', dataset.shape)
-				# handle imbalanced distribution, if any;
-				dataset = down_data_sample(dataset, sample_size)
-				print("after size: ", dataset.shape)
-			# the Y label;
+		loc = os.path.join(root, "*."+search_term)
+		for search_file in sorted(glob.glob(loc)):
+			# X or Y?
+			tmp = search_file.split("\\")[-1]
+			tmp = tmp.split("_")[0].lower()
+			
+			# txt or npy? process them differently;
+			if(search_term == "txt"):
+				# the training file, x
+				if(tmp == "x"):
+					# just an indicator;
+					INDEX = 0
+					# load it;
+					dataset = lstm.load_X(search_file)
+					print('prior size: ', dataset.shape)
+					# handle imbalanced distribution, if any;
+					dataset = balance_data_sample(dataset, sample_size)
+					print("after size: ", dataset.shape)
+				# the label file, Y;
+				else:
+					INDEX = 1
+					# handle imbalanced dist, if any
+					dataset = lstm.load_Y(search_file)
+					print("prior size: ", dataset.shape)
+					dataset = dataset[0:sample_size,:]
+					print("after size: ", dataset.shape)
+			# npy files;
 			else:
-				# handle imbalanced dist, if any
-				dataset = lstm.load_Y(src_path)
-				print("prior size: ", dataset.shape)
-				dataset = dataset[0:sample_size,:]
-				print("after size: ", dataset.shape)
-				#sys.exit('debug')
-			# done selecting the files?
-			PATCH[index].append(dataset)
-
+				if(tmp == "x"):
+					INDEX = 0
+					dataset = np.load(search_file)
+					print('prior size: ', dataset.shape)
+					# handle imbalanced distribution, if any;
+					dataset = balance_data_sample(dataset, sample_size)
+					print("after size: ", dataset.shape)
+				else:
+					INDEX = 1
+					dataset = np.load(search_file)
+					print('prior size: ', dataset.shape)
+					# handle imbalanced distribution, if any;
+					dataset = dataset[0:sample_size,:]
+					print("after size: ", dataset.shape)
+			# done?
+			PATCH[INDEX].append(dataset)
 	# concatenate all the arrays into one;
 	X_monstar = np.concatenate(tuple(PATCH[0]), axis = 0)
 	Y_monstar = np.concatenate(tuple(PATCH[1]), axis = 0)
 	return (X_monstar, Y_monstar)
 
-# save and load the huge numpy array;
+# save and load the huge numpy array in npz format;
 def npy_write(data, filename):
 	np.save(filename, data)
 
-# read np array;
+# read np array saved in npz;
 def npy_read(path):
 	return np.load(path)
 
-# svae numpy array as text;
+# load a saved np array in npz format and svae as text;
 def npy2text(array, filepath):
-	np2file = open(filepath, 'w')
+	np2file = open(filepath, 'a+')
 	for row in np.load(array):
 		np.savetxt(np2file, row)
+	np2file.close()
+
+# write a np array into txt;
+def write2text(array, filepath):
+	np2file = open(filepath, 'a+')
+	for row in array:
+		print(row)
+		sys.exit("debug")
+		#np.savetxt(np2file, row)
 	np2file.close()
 
 
 # test driver;
 if __name__ == '__main__':
 	
-	prefix = "C:\\Users\\yongw4\\Desktop\\NEW-FATE\\txt-files\\speed-10"
-	sign_dir = prefix+"\\4-hospital-txt\\X_train.txt"
+	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\speed_10"
+	#sign_dir = prefix+"\\4-hospital-txt\\X_train.txt"
+	(x_mon, y_mon)= patch_nparrays(prefix, "txt")
+	print(x_mon.shape, y_mon.shape)
 
+	(x_mon, y_mon)= patch_nparrays(prefix, "npy")
+	print(x_mon.shape, y_mon.shape)
+
+	#get_class_dict_info(prefix, "npy")
 	#np_X = lstm.load_X(sign_dir)
 	#sample_size = 2664
 	#print(np_X.shape)
@@ -250,6 +293,6 @@ if __name__ == '__main__':
 	#(x_monstar, y_monstar) = patch_nparrays(prefix)
 	#print(x_monstar.shape)
 	#print(y_monstar.shape)
-	arr = "Y_train.npy"
-	npy2text(arr, 'np2txt.txt')
+	#arr = "Y_train.npy"
+	#npy2text(arr, 'np2txt.txt')
 	

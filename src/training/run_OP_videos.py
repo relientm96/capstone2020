@@ -6,23 +6,21 @@ import sys
 # global var(s);
 #SPEED = [1, 0.6, 0.8, 1.2, 1.4]
 
-# date - 24 aug, 2020;
-#SPEED = [1]
-
-# date - 26 aug, 2020;
-SPEED = [1]
+SPEED = [1.2]
 
 def process_one_video(input, path_X, path_Y):
 	for i in range(len(SPEED)):
 		speed_seed = SPEED[i]
 		syntools.synthesize_block(input, speed_seed, path_X, path_Y)
-	
 
 if __name__ == '__main__':
-	signvideodirectory = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\PAIN"
+	signvideodirectory = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\THUMBS_UP"
 	
-	path_X = os.path.join(signvideodirectory, "X_train.txt")
-	path_Y = os.path.join(signvideodirectory, "Y_train.txt")
+	# get the class name to name the txt files accordingly;
+	tmpname = signvideodirectory.split("\\")[-1]
+
+	path_X = os.path.join(signvideodirectory, "X_" + tmpname + "_train.txt")
+	path_Y = os.path.join(signvideodirectory, "Y_" + tmpname + "_train.txt")
 	
 	# safeguard;
 	# create them if the files do not exist;
@@ -57,6 +55,6 @@ if __name__ == '__main__':
 			else:       
 				print("the current video has already been processed, skip\n")
 
-            # debugging ...
+			# debugging ...
 			#sys.exit("stop at one-video to check;")
 		

@@ -9,11 +9,9 @@ import random
 from glob import glob
 import sys, os
 import multiprocessing as mp
-
 import LSTM_tools as lstm
 import file_tools as ft
 
-TEST_PATH = "C:\\Users\\yongw4\\Desktop\\X_train.txt"
 # global constants;
 FRAMES = 75
 CUT_FRAMES = 70
@@ -94,7 +92,7 @@ def make_up(arr, meet_size = 35):
 	# get the number of rows and columns;
 	nrows = arr.shape[0]
 	ncol = arr.shape[1]
-	print('nrows: ', nrows)
+	#print('nrows: ', nrows)
 	diff = meet_size - nrows
 	
 	# no point proceed;
@@ -183,7 +181,7 @@ def down_sampling(arr, meet_size = HALF):
 		 return(reshape(output))
 	# step (4)
 	else:
-		print("shape: ", shape)
+		#print("shape: ", shape)
 		if((int(shape/2) < 35) and (int(shape/2) >= 30)):
 			first_half, second_half = split_half(arr)
 			first_half = make_up(first_half, meet_size = 35)
@@ -208,7 +206,7 @@ def process_one(filepath):
 	# load the training X files;
 	X_load = lstm.load_X(filepath)
 	nsample = X_load.shape[0]
-	print('number of samples: ', nsample)
+	#print('number of samples: ', nsample)
 
 	# run through all the samples;
 	i = 0
@@ -220,7 +218,7 @@ def process_one(filepath):
 		output = np.insert(output, 0 , processed, axis=0)
 		i = i+1
 	# end?
-	print(output.shape)
+	#print(output.shape)
 	return output
 
 def gen_XY(rootpath):
@@ -231,9 +229,9 @@ def gen_XY(rootpath):
 		# just in case evn though it has been sorted ...
 		fname = txt.split("\\")[-1]
 		tmpname = fname.split(".")[0]
-		print('tmpname: ', tmpname)
+		#print('tmpname: ', tmpname)
 		fname = fname.split("_")[0]
-		print("fname: ", fname)
+		#print("fname: ", fname)
 		low = fname.lower()
 		# training X file;
 		if (low == "x"):
@@ -246,7 +244,7 @@ def gen_XY(rootpath):
 		elif (low == "y"):
 			gety = lstm.load_Y(txt)
 			classname = gety[0][0]
-			print("classname: ", classname)
+			#print("classname: ", classname)
 			savename = os.path.join(rootpath, tmpname + "_down.npy")
 			# initialize new array for the Y;
 			outputY = np.empty((nsample, 1), dtype = np.int8)
@@ -265,7 +263,7 @@ def process_block(directory_path):
 		print(ls)
 	print("ls: ", ls)
 
-    # use multiprocessing to process all the txt files;
+	# use multiprocessing to process all the txt files;
 	num_workers = mp.cpu_count()
 	print("cpu workers: ", num_workers)
 	pool = mp.Pool(num_workers)
