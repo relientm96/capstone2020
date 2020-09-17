@@ -42,15 +42,15 @@ def removeConfidenceAndAppend(data):
 		# get all the hand keypoints;
 		lefthand_keypoints = data["people"][0]["hand_left_keypoints_2d"] 
 		righthand_keypoints = data["people"][0]["hand_right_keypoints_2d"] 
+		
+		# add some guards
+		# centering with respect to the shoulder;
+		# translation invariant;
+		shoulder_center = body_keypoints[3]
+		body_keypoints = offset_translation(body_keypoints, shoulder_center)
+		lefthand_keypoints = offset_translation(lefthand_keypoints, shoulder_center)
+		righthand_keypoints = offset_translation(righthand_keypoints, shoulder_center)
 		pose_keypoints = upperbody_keypoints + lefthand_keypoints + righthand_keypoints
-
-	# add some guards
-	# centering with respect to the shoulder;
-	# translation invariant;
-	shoulder_center = body_keypoints[3]
-	body_keypoints = offset_translation(body_keypoints, shoulder_center)
-	lefthand_keypoints = offset_translation(lefthand_keypoints, shoulder_center)
-	righthand_keypoints = offset_translation(righthand_keypoints, shoulder_center)
 
 	# pose keypoints are done processed;
 	# ignore the confidence level;
