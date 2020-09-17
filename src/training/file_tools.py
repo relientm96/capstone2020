@@ -123,6 +123,15 @@ def check_newfile(file_path):
 			print("An error occured", e)
 			sys.exit(-1)
 
+# to count the number of subdirectories at the top layer;
+def subdir_count(path):
+	count = 0
+	for root, dirs, files in os.walk(path):
+		print('dirs: ', dirs)
+		count1 += len(dirs)
+		break
+	return count
+
 def get_class_dict_info(filedirectory, search_term):
 	'''
 		args: 
@@ -135,7 +144,7 @@ def get_class_dict_info(filedirectory, search_term):
 	'''
 	dict = {}
 	# how many set it has?
-	ncombine = 0
+	ncombine = subdir_count(filedirectory)
 	if not(os.path.isdir(filedirectory)):
 		sys.exit("the directory is not valid;")
 	print('directory: ', filedirectory)
@@ -151,7 +160,6 @@ def get_class_dict_info(filedirectory, search_term):
 				# get the number of rows;
 				try:
 					dict[classname] = dict[classname] +  np.size(dataset, 0)
-					ncombine = ncombine + 1
 				except KeyError as e:
 					print('there is an error: %s, so ... do it differently', e)
 					dict[classname] = np.size(dataset, 0)
@@ -161,7 +169,6 @@ def get_class_dict_info(filedirectory, search_term):
 				classname = nparray[0][0]
 				try:
 					dict[classname] = dict[classname] + nparray.shape[0]
-					ncombine = ncombine + 1
 				except KeyError as e:
 					print('there is an error: %s, so ... do it differently', e)
 					dict[classname] = nparray.shape[0]
@@ -218,6 +225,7 @@ def patch_nparrays(txt_directory, search_term):
 			tmp = tmp.split("_")[0].lower()
 			
 			proportion = int(sample_size/ncombine)
+			#proportion = int(sample_size/2)
 			# txt or npy? process them differently;
 			if(search_term == "txt"):
 				# the training file, x
