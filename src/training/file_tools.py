@@ -147,12 +147,12 @@ def get_class_dict_info(filedirectory, search_term):
 				dataset = lstm.load_Y(search_file)	
 				classname = dataset[0][0]
 				# get the number of rows;
-				dict[classname] = np.size(dataset, 0)
+				dict[classname] = dict[classname] +  np.size(dataset, 0)
 			# in npy format; 
 			else:
 				nparray = np.load(search_file)
 				classname = nparray[0][0]
-				dict[classname] = nparray.shape[0]
+				dict[classname] = dict[classname] + nparray.shape[0]
 	print(dict)
 	# get the min;
 	minimum = min(dict.items(), key=operator.itemgetter(1))
