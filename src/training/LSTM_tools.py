@@ -199,10 +199,14 @@ def get_deployable_model(x_raw, y_raw):
 if __name__ == '__main__':
 	xtrain_path = "./training_files/X_train.txt"
 	ytrain_path = "./training_files/Y_train.txt"
+	path = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\speed_08\\AMBULANCE\\Y_ambulance_train.txt"
+	Y_train = load_Y(path)
+	print(Y_train)
+	print(Y_train.shape)
 	
+	'''
    # test - 01
    # the auxiiliary functions to load up the txt files;
-	'''
 	X_train = load_X(xtrain_path)
 	Y_train = load_Y(ytrain_path)
 	print(Y_train.shape)

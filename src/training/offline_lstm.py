@@ -32,7 +32,7 @@ op_videopath = PREFIX +  "result.avi"
 # where to save your recording?
 raw_videopath = PREFIX + '.avi'
 
-def offline_predict(PREFIX, write_vname, write_OP_name, json_path, signtime = 3, saved_model = 'saved_model.h5'):
+def offline_predict(PREFIX, write_vname, write_OP_name, json_path, signtime = 3, saved_model = 'saved_model.h5', window_Width = 75):
 	'''
 	args:
 		- PREFIX; the directory to save:
@@ -182,7 +182,7 @@ def offline_predict(PREFIX, write_vname, write_OP_name, json_path, signtime = 3,
 	#dictOfSigns = {0:"ambulance",1:"pain", 3:"hospital", 4:"thumbs"}
 	dictOfSigns = {0:"ambulance",1:"help", 3:"hospital", 2:"pain", 4:"thumbs"}
 	
-	window_Width = 75
+
 	numbJoints = 98
 
 	# initialize a rolling window;
@@ -287,15 +287,22 @@ if __name__ == '__main__':
 
 	#saved_model = './training-files/cudnnlstm_saved_model_01.h5'
 	saved_model = "FUCK.h5"
+	saved_model = "C:\\CAPSTONE\\capstone2020\\src\\training\\training-files\\frame-75\\fmodel.h5"
+	saved_model = "C:\\CAPSTONE\\capstone2020\\src\\training\\training-files\\frame-35\\fmodel.h5"
+	
 	#cudnnlstm_saved_model.h5
-	FUTURE_LIST = offline_predict(PREFIX, write_vname, write_OP_name, json_path, signtime, saved_model)
+	window_Width = 35
+	FUTURE_LIST = offline_predict(PREFIX, write_vname, write_OP_name, json_path, signtime, saved_model, window_Width)
 	
 	# a wrap around;
 	# [ISSUE] could not stream the saved video in the same script!!! 
 	# so, run the video-script part in another place;
 	# to do so, save the (list) predictions first;
-	list_path = PREFIX + 'future_prediction.txt'
+	#list_path = PREFIX + 'future_prediction.txt'
 
+	'''
 	with open(list_path, 'wb') as fp:
 		pickle.dump(FUTURE_LIST, fp, protocol=pickle.HIGHEST_PROTOCOL)
 		print("the predictions have been saved as: ", list_path)
+
+	'''
