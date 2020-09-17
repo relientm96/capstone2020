@@ -19,8 +19,7 @@ import file_tools as ftools
 import openpose_setup as OP_SET
 
 # global var;
-#DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
-DEGREE = [0]
+DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
 
 	
 def assign_video_locations(input_list, prefix, classname, identity, henshin_type):

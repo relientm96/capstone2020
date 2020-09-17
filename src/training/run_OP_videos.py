@@ -14,7 +14,7 @@ def process_one_video(input, path_X, path_Y):
 		syntools.synthesize_block(input, speed_seed, path_X, path_Y)
 
 if __name__ == '__main__':
-	signvideodirectory = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\THUMBS_UP"
+	signvideodirectory = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\PAIN"
 	
 	# get the class name to name the txt files accordingly;
 	tmpname = signvideodirectory.split("\\")[-1]

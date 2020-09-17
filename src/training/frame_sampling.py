@@ -276,7 +276,7 @@ def process_block(directory_path):
 
 # test driver;
 if __name__ == '__main__':
-	directory_path = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\speed_10"
+	directory_path = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\speed_08"
 	TEST_PATH = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train.txt"
 	process_block(directory_path)
 
