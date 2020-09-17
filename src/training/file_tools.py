@@ -134,6 +134,8 @@ def get_class_dict_info(filedirectory, search_term):
 			to find out which class has the lowest number of samples;
 	'''
 	dict = {}
+	# how many set it has?
+	ncombine = 0
 	if not(os.path.isdir(filedirectory)):
 		sys.exit("the directory is not valid;")
 	print('directory: ', filedirectory)
@@ -147,12 +149,23 @@ def get_class_dict_info(filedirectory, search_term):
 				dataset = lstm.load_Y(search_file)	
 				classname = dataset[0][0]
 				# get the number of rows;
-				dict[classname] = dict[classname] +  np.size(dataset, 0)
+				try:
+					dict[classname] = dict[classname] +  np.size(dataset, 0)
+					ncombine = ncombine + 1
+				except KeyError as e:
+					print('there is an error: %s, so ... do it differently', e)
+					dict[classname] = np.size(dataset, 0)
 			# in npy format; 
 			else:
 				nparray = np.load(search_file)
 				classname = nparray[0][0]
-				dict[classname] = dict[classname] + nparray.shape[0]
+				try:
+					dict[classname] = dict[classname] + nparray.shape[0]
+					ncombine = ncombine + 1
+				except KeyError as e:
+					print('there is an error: %s, so ... do it differently', e)
+					dict[classname] = nparray.shape[0]
+				
 	print(dict)
 	# get the min;
 	minimum = min(dict.items(), key=operator.itemgetter(1))
@@ -160,7 +173,7 @@ def get_class_dict_info(filedirectory, search_term):
 	#classmin = minimum[0]
 	#min_num = minimum[1]
 	#ls = [(key, value) for key,value in dict.items() if key != classmin]
-	return minimum
+	return (ncombine, minimum)
 
 def balance_data_sample(dataset, sample_size):
 	'''
@@ -192,7 +205,7 @@ def patch_nparrays(txt_directory, search_term):
 	'''
 	# get all the classes distribution info;
 	# and return the one with the lowest samples;
-	minimum = get_class_dict_info(txt_directory, search_term)
+	(ncombine, minimum) = get_class_dict_info(txt_directory, search_term)
 	sample_size = minimum[1]
 
 	# now, patch all the samples across the classes;
@@ -204,6 +217,7 @@ def patch_nparrays(txt_directory, search_term):
 			tmp = search_file.split("\\")[-1]
 			tmp = tmp.split("_")[0].lower()
 			
+			proportion = int(sample_size/ncombine)
 			# txt or npy? process them differently;
 			if(search_term == "txt"):
 				# the training file, x
@@ -214,7 +228,7 @@ def patch_nparrays(txt_directory, search_term):
 					dataset = lstm.load_X(search_file)
 					print('prior size: ', dataset.shape)
 					# handle imbalanced distribution, if any;
-					dataset = balance_data_sample(dataset, sample_size)
+					dataset = balance_data_sample(dataset, proportion)
 					print("after size: ", dataset.shape)
 				# the label file, Y;
 				else:
@@ -222,7 +236,7 @@ def patch_nparrays(txt_directory, search_term):
 					# handle imbalanced dist, if any
 					dataset = lstm.load_Y(search_file)
 					print("prior size: ", dataset.shape)
-					dataset = dataset[0:sample_size,:]
+					dataset = dataset[0:proportion,:]
 					print("after size: ", dataset.shape)
 			# npy files;
 			else:
@@ -231,14 +245,14 @@ def patch_nparrays(txt_directory, search_term):
 					dataset = np.load(search_file)
 					print('prior size: ', dataset.shape)
 					# handle imbalanced distribution, if any;
-					dataset = balance_data_sample(dataset, sample_size)
+					dataset = balance_data_sample(dataset, proportion)
 					print("after size: ", dataset.shape)
 				else:
 					INDEX = 1
 					dataset = np.load(search_file)
 					print('prior size: ', dataset.shape)
 					# handle imbalanced distribution, if any;
-					dataset = dataset[0:sample_size,:]
+					dataset = dataset[0:proportion,:]
 					print("after size: ", dataset.shape)
 			# done?
 			PATCH[INDEX].append(dataset)
