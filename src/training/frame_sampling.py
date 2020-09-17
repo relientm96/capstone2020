@@ -6,7 +6,10 @@
 
 import numpy as np
 import random
-import sys
+from glob import glob
+import sys, os
+import multiprocessing as mp
+
 import LSTM_tools as lstm
 import file_tools as ft
 
@@ -198,6 +201,7 @@ def down_sampling(arr, meet_size = HALF):
 
 # process one txt file;
 def process_one(filepath):
+
 	# initialize an empty np;
 	output = np.empty((0, HALF, FEATURE), dtype = np.float32)
 
@@ -211,17 +215,76 @@ def process_one(filepath):
 	while(i < nsample):
 		# down sample the current 75-chunk;
 		processed = down_sampling(X_load[i])
-		print("sanity check\n the processed chunk has a dimension of: ", processed.shape)
+		#print("sanity check\n the processed chunk has a dimension of: ", processed.shape)
 		# insert it into output;
 		output = np.insert(output, 0 , processed, axis=0)
 		i = i+1
 	# end?
 	print(output.shape)
+	return output
+
+def gen_XY(rootpath):
+	print("entering gen_xy")
+	loc = os.path.join(rootpath, "*.txt")
+	for txt in sorted(glob(loc)):
+		print(txt)
+		# just in case evn though it has been sorted ...
+		fname = txt.split("\\")[-1]
+		tmpname = fname.split(".")[0]
+		print('tmpname: ', tmpname)
+		fname = fname.split("_")[0]
+		print("fname: ", fname)
+		low = fname.lower()
+		# training X file;
+		if (low == "x"):
+			outputX = process_one(txt)
+			nsample = outputX.shape[0]
+			savename = os.path.join(rootpath, tmpname+"_down.npy")
+			np.save(savename, outputX)
+			print("outputX size: ", outputX.shape)
+		# the label file;
+		elif (low == "y"):
+			gety = lstm.load_Y(txt)
+			classname = gety[0][0]
+			print("classname: ", classname)
+			savename = os.path.join(rootpath, tmpname + "_down.npy")
+			# initialize new array for the Y;
+			outputY = np.empty((nsample, 1), dtype = np.int8)
+			outputY.fill(int(classname))
+			np.save(savename, outputY)
+			print("outputY size: ", outputY.shape)
+		else:
+			return None
+
+def process_block(directory_path):
+	ls = []
+	for root, dirs, files in os.walk(directory_path, topdown=False):
+		print(root)
+		#loc = os.path.join(root, "*.txt")
+		ls.append(root)
+		print(ls)
+	print("ls: ", ls)
+
+    # use multiprocessing to process all the txt files;
+	num_workers = mp.cpu_count()
+	print("cpu workers: ", num_workers)
+	pool = mp.Pool(num_workers)
+	for index in range(0, len(ls)):
+		print("entering the pool?")
+		print(ls[index])
+		pool.apply_async(gen_XY, args=(ls[index],))
+	pool.close()
+	pool.join()
 
 # test driver;
 if __name__ == '__main__':
+	directory_path = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\speed_10"
 	TEST_PATH = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train.txt"
-	process_one(TEST_PATH)
+	process_block(directory_path)
+
+	
+	#TEST_PATH = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train.txt"
+	#process_one(TEST_PATH)
 	'''
 	# txt file with 69 rows;
 	TEST_PATH_03 = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train_04.txt"
