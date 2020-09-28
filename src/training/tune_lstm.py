@@ -1,7 +1,20 @@
 
 from __future__ import print_function
 
-# for hyperparameter tuning;
+
+# is spark working?
+# src - https://bigdata-madesimple.com/guide-to-install-spark-and-use-pyspark-from-jupyter-in-windows/
+import findspark
+findspark.init()
+import pyspark
+from pyspark.sql import SparkSession
+spark = SparkSession.builder.getOrCreate()
+df = spark.sql("select 'spark' as hello ")
+df.show()
+
+# ml tracking
+import mlflow
+
 from hyperas import optim
 from hyperas.distributions import choice, uniform
 from hyperopt import fmin, tpe, hp, STATUS_OK, Trials, SparkTrials
@@ -28,7 +41,11 @@ except ImportError:  # python 3.x
 # hardcoding for now;
 n_classes = 5
 txt_directory = "C:\\Users\\yongw4\\Desktop\\FATE\\txt-files\\speed-01"
-X_monstar, Y_monstar = lstm.patch_nparrays(txt_directory)
+#X_monstar, Y_monstar = lstm.patch_nparrays(txt_directory)
+
+prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train"
+X_monstar = np.load(prefix+"\\X_main.npy")
+Y_monstar = np.load(prefix+"\\Y_main.npy")
 
 # seprate into training and validation set for hyperparameter tuning;
 # some notes:
@@ -135,23 +152,27 @@ if __name__ == '__main__':
 
 	reload_results = False
 	# Initialize an empty trials database, or reload where you left off
+	'''
 	if reload_results == True:
 		trials = pickle.load(open("hyper_results.pkl", "rb"))
 	else:
-		trials = SparkTrials()
-
+		spark_trials = SparkTrials()
+		#trials = Trials()
+	'''
+	spark_trials = SparkTrials()
 	# now; start the tuning;
 	step = 20
 	start = 60
 	end = start*20
 	for i in range(start, end, step):
+		with mlflow.start_run():
 		# fmin runs until the trials object has max_evals elements in it, so it can do evaluations in chunks like this
-		best = fmin(f_nn, space, algo=tpe.suggest, trials=spark_trials, max_evals=i)
-		# each step 'best' will be the best trial so far
-		print(best)
-		# each step 'trials' will be updated to contain every result
-		# you can save it to reload later in case of a crash, or you decide to kill the script
-		pickle.dump(trials, open("hyper_results.pkl", "wb"))
+			best = fmin(f_nn, space, algo=tpe.suggest, trials=spark_trials, max_evals=i)
+			# each step 'best' will be the best trial so far
+			print(best)
+			# each step 'trials' will be updated to contain every result
+			# you can save it to reload later in case of a crash, or you decide to kill the script
+			pickle.dump(trials, open("hyper_results.pkl", "wb"))
 	
 
 
