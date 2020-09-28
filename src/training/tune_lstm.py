@@ -4,7 +4,7 @@ from __future__ import print_function
 # for hyperparameter tuning;
 from hyperas import optim
 from hyperas.distributions import choice, uniform
-from hyperopt import fmin, tpe, hp, STATUS_OK, Trials
+from hyperopt import fmin, tpe, hp, STATUS_OK, Trials, SparkTrials
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, LSTM, Activation
@@ -49,7 +49,7 @@ x_train, x_val, y_train, y_val =  train_test_split(X_monstar, Y_monstar, test_si
 space = {'choice': hp.choice('num_layers',
 					[ {'layers':'two', },
 					{'layers':'three',
-					'units3': hp.choice('units3', [32, 64,128,256,512,1024]),
+					'units3': hp.choice('units3', [32,64,128,256,512,1024]),
 					'dropout3': hp.choice('dropout3',[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9])}
 					]),
 			'units1': hp.choice('units1', [32, 64, 128, 256, 512, 1024]),
@@ -77,19 +77,21 @@ space = {'choice': hp.choice('num_layers',
 def f_nn(params):   
 	# fixed tanh as the activation since we normalize the dataset to (-1,1);
 	model = Sequential()
-	model.add(LSTM(32, input_shape=(x_train.shape[1], x_train.shape[2]), return_sequences=True))
-	model.add(Activation('tanh'))
+	#model.add(LSTM(32, input_shape=(x_train.shape[1], x_train.shape[2]), return_sequences=True))
+	model.add(LSTM(params['units1'], input_shape=(x_train.shape[1], x_train.shape[2]), return_sequences=True))
+	
+	#model.add(Activation('tanh'))
 	model.add(Dropout(params['dropout1']))
 	
 	# If we choose 'three', add an additional third layer
 	if (params['choice']['layers']== 'three'):
 		model.add(LSTM(int(params['choice']['units3']), return_sequences=True))
-		model.add(Activation('tanh'))
+		#model.add(Activation('tanh'))
 		model.add(Dropout(params['choice']['dropout3']))
 	
 	# last layer;
 	model.add(LSTM(params['units1']))
-	model.add(Activation('tanh'))
+	#model.add(Activation('tanh'))
 	model.add(Dropout(params['dropout1']))
 	model.add(Dense(n_classes, activation='softmax'))
 	
@@ -115,8 +117,8 @@ def f_nn(params):
 	#get the highest validation accuracy of the training epochs
 	validation_acc = np.amax(result.history['val_accuracy']) 
 	print('Best validation acc of epoch:', validation_acc)
-    # note; we are minmizing negative validation accuracy;
-    # which is equivalent to maximizing the val acc;
+	# note; we are minmizing negative validation accuracy;
+	# which is equivalent to maximizing the val acc;
 	return {'loss': -validation_acc, 'status': STATUS_OK, 'model': model}
 
 if __name__ == '__main__':
@@ -136,15 +138,15 @@ if __name__ == '__main__':
 	if reload_results == True:
 		trials = pickle.load(open("hyper_results.pkl", "rb"))
 	else:
-		trials = Trials()
+		trials = SparkTrials()
 
 	# now; start the tuning;
-	step = 100
-	start = 500
+	step = 20
+	start = 60
 	end = start*20
 	for i in range(start, end, step):
 		# fmin runs until the trials object has max_evals elements in it, so it can do evaluations in chunks like this
-		best = fmin(f_nn, space, algo=tpe.suggest, trials=trials, max_evals=i)
+		best = fmin(f_nn, space, algo=tpe.suggest, trials=spark_trials, max_evals=i)
 		# each step 'best' will be the best trial so far
 		print(best)
 		# each step 'trials' will be updated to contain every result
