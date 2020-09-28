@@ -1,3 +1,9 @@
+
+from __future__ import print_function
+
+
+# is spark working?
+# src - https://bigdata-madesimple.com/guide-to-install-spark-and-use-pyspark-from-jupyter-in-windows/
 import findspark
 findspark.init()
 import pyspark
@@ -6,77 +12,78 @@ spark = SparkSession.builder.getOrCreate()
 df = spark.sql("select 'spark' as hello ")
 df.show()
 
-
-from sklearn.datasets import fetch_openml
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.utils import check_random_state
-
+# ml tracking
+#import mlflow
+'''
+from hyperas import optim
+from hyperas.distributions import choice, uniform
+'''
 from hyperopt import fmin, hp, tpe
-from hyperopt import SparkTrials, STATUS_OK
+from hyperopt import SparkTrials, STATUS_OK, Trials
 
-# Load MNIST data, and preprocess it by standarizing features.
-X, y = fetch_openml('mnist_784', version=1, return_X_y=True)
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, LSTM, Activation
+from tensorflow.keras import backend as keras_backend
+import tensorflow as tf
 
-random_state = check_random_state(0)
-permutation = random_state.permutation(X.shape[0])
-X = X[permutation]
-y = y[permutation]
-X = X.reshape((X.shape[0], -1))
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedKFold
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, train_size=5000, test_size=10000)
+import sys
+import tracemalloc
+import LSTM_tools as lstm
+import numpy as np
 
-scaler = StandardScaler()
-X_train = scaler.fit_transform(X_train)
-X_test = scaler.transform(X_test)
 
-# First, set up the scikit-learn workflow, wrapped within a function.
-def train(params):
-  """
-  This is our main training function which we pass to Hyperopt.
-  It takes in hyperparameter settings, fits a model based on those settings,
-  evaluates the model, and returns the loss.
+# hardcoding for now;
+n_classes = 5
+prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train"
+prefix = "C:\\CAPSTONE\\capstone2020\\src\\training\\training-files\\frame-75"
+X_monstar = np.load(prefix+"\\X_train.npy")
+Y_monstar = np.load(prefix+"\\Y_train.npy")
+print("shape X: ", X_monstar.shape)
 
-  :param params: map specifying the hyperparameter settings to test
-  :return: loss for the fitted model
-  """
-  # We will tune 2 hyperparameters:
-  #  regularization and the penalty type (L1 vs L2).
-  regParam = float(params['regParam'])
-  penalty = params['penalty']
+x_train, x_val, y_train, y_val =  train_test_split(X_monstar, Y_monstar, test_size=0.2, random_state=42, shuffle = True, stratify = Y_monstar)
 
-  # Turn up tolerance for faster convergence
-  clf = LogisticRegression(C=1.0 / regParam,
-                           multi_class='multinomial',
-                           penalty=penalty, solver='saga', tol=0.1)
-  clf.fit(X_train, y_train)
-  score = clf.score(X_test, y_test)
+# smaller search space;
+search_space = {'choice': hp.choice('num_layers',
+					[ {'layers':'two', },
+					{'layers':'three',
+					'units3': hp.choice('units3', [32, 64,128,256,512,1024]),
+					'dropout3': hp.choice('dropout3',[0.1,0.2,0.3,0.4,0.5])}
+					]),
+			'units1': hp.choice('units1', [32, 64, 128, 256, 512,1024]),
+			'dropout1': hp.choice('dropout1', [0.1,0.2,0.3,0.4,0.5]),
+			'batch_size' : hp.choice('batch_size', [32, 64, 128]),
+			'nb_epochs' :  hp.choice('epochs', [50, 70, 80, 100]),
+		}
 
-  return {'loss': -score, 'status': STATUS_OK}
+# the objective function to be minimized for the search space;
+def train(params):   
+	model = Sequential()
+	model.add(LSTM(params['units1'], input_shape=(x_train.shape[1], x_train.shape[2]), return_sequences=True))
+	model.add(Dropout(params['dropout1']))
+	model.add(Dense(n_classes, activation='softmax'))
+	
+	opt = tf.keras.optimizers.Adam(lr=1e-4, decay=1e-5)
+	model.compile(loss='sparse_categorical_crossentropy', metrics=['accuracy'], optimizer=opt)
+	result = model.fit(x_train, y_train,
+			  batch_size=params['batch_size'],
+			  epochs = params['nb_epochs'],
+			  verbose=2,
+			  validation_data = (x_val, y_val))
 
-# Next, define a search space for Hyperopt.
-search_space = {
-  'penalty': hp.choice('penalty', ['l1', 'l2']),
-  'regParam': hp.loguniform('regParam', -10.0, 0),
-}
+	validation_acc = np.amax(result.history['val_accuracy']) 
+	return {'loss': -validation_acc, 'status': STATUS_OK}
+
+
+
+# We can distribute tuning across our Spark cluster
 
 # Select a search algorithm for Hyperopt to use.
 algo=tpe.suggest  # Tree of Parzen Estimators, a Bayesian method
-
-# We can run Hyperopt locally (only on the driver machine)
-# by calling `fmin` without an explicit `trials` argument.
-best_hyperparameters = fmin(
-  fn=train,
-  space=search_space,
-  algo=algo,
-  max_evals=32)
-best_hyperparameters
-
-# We can distribute tuning across our Spark cluster
 # by calling `fmin` with a `SparkTrials` instance.
-spark_trials = SparkTrials()
+spark_trials = SparkTrials(parallelism=8)
 best_hyperparameters = fmin(
   fn=train,
   space=search_space,
@@ -84,3 +91,9 @@ best_hyperparameters = fmin(
   trials=spark_trials,
   max_evals=32)
 best_hyperparameters
+
+# hyperopt's defult trials class
+algo = tpe.suggest
+trials = Trials()
+best = fmin(f_nn, space, algo=algo, trials = trials, max_evals=32)
+best
