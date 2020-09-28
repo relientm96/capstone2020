@@ -128,7 +128,7 @@ def subdir_count(path):
 	count = 0
 	for root, dirs, files in os.walk(path):
 		print('dirs: ', dirs)
-		count1 += len(dirs)
+		count += len(dirs)
 		break
 	return count
 
@@ -145,6 +145,8 @@ def get_class_dict_info(filedirectory, search_term):
 	dict = {}
 	# how many set it has?
 	ncombine = subdir_count(filedirectory)
+	print("ncombine: ", ncombine)
+	sys.exit('DEBUG')
 	if not(os.path.isdir(filedirectory)):
 		sys.exit("the directory is not valid;")
 	print('directory: ', filedirectory)
@@ -297,13 +299,21 @@ def write2text(array, filepath):
 # test driver;
 if __name__ == '__main__':
 	
-	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\speed_10"
+	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train"
 	#sign_dir = prefix+"\\4-hospital-txt\\X_train.txt"
-	(x_mon, y_mon)= patch_nparrays(prefix, "txt")
-	print(x_mon.shape, y_mon.shape)
+	#(x_mon, y_mon)= patch_nparrays(prefix, "txt")
+	#print(x_mon.shape, y_mon.shape)
 
 	(x_mon, y_mon)= patch_nparrays(prefix, "npy")
 	print(x_mon.shape, y_mon.shape)
+
+	filenameX = prefix+"\\X_main.npy"
+	filenameY = prefix+"\\Y_main.npy"
+
+	np.save(filenameX, x_mon)
+	np.save(filenameY, y_mon)
+
+
 
 	#get_class_dict_info(prefix, "npy")
 	#np_X = lstm.load_X(sign_dir)
