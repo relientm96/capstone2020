@@ -1,4 +1,4 @@
-## Application Deployment
+### Application Deployment
 
 A big part of our project was dedicated towards developing a system for users to interact and play with our model.
 

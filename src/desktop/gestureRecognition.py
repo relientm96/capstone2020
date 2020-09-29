@@ -131,11 +131,14 @@ def translate(datum):
 
     # Reshape for model to read
     reshaped_keypoints = r.getPoints().reshape((1, window_Width, numbJoints))
-    pp.pprint(reshaped_keypoints)
+
     # Load Keras Model
-    global lstm
+    global lstm 
     try:
         predictions = lstm.predict([reshaped_keypoints])
+        if abs( (np.max(predictions) - np.min(predictions)) ) < 0.9 :
+            r.resetWindow()
+        
         guess = np.argmax(predictions)
         word = dictOfSigns[guess] + "-" + str(round(float(np.max(predictions)),2))
     except Exception as e:

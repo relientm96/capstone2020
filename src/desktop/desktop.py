@@ -15,7 +15,9 @@ import gestureRecognition as gr
 # Hold parameters for OpenPose as a dictionary
 params = dict()
 
-params["net_resolution"]       = "160x160"
+params["disable_blending"]     = False
+
+params["net_resolution"]       = "128x128"
 params["hand_net_resolution"]  = "256x256"
 
 #params["net_resolution"]      = "336x336"
@@ -24,7 +26,7 @@ params["hand_net_resolution"]  = "256x256"
 
 params["hand"]                 = True
 params['keypoint_scale']       = 3
-params["disable_multi_thread"] = False
+#params["disable_multi_thread"] = False
 params["number_people_max"]    = 1
 ############################################
 

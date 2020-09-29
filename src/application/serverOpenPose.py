@@ -47,6 +47,7 @@ try:
         print(e)
         sys.exit(-1)
 
+    '''
     # Flags
     parser = argparse.ArgumentParser()
     parser.add_argument("--image_dir", default="../../../examples/media/", help="Process a directory of images. Read all standard formats (jpg, png, bmp, etc.).")
@@ -64,7 +65,7 @@ try:
         elif "--" in curr_item and "--" not in next_item:
             key = curr_item.replace('-','')
             if key not in params: params[key] = next_item
-
+    '''
     # Start openpose wrapper
     opWrapper = op.WrapperPython()
     opWrapper.configure(params)
@@ -140,12 +141,17 @@ def returnKeypointsFlattened(inputImageUri):
     Returns keypoints generated for this image (flattened for prediction)
     '''
     try:
+        # Extract the image data as b64 string
         b64_string = inputImageUri.split(',')[0]
+        # Add padding to avoid "Incorrect Padding Error"
+        # Refer to https://stackoverflow.com/questions/2941995/python-ignore-incorrect-padding-error-when-base64-decoding/2942039#2942039
         b64_string += "=" * ((4 - len(b64_string) % 4) % 4)
+        # Decode the b64 string into bytes
         encoded_string = base64.b64decode(b64_string)
-        # Send image to OpenPose for processing
         jpg_as_np = np.frombuffer(encoded_string, dtype=np.uint8)
+        # Read image from transmitted bytes
         frame = cv2.imdecode(jpg_as_np, flags=1)
+        # Send image to OpenPose for processing
         datum = op.Datum()
         datum.cvInputData = frame
         opWrapper.emplaceAndPop([datum])

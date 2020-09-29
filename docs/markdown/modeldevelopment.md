@@ -1,4 +1,4 @@
-## Model Development
+### Model Development
 
 We have decided to implement a gesture recognition model using Recurrent Neural Networks, 
 in particular, using Long Short Term Memory (LSTM) Networks.

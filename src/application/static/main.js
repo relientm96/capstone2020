@@ -51,10 +51,11 @@ var rw;
 
 // Define Rolling Window
 class RollingWindow {
-    constructor(windowWidth, numbJoints, points){
+    constructor(windowWidth, numbJoints){
         this.windowWidth    = windowWidth;
         this.numbJoints     = numbJoints;
-        this.points         = points; 
+        this.points         = Array(windowWidth)
+        this.isReset        = true;
     }
     printPoints(){
         console.log(this.points);
@@ -64,18 +65,29 @@ class RollingWindow {
     }
     getLastPoint(){
         // Get Earliest Point Added
-        return this.points[this.points.length -1]
+        return this.points[this.points.length - 1]
     }
     addPoint(incomingKp){
+        // Adds point to rolling window
         if (incomingKp.length != this.numbJoints){
             console.log("Error! Need to have same length as number of joints: " + this.numbJoints)
             return false;
         }
-        // Shift register
-        // Remove the oldest from the first index
-        // Add the most recent entry, enters from the last index        
-        this.points.shift()
-        this.points.push(incomingKp)
+        if (this.isReset == true){
+            // Performing duplication if triggered
+            this.points = Array(this.windowWidth);
+            for(let i=0 ; i < this.windowWidth ; i++){
+                this.points[i] = incomingKp;
+            }
+            this.isReset = false;
+        }
+        else {
+            // Shift register
+            // Remove the oldest from the first index
+            // Add the most recent entry, enters from the last index      
+            this.points.shift()
+            this.points.push(incomingKp)
+        }
         return true;
     }
     shape(){
@@ -117,6 +129,11 @@ function enableSkeleton() {
     isSkeleton ^= 1;
     btnElem = document.getElementById("buttonControl");
     btnElem.className = "";
+    canvas.style.display = "";
+    imageOutput.style.display = "none";
+    btnElem.className = "waves-effect waves-light btn blue";
+    btnElem.innerHTML = "Enable Skeleton";
+    
     if (isSkeleton) {
         canvas.style.display = "none";
         imageOutput.style.display = "";
@@ -130,14 +147,6 @@ function enableSkeleton() {
     }
 }
 
-function zeros(dimensions) {
-    var array = [];
-    for (var i = 0; i < dimensions[0]; ++i) {
-        array.push(dimensions.length == 1 ? 0 : zeros(dimensions.slice(1)));
-    }
-    return array;
-}
-
 // Async function to load camera permissions and settings
 async function loadVideo() {
     const video = await setupCamera();
@@ -147,7 +156,7 @@ async function loadVideo() {
 
 async function drawKeypointsFromOP(array){
     const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "white";
+    ctx.fillStyle = "red";
     var currentX = null;
     for(let i = 0; i < array.length; i++){
         if (currentX == null){
@@ -179,7 +188,6 @@ function detectPoseInRealTime(video) {
             //ctx.restore();
             // Add text for result of current word and probability
             ctx.fillText(word + " - " + probability, 20, 50);
-            
             if (frameCount > frameThresholdCount) {
                 // Transmit image to backend for processing
                 let format = "image/jpeg";
@@ -259,6 +267,13 @@ socket.on("keypoints_recv", function (keypoints) {
             let argMax = d.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
             word = dictOfSigns[argMax];
             probability = d[argMax].toFixed(2);
+            // Now, we see that if the range (between min and max) prediction prob is low
+            // We can initiate a "change of sign" procedure
+            //console.log(  Math.min.apply(Math,d) );
+            if ( Math.abs(d[argMax] - Math.min.apply(Math,d)) < 0.95){
+                // Initiate sign change
+                rw.isReset = true;
+            } 
         })
     }
 });
@@ -266,7 +281,7 @@ socket.on("keypoints_recv", function (keypoints) {
 // Function to run entire thing
 async function run() {
     let video;
-    rw = new RollingWindow(windowWidth, numbJoints, zeros([windowWidth, numbJoints]))
+    rw = new RollingWindow(windowWidth, numbJoints)
     try {
         video = await loadVideo();
         // model = await tf.loadLayersModel(window.location.href + 'getGestureModel', strict=false)
