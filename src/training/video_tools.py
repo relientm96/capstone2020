@@ -4,6 +4,7 @@
 import cv2
 import time
 import sys
+import tensorflow as tf
 import tempfile
 import numpy as np
 import ffmpeg
@@ -11,6 +12,8 @@ import moviepy.editor as mp
 import moviepy.video.fx.all as vfx
 import os
 import imageio
+from matplotlib import image
+import matplotlib.pyplot as plt
 
 # needed to save non-string python object; eg dictionary;
 try:
@@ -270,7 +273,11 @@ def grab_frames(input):
 		if(count_frame > total_frames-1):
 			break
 	cap.release()
+	cv2.destroyAllWindows()
 	return store	
+
+
+
 
 def frames2video(input_list, output, size):
 	'''
@@ -290,6 +297,7 @@ def frames2video(input_list, output, size):
 		# writing to a image array
 		out.write(input_list[i])
 	out.release()
+	cv2.destroyAllWindows()
 	
 
 def video_flip(input, output):
@@ -405,6 +413,7 @@ def fast_video(input, output, speed):
 	del clip
 
 
+
 def video_speed(input, output, speed):
 	'''
 	function:
@@ -421,9 +430,63 @@ def video_speed(input, output, speed):
 		slow_video(input, output, speed)
 	else:
 		fast_video(input, output, speed)	
+
+
+def shear_video(input, output, shear=10):
+	# ref - https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/image/apply_affine_transform
+	'''
+	function:
+		- to shear  video;
+	args:
+		- input; the filename (path) of the input video;
+		- output; where to save?
+		- shear angle;
+	return:
+		- none;
+	'''
+	# get size;
+	vcap = cv2.VideoCapture(input) # 0=camera
+ 
+	if vcap.isOpened(): 
+		# get vcap property 
+		width  = vcap.get(cv2.CAP_PROP_FRAME_WIDTH)   # float
+		height = vcap.get(cv2.CAP_PROP_FRAME_HEIGHT)  # float
+		print('width, height:', width, height)
+		size = (int(height), int(width))
+	# clean up
+	vcap.release()
+	cv2.destroyAllWindows()
+	
+	# convert into frames;
+	input_list = grab_frames(input)
+	# assert we meet the lstm window width minimum;
+	input_list = lstm_window_check(input_list)
+	print("length ", len(input_list))
+	outls = []
+	# apply the transformation:
+	for i in range(0, len(input_list)):
+		frame = input_list[i]
+		henshin = tf.keras.preprocessing.image.apply_affine_transform(frame, theta=0, tx=0, ty=0, shear=shear, zx=1.1, zy=1.1,
+																		row_axis=0, col_axis=0, channel_axis=2, fill_mode='constant', cval=0.0, order=1)
+		henshin = cv2.cvtColor(henshin, cv2.COLOR_BGR2RGB)
+		plt.imshow(henshin)
+		plt.show()
+		print(henshin)
+		sys.exit('debug')
+		outls.append(henshin)
+	print(outls)
+	# done? write it;
+	frames2video(outls, output, size)
+
+	print("the sheared-video has been saved to: ", output)
 		
 # test driver;
 if __name__ == '__main__':
+
+	# shearing;
+	videopath = "C:\\CAPSTONE\\capstone2020\\src\\training\\test-videos\\auslan\\ambulance.mp4"
+	output = "C:\\CAPSTONE\\capstone2020\\src\\training\\test-videos\\auslan\\shear_ambulance.mp4"
+	shear_video(videopath, output)
 	# test - 01
 	'''
 	filename = "C:\\Users\\yongw4\\Desktop\\JSON\\" + 'dummy.avi'
@@ -446,11 +509,14 @@ if __name__ == '__main__':
 	output = PREFIX + "output_test.mp4"
 	video_rotate(input, output, 90)
 	'''
+	
+	'''
 	# test 04
 	PREFIX = "C:\\Users\\yongw4\\Desktop\\test-ffmpeg\\"
 	input = PREFIX + "fullbody.mp4"
 	output = PREFIX + "output_test.mp4"
 	slow_video(input, output, 0.8)
+	'''
 	
 	'''
 	# test 05;
