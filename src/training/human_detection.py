@@ -3,6 +3,8 @@ import imutils
 import numpy as np
 import argparse
 
+# src = https://data-flair.training/blogs/python-project-real-time-human-detection-counting/
+
 def detect(frame):
     bounding_box_cordinates, weights =  HOGCV.detectMultiScale(frame, winStride = (4, 4), padding = (8, 8), scale = 1.03)
     
@@ -77,6 +79,8 @@ def detectByPathImage(path, output_path):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+
+'''
 def humanDetector(args):
     image_path = args["image"]
     video_path = args['video']
@@ -96,6 +100,13 @@ def humanDetector(args):
     elif image_path is not None:
         print('[INFO] Opening Image from path.')
         detectByPathImage(image_path, args['output'])
+'''
+
+def humanDetector(video_path):
+    writer = None
+    print('[INFO] Opening Video from path.')
+    detectByPathVideo(video_path, writer)
+
 
 def argsParser():
     arg_parse = argparse.ArgumentParser()
@@ -111,6 +122,7 @@ if __name__ == "__main__":
     HOGCV = cv2.HOGDescriptor()
     HOGCV.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
-    args = argsParser()
+    #args = argsParser()
+    args = "C:\\CAPSTONE\\capstone2020\\src\\training\\test-videos\\auslan\\ambulance.mp4"
     humanDetector(args)
 
