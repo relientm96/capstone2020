@@ -276,10 +276,12 @@ def process_block(directory_path):
 
 # test driver;
 if __name__ == '__main__':
-	directory_path = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\speed_08"
+	directory_path = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train"
 	TEST_PATH = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train.txt"
 	process_block(directory_path)
-
+	#filepath = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train\\speed_08\\AMBULANCE\\Y_AMBULANCE_train_down.npy"
+	#y = np.load(filepath)
+	#print(y.shape)
 	
 	#TEST_PATH = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train.txt"
 	#process_one(TEST_PATH)
