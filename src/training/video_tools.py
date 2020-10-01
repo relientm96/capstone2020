@@ -432,7 +432,7 @@ def video_speed(input, output, speed):
 		fast_video(input, output, speed)	
 
 
-def shear_video(input, output, shear=20):
+def shear_video(input, output, shear=-10):
 	# ref - https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/image/apply_affine_transform
 	'''
 	function:
@@ -454,12 +454,11 @@ def shear_video(input, output, shear=20):
 	# assert we meet the lstm window width minimum;
 	input_list = lstm_window_check(input_list)
 	outls = []
-
 	# apply the transformation:
 	for i in range(0, len(input_list)):
 		frame = input_list[i]
 		henshin = tf.keras.preprocessing.image.apply_affine_transform(frame, theta=0, tx=0, ty=0, shear=shear, zx=1.1, zy=1.1,
-																		row_axis=0, col_axis=0, channel_axis=2, fill_mode='constant', cval=0.0, order=1)
+																		row_axis=0, col_axis=0, channel_axis=2, fill_mode='nearest', cval=0.0, order=1)
 		
 		#henshin = cv2.cvtColor(henshin, cv2.COLOR_RGB2BGR)
 		outls.append(henshin)
@@ -467,7 +466,8 @@ def shear_video(input, output, shear=20):
 		
 	# done? write it;
 	frames2video(outls, output, size)
-	video_rotate(output, output, 10)
+	
+	#video_rotate(output, "viola.mp4", -10)
 	print("the sheared-video has been saved to: ", output)
 
 	
