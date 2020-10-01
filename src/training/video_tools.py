@@ -266,8 +266,8 @@ def grab_frames(input):
 		count_frame += 1
 		#cv2.imshow('frame', frame)
 		store.append(frame)
-		if cv2.waitKey(30) & 0xFF == ord('q'):
-			break
+		#if cv2.waitKey(30) & 0xFF == ord('q'):
+		#	break
 		# after all the frames have been read, no point to continue;
 		# a wrap around to prevent opencv2 error
 		if(count_frame > total_frames-1):
@@ -432,7 +432,7 @@ def video_speed(input, output, speed):
 		fast_video(input, output, speed)	
 
 
-def shear_video(input, output, shear=10):
+def shear_video(input, output, shear=20):
 	# ref - https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/image/apply_affine_transform
 	'''
 	function:
@@ -445,41 +445,32 @@ def shear_video(input, output, shear=10):
 		- none;
 	'''
 	# get size;
-	vcap = cv2.VideoCapture(input) # 0=camera
- 
-	if vcap.isOpened(): 
-		# get vcap property 
-		width  = vcap.get(cv2.CAP_PROP_FRAME_WIDTH)   # float
-		height = vcap.get(cv2.CAP_PROP_FRAME_HEIGHT)  # float
-		print('width, height:', width, height)
-		size = (int(height), int(width))
-	# clean up
-	vcap.release()
-	cv2.destroyAllWindows()
+	clip = mp.VideoFileClip(input) 
+	size = tuple(clip.size)
+	del clip.reader
+	del clip
 	
-	# convert into frames;
 	input_list = grab_frames(input)
 	# assert we meet the lstm window width minimum;
 	input_list = lstm_window_check(input_list)
-	print("length ", len(input_list))
 	outls = []
+
 	# apply the transformation:
 	for i in range(0, len(input_list)):
 		frame = input_list[i]
 		henshin = tf.keras.preprocessing.image.apply_affine_transform(frame, theta=0, tx=0, ty=0, shear=shear, zx=1.1, zy=1.1,
 																		row_axis=0, col_axis=0, channel_axis=2, fill_mode='constant', cval=0.0, order=1)
-		henshin = cv2.cvtColor(henshin, cv2.COLOR_BGR2RGB)
-		plt.imshow(henshin)
-		plt.show()
-		print(henshin)
-		sys.exit('debug')
+		
+		#henshin = cv2.cvtColor(henshin, cv2.COLOR_RGB2BGR)
 		outls.append(henshin)
-	print(outls)
+
+		
 	# done? write it;
 	frames2video(outls, output, size)
-
+	video_rotate(output, output, 10)
 	print("the sheared-video has been saved to: ", output)
-		
+
+	
 # test driver;
 if __name__ == '__main__':
 
@@ -487,6 +478,8 @@ if __name__ == '__main__':
 	videopath = "C:\\CAPSTONE\\capstone2020\\src\\training\\test-videos\\auslan\\ambulance.mp4"
 	output = "C:\\CAPSTONE\\capstone2020\\src\\training\\test-videos\\auslan\\shear_ambulance.mp4"
 	shear_video(videopath, output)
+
+	#video_speed(videopath, output, 0.6)
 	# test - 01
 	'''
 	filename = "C:\\Users\\yongw4\\Desktop\\JSON\\" + 'dummy.avi'
