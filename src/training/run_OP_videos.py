@@ -13,8 +13,8 @@ def process_one_video(input, path_X, path_Y):
 		speed_seed = SPEED[i]
 		syntools.synthesize_block(input, speed_seed, path_X, path_Y)
 
-if __name__ == '__main__':
-	signvideodirectory = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\PAIN"
+def process_one_class(signvideodirectory):
+	#signvideodirectory = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\PAIN"
 	
 	# get the class name to name the txt files accordingly;
 	tmpname = signvideodirectory.split("\\")[-1]
@@ -57,4 +57,14 @@ if __name__ == '__main__':
 
 			# debugging ...
 			#sys.exit("stop at one-video to check;")
-		
+	
+
+if __name__ == '__main__':
+	path = "C:\\Users\\yongw4\\Desktop\\test"
+	for root, dirs, files in os.walk(path):
+		for i in range(len(dirs)):
+			classvideo = os.path.join(root, dirs[i])
+			print("processing class: ", classvideo)
+			process_one_class(classvideo)
+		# stop here;
+		break
