@@ -460,8 +460,11 @@ def shear_video(input, output, shear=-10):
 		henshin = tf.keras.preprocessing.image.apply_affine_transform(frame, theta=0, tx=0, ty=0, shear=shear, zx=1.1, zy=1.1,
 																		row_axis=0, col_axis=0, channel_axis=2, fill_mode='nearest', cval=0.0, order=1)
 		
-		#henshin = cv2.cvtColor(henshin, cv2.COLOR_RGB2BGR)
+		#plt.imshow(henshin)
+        #plt.show()
+        #henshin = cv2.cvtColor(henshin, cv2.COLOR_RGB2BGR)
 		outls.append(henshin)
+
 
 		
 	# done? write it;

@@ -34,6 +34,7 @@ def checkoff_file(src, add_vocab):
 		vocab = checked;
 		--> return( C:\\capstone\\a_1_checked.txt, a)
 	'''
+	print("checkoff_file; src:", src)
 	tmp = src.split('.')
 	prefix = tmp[0]
 	token = (prefix.split('\\'))[-1]

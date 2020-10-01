@@ -2,16 +2,20 @@ import synthetic_tools as syntools
 import os
 import file_tools as ftools
 import sys
+import video_tools as VID
 
 # global var(s);
 #SPEED = [1, 0.6, 0.8, 1.2, 1.4]
 
-SPEED = [1.2]
+SPEED = [1]
+#DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
 
-def process_one_video(input, path_X, path_Y):
+
+def process_one_video(input, path_X, path_Y, func, DEGREE):
 	for i in range(len(SPEED)):
 		speed_seed = SPEED[i]
-		syntools.synthesize_block(input, speed_seed, path_X, path_Y)
+		syntools.synthesize_block(input, speed_seed, path_X, path_Y, func, DEGREE)
+		#syntools.synthesize_block(input, speed_seed, path_X, path_Y)
 
 def process_one_class(signvideodirectory):
 	#signvideodirectory = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\PAIN"
@@ -33,6 +37,12 @@ def process_one_class(signvideodirectory):
 			print("An error occured", e)
 			sys.exit(-1)
 
+
+	# which transformatoon? rotation or shear?
+	func = VID.shear_video
+	# transformation parameters; angles?
+	DEGREE = [-10, -5, 5, 10]
+
 	for root, dirs, files in os.walk(signvideodirectory, topdown=False):
 		for name in files:
 			# make sure the current file is MP4;
@@ -44,8 +54,7 @@ def process_one_class(signvideodirectory):
 			print("currently processing: ", src_path)
 			# current video has not been processed; 
 			if not (ftools.checksubstring(src_path, "checked")):
-				process_one_video(src_path, path_X, path_Y)
-
+				process_one_video(src_path, path_X, path_Y, func, DEGREE)
 				# done processing? sign off;
 				# so that the processed video will not be processed again;
 				print('the current video has been processed: ', src_path)

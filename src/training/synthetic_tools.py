@@ -19,7 +19,7 @@ import file_tools as ftools
 import openpose_setup as OP_SET
 
 # global var;
-DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
+#DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
 
 	
 def assign_video_locations(input_list, prefix, classname, identity, henshin_type):
@@ -49,7 +49,7 @@ def which_block(func, input, storage_path):
 	print("\n function: ", func)
 	func(input, storage_path)
 
-def rotate_block(input, storage_path):
+def rotate_block(input, storage_path, DEGREE):
 	print("\n video input: ", input)
 	# extract the info from the input pathname;
 	tmp = input.split('.')
@@ -76,7 +76,7 @@ def rotate_block(input, storage_path):
 	pool.join()
 	# end of function;
 
-def flip_and_rotate_block(input, storage_path):
+def flip_and_rotate_block(input, storage_path, DEGREE):
 	# extract the info from the input pathname;
 	tmp = input.split('.')
 	prefix = tmp[0]
@@ -109,13 +109,74 @@ def flip_and_rotate_block(input, storage_path):
 		pool.join()
 		# end of function;
 
+
+def transform_block(func, input, storage_path, DEGREE):
+	print("\n video input: ", input)
+	# extract the info from the input pathname;
+	tmp = input.split('.')
+	prefix = tmp[0]
+	token = (prefix.split('\\'))[-1]
+	suffix = token.split('_')
+	classname = suffix[0]
+	speedname = suffix[1]
+
+	# rotation degree;
+	#DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
+	
+	# assigning addresses for each rotation/shearing for convenienece;
+	addresses = assign_video_locations(DEGREE, storage_path, classname, speedname, "r")
+	#print('\n assigned address: ', addresses)
+	num_workers = mp.cpu_count()  
+	#print("number of cpu cores: ", num_workers)
+	pool = mp.Pool(num_workers)
+	for index in range(len(DEGREE)):
+		print(index)
+		pool.apply_async(func, args=(input, addresses[index], DEGREE[index]))
+	print('pooled')
+	pool.close()
+	pool.join()
+	# end of function;
+
+def flip_and_transform_block(func, input, storage_path, DEGREE):
+	# extract the info from the input pathname;
+	tmp = input.split('.')
+	prefix = tmp[0]
+	token = (prefix.split('\\'))[-1]
+	suffix = token.split('_')
+	classname = suffix[0]
+	speedname = suffix[1]
+
+	# flip first;
+	# create a temporary directory;
+	with tempfile.TemporaryDirectory() as prefix:
+		output_flip_path = os.path.join(prefix , "flipped_tmp.mp4")
+		# create the file within the temp directory;
+		ftools.check_newfile(output_flip_path)
+
+		# the dummy file has been created;
+		# safe to process;
+		VID.video_flip(input, output_flip_path)
+	
+		# rotation degree;
+		#DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
+
+		# assigning addresses for each rotation.shearing for convenienece;
+		addresses = assign_video_locations(DEGREE, storage_path, classname, speedname, "fr")
+		num_workers = mp.cpu_count()  
+		pool = mp.Pool(num_workers)
+		for index in range(len(DEGREE)):
+			pool.apply_async(func, args=(output_flip_path, addresses[index], DEGREE[index]))
+		pool.close()
+		pool.join()
+		# end of function;
+
 # exception handler  
 # needed for synthesize_bloack() function below;
 def handler(func, path, exc_info):  
 	print("Inside handler")  
 	print(exc_info)
 
-def synthesize_block(input, speed_seed, main_X, main_Y):
+def synthesize_block(input, speed_seed, main_X, main_Y, func, DEGREE):
 	try:
 		# create temporary locations
 		tmp_dir = tempfile.mkdtemp()
@@ -149,9 +210,9 @@ def synthesize_block(input, speed_seed, main_X, main_Y):
 		
 			# now, pass through:
 			# transformation 1: only rotate;
-			# transformation 2: flip then rotate;
-			rotate_block(output_speed_path, storage_paths[0])
-			flip_and_rotate_block(output_speed_path, storage_paths[1])
+			# transformation 2: flip then transform (shear or rotate);
+			transform_block(func, output_speed_path, storage_paths[0], DEGREE)
+			flip_and_transform_block(func, output_speed_path, storage_paths[1], DEGREE)
 		
 		# maximize the cpu cores;
 		num_workers = mp.cpu_count()  
