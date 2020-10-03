@@ -20,7 +20,7 @@ const dictOfSigns = {
     3: "pain",
 };
 // Socketio obj
-const socket = io();
+const socket = io({transports: ['websocket']});
 // Probability and sign variable
 var sign = document.getElementById("currentsign");
 var prob = document.getElementById("probability");

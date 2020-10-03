@@ -1,19 +1,18 @@
 ### Introduction
 
-What is Pose Estimation?
-* Test 
-* Test
+This is the technical documentation of the project "Australian Sign Language Recognition". The documentation will cover the following aspects of our project:
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+* Overview:
+  * Quick overview on the context of our project, and how it is revolutionary in the field of IT and Engineering. 
+* Feature:
+  * Run down of our project features.
+* Dataset Processing:
+  * How we processed, stored and altered our data for the deep learning model.
+* Model Development:
+  * How we developed our model, building on top of OpenPose and our own developed sign language detection model.
+* Application Deployment:
+  * How we deployed and realised our system as a web application.
 
-```c
-#include <stdio.h>
-
-int main(){
-    printf("Hello World");
-    return 1;
-}
-```
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
+#### Links
+* Link to our source code (https://github.com/relientm96/capstone2020)
+* Link to our project homepage (https://relientm96.github.io/capstone2020/)
