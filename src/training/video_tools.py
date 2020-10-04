@@ -464,14 +464,52 @@ def shear_video(input, output, shear=-10):
         #plt.show()
         #henshin = cv2.cvtColor(henshin, cv2.COLOR_RGB2BGR)
 		outls.append(henshin)
-
-
 		
 	# done? write it;
 	frames2video(outls, output, size)
 	
 	#video_rotate(output, "viola.mp4", -10)
 	print("the sheared-video has been saved to: ", output)
+
+
+def zoom_video(input, output, ratio = 1.0):
+	# ref - https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/image/apply_affine_transform
+	'''
+	function:
+		- to zoom out a video;
+	args:
+		- input; the filename (path) of the input video;
+		- output; where to save?
+		- shear angle;
+	return:
+		- none;
+	'''
+	# get size;
+	clip = mp.VideoFileClip(input) 
+	size = tuple(clip.size)
+	del clip.reader
+	del clip
+	
+	input_list = grab_frames(input)
+	# assert we meet the lstm window width minimum;
+	input_list = lstm_window_check(input_list)
+	outls = []
+	# apply the transformation:
+	for i in range(0, len(input_list)):
+		frame = input_list[i]
+		henshin = tf.keras.preprocessing.image.apply_affine_transform(frame, theta=0, tx=0, ty=0, shear=0, zx=ratio, zy=ratio,
+																		row_axis=0, col_axis=0, channel_axis=2, fill_mode='constant', cval=0.0, order=1)
+		
+		#plt.imshow(henshin)
+        #plt.show()
+        #henshin = cv2.cvtColor(henshin, cv2.COLOR_RGB2BGR)
+		outls.append(henshin)
+		
+	# done? write it;
+	frames2video(outls, output, size)
+	
+	#video_rotate(output, "viola.mp4", -10)
+	print("the zoomed-out-video has been saved to: ", output)
 
 	
 # test driver;
