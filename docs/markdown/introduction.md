@@ -18,3 +18,4 @@ This is the technical documentation of the project "Australian Sign Language Rec
 #### Links
 * Link to our source code (https://github.com/relientm96/capstone2020)
 * Link to our project homepage (https://relientm96.github.io/capstone2020/)
+* Please note that we are still in the midst of developing our web application. Link will be up when it is ready.
