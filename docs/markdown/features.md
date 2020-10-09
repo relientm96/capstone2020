@@ -2,14 +2,19 @@
 
 We have successfully developed a system that is able to recognise the following Auslan signs:
 
-<div style="display:inline-flex">
-    <img src="https://github.com/relientm96/capstone2020/blob/yick_vm_pipeline/meeting-logs/JonathanLogs/gifs/ambulance_sign.gif?raw=true">
-    <img src="https://github.com/relientm96/capstone2020/blob/yick_vm_pipeline/meeting-logs/JonathanLogs/gifs/pain_sign.gif?raw=true">
-</div>
-
-<div style="display:inline-flex">
-    <img src="https://github.com/relientm96/capstone2020/blob/yick_vm_pipeline/meeting-logs/JonathanLogs/gifs/help_sign.gif?raw=true">
-    <img src="https://github.com/relientm96/capstone2020/blob/yick_vm_pipeline/meeting-logs/JonathanLogs/gifs/hospital_sign.gif?raw=true">
+<div style="text-align:center">
+    <div style="display:inline-block;">
+        <img style="height:150px;width:auto"  src="images/gifs/ambulance_sign.gif">
+        <p> Ambulance </p>
+        <img style="height:150px;width:auto"  src="images/gifs/pain_sign.gif">
+        <p> Pain </p>
+    </div>
+    <div style="display:inline-block;">
+        <img style="height:150px;width:auto" src="images/gifs/help_sign.gif">
+        <p> Help </p>
+        <img style="height:150px;width:auto"  src="images/gifs/hospital.gif">
+        <p> Hospital </p>
+    </div>
 </div>
 
 #### Our System

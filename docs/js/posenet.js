@@ -75,7 +75,7 @@ function handleButton(){
     else if (render_state == 1) {
         document.getElementById("buttonCtrl").innerHTML = "Enable Both"
         document.getElementById("buttonCtrl").className = "waves-effect waves-light btn purple";
-        document.getElementById("camSetup").innerHTML = "Now Doing Hand Estimation! (Keep Hand In frame to process video)";
+        document.getElementById("camSetup").innerHTML = "Now Doing Hand Estimation! (Please wait for the hand model to load)";
     }
     else {
         document.getElementById("buttonCtrl").innerHTML = "Enable Pose"
