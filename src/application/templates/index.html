@@ -19,6 +19,7 @@
 <body>
     <div style="text-align: center; height:100%">
         <h3> Real Time Sign Language Translation System </h3>
+<<<<<<< HEAD
         <div class="container" style="text-align:center;">
             <p id='status'> Connecting to OpenPose Server... </p>
             <p id='clientStatus'></p>
@@ -29,10 +30,89 @@
             <div style="display: inline-block">
                 <a id="buttonControl" class="waves-effect waves-light btn blue" onclick="enableSkeleton()"> </a>
                 <a class="waves-effect waves-light btn purple" href="/posenet">PoseNet Demo</a>
+=======
+        <p id='status'> Connecting to OpenPose Server... </p>
+        <div class="row">
+            <div class='col s12 m12 l6'>
+                <canvas id="canvasOutput"></canvas>
+                <video autoplay="true" id="videoElement" style="display: none;"></video>
+                <p> Your Camera </p>
+            </div>
+            <div class='col s12 m12 l6'>
+                <div class='video'>
+                    <img id="image">
+                </div>
+                <p> Model Output </p>
+>>>>>>> a59ba59fb4a5f55453868e7cc9c5c3403b867c3b
             </div>
         </div>
     </div>
 
+<<<<<<< HEAD
     <script src="../static/main.js"></script>
+=======
+    <script>
+
+        // Hardcoded Pixel Values
+        var videoWidth = 620;
+        var videoHeight = 480;
+
+        const video = document.querySelector("#videoElement");
+        video.width = videoWidth; 
+        video.height = videoHeight; 
+
+        // Canvas details
+        var canvas = document.getElementById('canvasOutput')
+        canvas.width = videoWidth
+        canvas.height = videoHeight
+
+        // Handle User Media
+        navigator.getUserMedia = navigator.getUserMedia ||
+            navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+        // Handle camera setup
+        if (navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (stream) {
+                video.srcObject = stream;
+                video.play();
+        })
+        .catch(function (error) {
+            console.log(error)
+            console.log("Something went wrong!");
+        });
+    }
+
+        // Setting up Socket IO Connection to Server
+        var socket = io();
+        socket.on('connect', function(){
+            console.log("Connected...!", socket.connected)
+        });
+        socket.on('resp', function(responseText){
+            document.getElementById('status').innerHTML = responseText;
+        });
+
+        setInterval(() =>{
+            canvas.getContext('2d').drawImage(video, 0, 0, video.width, video.height);
+        }, 1000/20)
+
+        const FPS = 5.5;
+        setInterval(() => {
+            // This function runs according to FPS rate
+            // Takes image from webcam, sends it to server for processing
+            //canvas.getContext('2d').drawImage(video, 0, 0, video.width, video.height);
+            var data = canvas.toDataURL("image/png");
+            data = data.replace('data:' + "image/png" + ';base64,', ''); 
+            socket.emit('imageSend', data);
+        }, 1000/FPS);
+
+        socket.on('response_back', function(image){
+            // This function is called whenever server finishes processing the frame
+            const image_id = document.getElementById('image');
+            image_id.src = image;
+        });
+        
+    </script>
+            
+>>>>>>> a59ba59fb4a5f55453868e7cc9c5c3403b867c3b
 </body>
 

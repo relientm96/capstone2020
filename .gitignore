@@ -31,6 +31,7 @@ src/openpose-python/models
 src/openpose-python/bin
 src/openpose-python/*.dll
 
+<<<<<<< HEAD
 # Ignore all pycache stuff
 src/scrapper/__pycache__
 # Ignore all pycache
@@ -38,4 +39,11 @@ src/desktop/__pycache__
 
 # Ignore DLL in release
 src/openpose-python/Release/*.dll
+=======
+# Adding in LSTM-Dataset as ignore
+LSTM-dataset/
+src/training/__pycache__
+src/auslan-raw-videos
+src/matthew_vidprocess
+>>>>>>> a59ba59fb4a5f55453868e7cc9c5c3403b867c3b
 

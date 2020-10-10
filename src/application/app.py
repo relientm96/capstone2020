@@ -10,6 +10,7 @@ from engineio.payload import Payload
 import base64
 import serverOpenPose as serverOP
 
+<<<<<<< HEAD
 import numpy as np
 import time
 
@@ -20,6 +21,9 @@ clients = 0
 Payload.max_decode_packets = 500
 
 # Create flask application
+=======
+Payload.max_decode_packets = 500
+>>>>>>> a59ba59fb4a5f55453868e7cc9c5c3403b867c3b
 app = Flask(__name__)
 CORS(app)
 # Activtate flask socket io

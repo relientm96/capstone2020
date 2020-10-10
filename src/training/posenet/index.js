@@ -17,7 +17,12 @@ Make sure that video labels are as such:
 */
 
 // Path of your directory of all videos, structured as above
+<<<<<<< HEAD
 const videoInputDir = './videos_test/';
+=======
+// Needs to be a relative path from this directory
+const videoInputDir = '../videos/';
+>>>>>>> a59ba59fb4a5f55453868e7cc9c5c3403b867c3b
 
 // Desired number of frames to stop
 /*
