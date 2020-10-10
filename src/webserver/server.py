@@ -33,6 +33,10 @@ op = None
 opWrapper = None
 keypoints = None
 
+# Counter
+counter = 0
+n = 2
+
 class VideoTransformTrack(MediaStreamTrack):
     """
     A video stream track that transforms frames from an another track.
@@ -56,11 +60,18 @@ class VideoTransformTrack(MediaStreamTrack):
             opWrapper.emplaceAndPop([datum])
             image = datum.cvOutputData
 
+            '''
+            if counter % n == 0:
+                # Get keypoints using numpy slicing
+                keypoints = removeConfidenceAndShapeAsNumpy(datum)
+                # Send keypoints using socketion once frame processed
+                await sio.emit('keypoints', str(keypoints.tolist()))
+            '''
             # Get keypoints using numpy slicing
             keypoints = removeConfidenceAndShapeAsNumpy(datum)
             # Send keypoints using socketion once frame processed
             await sio.emit('keypoints', str(keypoints.tolist()))
-            
+
             new_frame = VideoFrame.from_ndarray(image, format="bgr24")
             new_frame.pts = frame.pts
             new_frame.time_base = frame.time_base

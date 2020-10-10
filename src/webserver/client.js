@@ -2,6 +2,9 @@
  * WebRTC Demo using Python Aiortc
  */
 
+var videoWidth = 800;
+var videoHeight = 600;
+
 // get DOM elements
 var iceConnectionLog = document.getElementById('ice-connection-state'),
     iceGatheringLog = document.getElementById('ice-gathering-state'),
@@ -11,15 +14,20 @@ var iceConnectionLog = document.getElementById('ice-connection-state'),
 var pc = null;
 
 // data channel
-var dc = null, dcInterval = null;
+var dc = null;
 
-const mobile =/Android/i.test(navigator.userAgent) || /iPhone|iPad|iPod/i.test(navigator.userAgent);
+// Check if firefox/chrome
+// Ref: https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+// Firefox 1.0+
+var isFirefox = typeof InstallTrigger !== 'undefined';
+console.log("Is Firefox", isFirefox);
 
 function createPeerConnection() {
     var config = {
         sdpSemantics: 'unified-plan'
     };
 
+    // Trying without ICE
     config.iceServers = [{urls: ['stun:stun.l.google.com:19302']}];
 
     pc = new RTCPeerConnection(config);
@@ -85,11 +93,10 @@ function negotiate() {
             method: 'POST'
         });
     }).then(function(response) {
-        console.log("DONE!", response)
-        document.getElementById("loadingWidget").style = "display:none";
+        console.log("Returning JSON", response)
         return response.json();
     }).then(function(answer) {
-        console.log("Resp", answer)
+        console.log("Receiving an answer, done!", answer)
         return pc.setRemoteDescription(answer);
     }).catch(function(e) {
         alert(e);
@@ -99,24 +106,72 @@ function negotiate() {
 function start() {
 
     document.getElementById('StatusOfVideo').innerHTML = "Please Wait For WebRTC To Setup (might take awhile)";
-
+    // Create peer connections
     pc = createPeerConnection();
 
-    var constraints = {
-        audio: false,
-        video : {
-            width : mobile? undefined:  640,
-            height: mobile? undefined:  480,
-            frameRate: {
-                max: 5
+    // Mobile Support
+    const mobile =/Android/i.test(navigator.userAgent) || /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    // Web media api enable
+    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("Browser API navigator.mediaDevices.getUserMedia not available");
+        throw new Error(
+            "Browser API navigator.mediaDevices.getUserMedia not available"
+        );
+    }
+
+    // Set up video streaming
+    if (isFirefox){
+        // Firefox specific
+        var constraints = {
+            audio: false,
+            video : {
+                width : mobile? undefined: videoWidth,
+                height: mobile? undefined: videoHeight
+            }
+        };
+    }
+    else {
+        // Assume chrome, can apply maxFrameRate setting
+        var constraints = {
+            audio: false,
+            video : {
+                width : mobile? undefined: videoWidth,
+                height: mobile? undefined: videoHeight,
+                frameRate : {
+                    max : 5
+                }
             }
         }
-    };
+    }
 
     if (constraints.video) {
         navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
             stream.getTracks().forEach(function(track) {
-                pc.addTrack(track, stream);
+                if (isFirefox){
+                    const sender = pc.addTrack(track, stream);
+                    /**
+                     * Firefox weird errors when limiting frame rate
+                     * Refer to threads:
+                     * https://stackoverflow.com/questions/35516416/firefox-frame-rate-max-constraint
+                     * https://stackoverflow.com/questions/57400849/webrtc-change-bandwidth-receiving-invalidmodificationerror-on-chrome
+                     * https://stackoverflow.com/questions/63303684/use-high-resolution-local-video-but-limit-video-size-in-webrtc-connection/63331550#63331550
+                     */
+                    const params = sender.getParameters();
+                    console.log(params);
+                    if (!params.encodings) {
+                        params.encodings = [{}];
+                    }
+                    params.encodings[0].maxFramerate = 5;
+                    sender.setParameters(params);
+                    console.log(params);
+                }
+                else {
+                    console.log("Chrome Only")
+                    pc.addTrack(track, stream);
+                }
             });
             return negotiate();
         }, function(err) {
@@ -125,6 +180,24 @@ function start() {
     } else {
         negotiate();
     }
+
+    /*
+    // Setting up datachannel to get keypoints
+    const parameters = {
+        "ordered": true
+    }
+    dc = pc.createDataChannel('chat', parameters);
+    dc.onclose = function() {
+        console.log("Closing Data Channel");
+    };
+    dc.onopen = function() {
+        var message = 'Hello From Client!';
+        dc.send(message);
+    };
+    dc.onmessage = function(evt) {
+        console.log(evt.data);
+    };
+    */
 }
 
 function stop() {

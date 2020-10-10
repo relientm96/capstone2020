@@ -13,6 +13,7 @@ class RollingWindow {
         this.windowWidth    = windowWidth;
         this.numbJoints     = numbJoints;
         this.points         = zeros([windowWidth, numbJoints]); 
+        this.isInit         = true;
     }
     printPoints(){
         console.log(this.points);
@@ -25,11 +26,22 @@ class RollingWindow {
             console.log("Error! Need to have same length as number of joints: " + this.numbJoints)
             return false;
         }
-        // Shift register
-        // Remove the oldest from the first index
-        // Add the most recent entry, enters from the last index        
-        this.points.shift()
-        this.points.push(incomingKp)
+        if (this.isInit){
+            // If uninitialised, we repeat the first incoming frame across whole window
+            var i = 0;
+            while (i < this.points.length){
+                this.points[i] = incomingKp;
+                i++;
+            }
+            this.isInit = false;
+        }
+        else {
+            // Shift register
+            // Remove the oldest from the first index
+            // Add the most recent entry, enters from the last index        
+            this.points.shift()
+            this.points.push(incomingKp)
+        }
         return true;
     }
     shape(){
@@ -38,5 +50,5 @@ class RollingWindow {
     }
 }
 
-export {RollingWindow}
+export {RollingWindow, zeros}
 

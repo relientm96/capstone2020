@@ -3,7 +3,7 @@
  */
 
 import {start, stop} from './client.js'
-import {RollingWindow} from './rollingwindow.js'
+import {RollingWindow, zeros} from './rollingwindow.js'
 
 // Rolling window variables
 const numbJoints  = 98; 
@@ -18,23 +18,79 @@ const dictOfSigns = {
     1: "help",
     2: "hospital",
     3: "pain",
+    4: "ThumbsUp"
 };
 // Socketio obj
-const socket = io({transports: ['websocket']});
+const socket = io();
 // Probability and sign variable
 var sign = document.getElementById("currentsign");
 var prob = document.getElementById("probability");
 
+/**
+ * Retrieve the array key corresponding to the largest element in the array.
+ *
+ * @param {Array.<number>} array Input array
+ * @return {number} Index of array element with largest value
+ */
+function argMax(array) {
+    // Referenced from https://gist.github.com/engelen/fbce4476c9e68c52ff7e5c2da5c24a28
+    return [].map.call(array, (x, i) => [x, i]).reduce((r, a) => (a[0] > r[0] ? a : r))[1];
+  }
+
 socket.on("keypoints", function(keypoints){
+
+    if (rw.isInit == false){
+        document.getElementById("loadingWidget").style = "display:none";
+
+    }
+
     // Receives openpose keypoints after rendering from backend
     var kp_arr = JSON.parse(keypoints)
     // Append point to rolling window
     if (rw.addPoint(kp_arr)){
         // Do prediction once we have new updated rolling window from this keypoint
         var keypoint_shaped = tf.tensor3d(rw.getPoints().flat(), [1, windowWidth, numbJoints])
-        var pred_result = model.predict(keypoint_shaped);
-        sign.innerHTML = dictOfSigns[pred_result.argMax(1).dataSync()[0]];
-        prob.innerHTML = Math.max.apply(Math, pred_result.dataSync()).toFixed(2).toString();
+        try {
+            
+            model.predict(keypoint_shaped).data().then(
+                result => {
+                    // Resulting prob:
+                    var probVal = Math.max.apply(Math, result);
+                    sign.innerHTML = dictOfSigns[argMax(result)];
+                    prob.innerHTML = probVal.toFixed(2).toString();
+                    var range   = probVal - Math.min.apply(Math, result);
+                    // Check if we need to do a reset for the next round if prob difference too high
+                    if (range < 0.95) {
+                        // Initiate a reset to the window by copying over frames for whole window
+                        rw.isInit = true;
+                    }
+                    else {
+                        rw.isInit = false;
+                    }
+                }
+            )
+            
+            
+           /*
+           // Synchronous prediction
+           var predictions = model.predict(keypoint_shaped).dataSync();
+           var probVal = Math.max.apply(Math, predictions);
+           sign.innerHTML = dictOfSigns[argMax(predictions)];
+           prob.innerHTML = probVal.toFixed(2).toString();
+           // Check if we need to do a reset for the next round if prob difference too high
+           var range   = probVal - Math.min.apply(Math, predictions);
+           if (range < 0.8) {
+               // Initiate a reset to the window by copying over frames for whole window
+               rw.isInit = true;
+            }
+            else {
+                rw.isInit = false;
+            }
+            */
+        }
+        catch (e){
+            throw e;
+        }
     }
 });
 
@@ -44,6 +100,7 @@ async function main(){
     try {
         // Load TF Model from Server
         model = await tf.loadLayersModel(window.location.href + "model.json");
+        model.summary();
     } catch (e) {
         throw e;
     }

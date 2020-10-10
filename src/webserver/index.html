@@ -62,10 +62,8 @@
 <body class="p-3 mb-2 text-light" style="background-color:#706e6e; height: 100%" >
 
     <div class="container" style="text-align: center;" >
-        <h1>Real Time Pose Estimation With WebRTC</h1>
-        <p>
-            Recognising Emergency Signs using Human Pose Estimation
-        </p>
+        <h1>Real Time Australian Sign Language Recognition</h1>
+        <h2> with Human Pose Estimation </h2>
         <button type="button" class="btn btn-info" onclick="redirectDocs()">View Docs</button>
         <button type="button" class="btn btn-info" onclick="redirectSrc()">View Source</button>
         <br>
@@ -85,7 +83,10 @@
                             <p>Signaling state: <span id="signaling-state"></span></p>
                         </div>
                     </div>
-                    <video id="video" autoplay="true" playsinline="true" style="max-width: 100%; height:auto;"></video>
+                    <div id="outputVidStream">
+                        <video id="video" autoplay="true" playsinline="true" style="max-width: 100%; height:auto;"></video>
+                        <p> Human Pose Estimation Video Output </p>
+                    </div>
                 </div>
             </div>
             <div class="col" style="text-align: left;">
@@ -101,22 +102,22 @@
                     
                     <br>
                     <p>Current Possible Signs:</p>
-                    <div class="d-flex flex-row">
+                    <div class='d-flex flex-row'>
                         <div class="col">
-                            <img src="https://github.com/relientm96/capstone2020/blob/yick_vm_pipeline/meeting-logs/JonathanLogs/gifs/ambulance_sign.gif?raw=true" style="width:auto;height:120px;">
+                            <img src="https://github.com/relientm96/capstone2020/blob/yick_vm_pipeline/meeting-logs/JonathanLogs/gifs/ambulance_sign.gif?raw=true" style="width:auto;height:100px;">
                             <p>Ambulance</p>
                         </div>
                         <div class="col">
-                            <img src="https://github.com/relientm96/capstone2020/blob/yick_vm_pipeline/meeting-logs/JonathanLogs/gifs/help_sign.gif?raw=true"  style="width:auto;height:120px;">
+                            <img src="https://github.com/relientm96/capstone2020/blob/yick_vm_pipeline/meeting-logs/JonathanLogs/gifs/pain_sign.gif?raw=true"  style="width:auto;height:100px;">
+                            <p>Pain</p>
+                        </div>
+                        <div class="col">
+                            <img src="https://github.com/relientm96/capstone2020/blob/yick_vm_pipeline/meeting-logs/JonathanLogs/gifs/help_sign.gif?raw=true"  style="width:auto;height:100px;">
                             <p>Help</p>
                         </div>
                         <div class="col">
-                            <img src="https://github.com/relientm96/capstone2020/blob/yick_vm_pipeline/meeting-logs/JonathanLogs/gifs/hospital_sign.gif?raw=true"  style="width:auto;height:120px;">
+                            <img src="https://i.imgur.com/O7eZzvI.gif" style="width:auto;height:100px;">
                             <p>Hospital</p>
-                        </div>
-                        <div class="col">
-                            <img src="https://github.com/relientm96/capstone2020/blob/yick_vm_pipeline/meeting-logs/JonathanLogs/gifs/pain_sign.gif?raw=true"  style="width:auto;height:120px;">
-                            <p>Pain</p>
                         </div>
                     </div>
                     
@@ -134,6 +135,7 @@
         }
     </script>
 
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
     <script type="module" src="./rollingwindow.js"></script>
     <script type="module" src="./client.js"></script>
     <script type="module" src="./main.js"></script>
