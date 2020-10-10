@@ -1,5 +1,7 @@
 # Australian Sign Language Recognition using Human Pose Estimation
 
+![demo](docs/images/Demo_Gif.gif)
+
 Repository for the Australian Sign Language Recognition using Human Pose Estimation project. For project documentation please visit the following link https://relientm96.github.io/capstone2020/
 
 Team Members:
