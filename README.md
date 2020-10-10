@@ -1,10 +1,8 @@
-# Sign Language Translation with Real Time Pose Estimation
+# Australian Sign Language Recognition using Human Pose Estimation
 
-Repository for the 2020 Capstone Real Time Pose Estimation project.    
+Repository for the Australian Sign Language Recognition using Human Pose Estimation project. For project documentation please visit the following link https://relientm96.github.io/capstone2020/
 
-This project is aimed to develop a real time sign language translation system that translates signs from video streams into readable text.
-
-Members:
+Team Members:
 
 * Matthew Yong
 * Tsz Kiu Pang
@@ -12,47 +10,34 @@ Members:
 
 ## Repository Structure
 ```
-|--- README.md - Main markdown for this repository
+|--- src - Folder containing source code of project
+|       |
+|       +--- training  - Data processing pipeline (both pre & post processing)  
+|       +--- webserver - New web server code using WebRTC
+|       +--- desktop   - Desktop version of our application using OpenCV Python.
+|       +--- openpose-python - OpenPose compiled binaries for Python
+|       +--- scrapper  - Python web scrapper for video data collection
 |
 +--- documents - Folder containing project documents
-|       |
-|       +--- Resources - Folder containing helpful project document resources
-|       
-+--- media - Folder containing all images, videos or other forms of media
 |       
 +--- meeting-logs - Folder containing all meeting logs
-|       |
-|       +--- JonathanLogs - Folder containing all meeting logs with Jonathan
-|       |  
-|       +--- GroupLogs - Folder containing all group logs
 |
-\--- src - Folder containing source code of project
-|       |
-|       +--- training - Contains code to process and train our raw datasets
++--- Archive - Old Code not in use 
 ```
 
-## Links
-Project links :    
-* [Project description](./documents/projectOutline.md).   
-* [Slack Link](https://nebula-m78.slack.com/)
-* [Project Timeline](https://docs.google.com/document/d/1RuPlROiwp9qh14LQtcvLYuOO0s0pgH-rktbnG3PjgCE/edit)
-* [Projet HackMD Page](https://hackmd.io/team/capstone2020?nav=overview)
-* [Project EMI Link](https://apps2.eng.unimelb.edu.au/emi-capstone-projects/index.php?r=project%2Fview&id=194&ajaxView=yes)
-* [Project Proposals + Discussion Google Sheets](https://docs.google.com/spreadsheets/d/15XxvRazeiOha9PAxoPqFTfDsIj7EWxJ6Ipewfeq0vCw/edit?fbclid=IwAR26_xDexQU5j8ucYRdEgOGRn9WnBZEb_gNmb5hwk7R50zRKGe-IrorVelA#gid=1278852641)
-* [Project Assessments](https://drive.google.com/open?id=1vqbPQjNfL9CqeaYIf6xfPV044M-8mn2Q)
-    * Assessment 01
-        * Team Charter
-        * Ganntt Chart
-        * RACIX Matrix
-    * General Risk Assessment 
+## Project Information
 
+#### Project Poster Summary
+![poster](docs/images/Electrical_Matthew_Yong_Poster.png)
 
-Tutorial/Reading resources links :  
+#### Project Presentation
+[![oral_presentation](http://img.youtube.com/vi/AMlnNzqC3Bs/0.jpg)](http://www.youtube.com/watch?v=AMlnNzqC3Bs "Endeavour Presentation - Australian Sign Language Recognition")
 
-* [Useful cheat sheet to format README.md files](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
-* [Great Git command line tutorial](http://gitimmersion.com/)
+#### Our Project Journey
+[![road_to_endeavour](http://img.youtube.com/vi/zT6ssMtPTGA/0.jpg)](http://www.youtube.com/watch?v=zT6ssMtPTGA "Road to Endeavour")
 
 ## Info On Workflow
+Guides to follow when making changes to repository.
 
 ### How to get repository on pc ( do this once )
 1. Install [git bash](https://gitforwindows.org/) if you do not have git command prompt.  
@@ -82,6 +67,13 @@ git branch -d MyNewBranchName
 git push origin :MyNewBranchName
 ```
 
+## Links
+Project links :    
+* [Projet HackMD Page](https://hackmd.io/team/capstone2020?nav=overview)
+* [Project EMI Link](https://apps2.eng.unimelb.edu.au/emi-capstone-projects/index.php?r=project%2Fview&id=194&ajaxView=yes)
 
+Tutorial/Reading resources links :  
+* [Useful cheat sheet to format README.md files](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
+* [Great Git command line tutorial](http://gitimmersion.com/)
 
 
