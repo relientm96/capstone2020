@@ -21,7 +21,8 @@ mdFilePaths = {
     "modeldevelopment"      : "markdown/modeldevelopment.md",
     "applicationdeployment" : "markdown/applicationdeployment.md",
     "acknowledgements"      : "markdown/acknowledgements.md",
-    "introduction"          : "markdown/introduction.md"
+    "introduction"          : "markdown/introduction.md",
+    "humanpose"             : "markdown/humanpose.md"
 }
 
 $(document).ready(function(){
