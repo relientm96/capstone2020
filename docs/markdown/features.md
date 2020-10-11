@@ -29,5 +29,5 @@ The following diagram explains a high level view of our system flow:
 1. Auslan users would interact with a live video input from an RGB camera on their laptop.
 2. The live video feed is then transmitted to specialised human pose estimation software.
 3. This pose estimation software converts a video into x,y coordinates of human joints.
-4. Our self-developed sign language recognition model accepts these x,y coordiantes and makes a prediction on the word that the Auslan user is doing as well as the probability of that sign.
+4. Our self-developed sign language recognition model accepts these x,y coordinates and makes a prediction on the word that the Auslan user is doing as well as the probability of that sign.
 5. Both the word and the probability output is sent to a web interface, where the user can then view the outputs.
