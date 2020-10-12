@@ -2,7 +2,7 @@
 
 #### Australian Sign Language (Auslan)
 
-Approximately 20,000 Australians rely on Australian Sign Language (Auslan) to communicate every day. Yet, we still see problems in communication due to the large communication gap between Auslan users and non-Auslan users. This problem becomes worse when both parties are involved in emergency like situations. 
+Approximately 20,000 Australians rely on Australian Sign Language (Auslan) to communicate every day. Yet, we still see problems in communication due to the communication gap between Auslan users and non-Auslan users. 
 
 #### Human Pose Estimation
 
@@ -13,18 +13,18 @@ Human Pose Estimation is a field of research in developing robust algorithms and
 <br>
 <div class="row center-align">
     <div class="col s12 m6 l6">
-        <img src="images/gifs/ai_bball_cropped.gif" style="width: 300px; height: auto">
+        <img src="images/Overview/ai_bball_cropped.gif" style="width: 300px; height: auto">
         <p> Figure 1: AI Basketball Analysis.</p>
     </div>
     <div class="col s12 m6 l6">
-        <img src="images/gifs/OpenPoseDemo/openpose_animate.gif" style="width: 300px; height: auto">
+        <img src="images/Overview/openpose_animate.gif" style="width: 300px; height: auto">
         <p> Figure 2: Rendering key-points onto 3D animated characters.</p>
     </div>
 </div>
 
 #### Project Objectives
 
-Exploring the possibility of building a technology that may be of use for sign language users in the future (particularly in emergencies), can we leverage the power of Human Pose Estimation for Sign Language Recognition?
+Exploring the possibility of building a technology that may be of use for sign language users in the future, can we leverage the power of Human Pose Estimation for Sign Language Recognition?
 
 This is the goal of our project:
 
@@ -60,10 +60,10 @@ To circumvent this, we propose the usage of Human Pose Estimation software that 
     <div class="row">
         <div class="col s6 m6 l6">
             <br><br><br>
-            <img style="width:330px;height:auto;" src="images/matt_demo_op.gif">
+            <img style="width:330px;height:auto;" src="images/Overview/matt_demo_op.gif">
         </div>
         <div class="col s6 m6 l6">
-            <img style="width:250px;height:350px;" src="images/moving_keypoints.gif">
+            <img style="width:250px;height:350px;" src="images/Overview/moving_keypoints.gif">
         </div>
     </div>
     <p> Figure: Using Human Pose Estimation software for landmark detection of human body key-points. Data per frame now represented as numerical coordinates instead of raw pixel data. </p> 

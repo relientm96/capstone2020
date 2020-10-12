@@ -1,5 +1,7 @@
 ### Introduction
 
+**NOTE**: This is still a work in progress document, and will be finished before the start of Endeavour 2020. 
+
 This is the technical documentation of the project "Australian Sign Language Recognition". The documentation will cover the following aspects of our project:
 
 * Overview:
