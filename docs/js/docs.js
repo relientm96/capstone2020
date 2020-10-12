@@ -28,8 +28,7 @@ mdFilePaths = {
 $(document).ready(function(){
     $('.sidenav').sidenav();
     $('.scrollspy').scrollSpy();
-    $('.materialboxed').materialbox();
-
+      
     marked.setOptions({
         highlight: function(code) {
           return hljs.highlightAuto(code).value;
@@ -43,4 +42,7 @@ $(document).ready(function(){
             fileToMarked(mdFilePaths[key], elem);
         }
     }  
+    console.log("Rendered finish, now load materialbox");
+    $('.materialboxed').materialbox();
+    console.log("Loaded Material Box");
 });

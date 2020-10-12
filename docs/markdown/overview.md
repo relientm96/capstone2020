@@ -1,9 +1,5 @@
 ### Overview
 
-#### Australian Sign Language (Auslan)
-
-Approximately 20,000 Australians rely on Australian Sign Language (Auslan) to communicate every day. Yet, we still see problems in communication due to the communication gap between Auslan users and non-Auslan users. 
-
 #### Human Pose Estimation
 
 As humans, we influence the world through our bodies. We express our emotions and actions through body posture and orientation. For computers to be partners with humans, they have to perceive us and understand our behavior - recognising our facial expressions, our gestures and our movements.
