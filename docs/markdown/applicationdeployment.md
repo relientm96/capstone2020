@@ -23,7 +23,7 @@ A huge part in our project was dedicated towards building an online real-time we
 ##### Version 1
 <br>
 <div style="text-align:center">
-    <img class="materialboxed" src="images/SystemApplication/app_draft.png" style="width:700px; height:auto">
+    <img src="images/SystemApplication/app_draft.png" style="width:700px; height:auto">
     <p>Figure - Version 1 of our working web application design.</p>
 </div>
 
@@ -35,7 +35,7 @@ A huge part in our project was dedicated towards building an online real-time we
 
 #### Version 3 (Final)
 <div style="text-align:center">
-    <img class="materialboxed" src="images/SystemApplication/System_Diagram_Detail.png" style="width:800px; height:auto">
+    <img src="images/SystemApplication/System_Diagram_Detail.png" style="width:800px; height:auto">
     <p>Figure - Application Workflow as a Real Time Sign Language Recognition on the web</p>
 </div>
 
