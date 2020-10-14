@@ -19,7 +19,7 @@
 * OpenPose uses a **bottom-up** approach in doing Human Pose Estimation.
 
 <div class="center-align">
-  <img src="images/PoseEstimation/OpenPosePipeLine.PNG" width='600px', height='auto'>
+  <img src="images/PoseEstimation/OpenPosePipeLine.PNG" width='800px', height='auto'>
   <p> Figure : High level view of OpenPose pipeline from Realtime Multi-Person 2D Pose
   Estimation using Part Affinity Fields.
   </p>
