@@ -1,6 +1,8 @@
 ### Features
 
-We have successfully developed a system that is able to recognise the following Auslan signs:
+* Developed a proof-of-concept system.
+* To show the potential of using Human Pose Estimation in Sign Language Recognition. 
+* Our system currently detects the following four Auslan signs:
 
 <div style="text-align:center">
     <div style="display:inline-block;">
