@@ -17,12 +17,6 @@ This is the technical documentation of the project "Australian Sign Language Rec
 * Application Deployment:
   * How we deployed our system as a web application.
 
-##### Project Presentation:
-[![road_to_endeavour](http://img.youtube.com/vi/AMlnNzqC3Bs/0.jpg)](http://www.youtube.com/watch?v=AMlnNzqC3Bs "Road To Endeavour")
-
-##### Project Journey Video:
-[![road_to_endeavour](http://img.youtube.com/vi/zT6ssMtPTGA/0.jpg)](http://www.youtube.com/watch?v=zT6ssMtPTGA "Road To Endeavour")
-
 #### Links
 * Link to our source code (https://github.com/relientm96/capstone2020)
 * Link to our project homepage (https://relientm96.github.io/capstone2020/)

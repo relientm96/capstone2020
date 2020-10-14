@@ -14,7 +14,7 @@
 * The OpenCV program reads frame by frame from the computer's webcam using `cap.read`.
 * Datum object is a custom defined OpenPose data structure - that stores keypoints in `numpy arrays`.
 * Datum gets passed to our gesture recognition module, that receives an input keypoints.
-* Using a RollingWindow, a queue like structure that performs both Enqueue and Dequeue when a keypoint comes.
+* Used a RollingWindow, a queue like structure that performs both Enqueue and Dequeue when a keypoint comes.
 
 #### Web Application
 
