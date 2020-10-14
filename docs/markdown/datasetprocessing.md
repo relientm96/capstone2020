@@ -1,7 +1,5 @@
 ### Dataset Processing
 
-[Work in Progress]
-
 In this section, we will cover how we collected and processed raw video data to be used for our model training. 
 
 #### Data Collection
@@ -59,10 +57,15 @@ In this section, we will cover how we collected and processed raw video data to 
   * 8 from pose_keypoints
   * 21 from hand_left_keypoints_2d
   * 21 from hand_right_keypoints_2d
+* Removed all confidence level values (removing c_i's)
 * into a single array like [b]:
 ```
-[j0_x, j0_y, j1_x, j1_y , j2_x, j2_y, j3_x, j3_y, j4_x, j4_y, j5_x, j5_y, j6_x, j6_y, j7_x, j7_y, j8_x, j8_y, ...j98_x j98_y]
+[j0_x, j0_y, j1_x, j1_y , j2_x, j2_y, j3_x, j3_y, j4_x, j4_y, j5_x, j5_y, ...j98_x j98_y]
 ```
+
+##### Keypoint Augmentation
+* [To Be Added]
+
 
 ##### Data Formatting 
 * Before training, we would need to label our input/output data correctly.
@@ -80,14 +83,19 @@ dictOfSigns = {
 * We stored X,Y data in .txt files (and later numpy pickled files) in the following format:
 * X Data (input) 
 ```
-[x1 y1, x2 y2, x3, y3, x4, y4, x5, y5 ... x98, y98]  --> For Frame 1
-[x1 y1, x2 y2, x3, y3, x4, y4, x5, y5 ... x98, y98]  --> For Frame 2
+[x1 y1, x2 y2, x3, y3, x4, y4, x5, y5 ... x98, y98]  --> For Sign Pain, Frame 1
+[x1 y1, x2 y2, x3, y3, x4, y4, x5, y5 ... x98, y98]  --> For Sign Pain, Frame 2
 ...
-[x1 y1, x2 y2, x3, y3, x4, y4, x5, y5 ... x98, y98]  --> For Frame 75
+[x1 y1, x2 y2, x3, y3, x4, y4, x5, y5 ... x98, y98]  --> For Sign Pain, Frame 75
+[x1 y1, x2 y2, x3, y3, x4, y4, x5, y5 ... x98, y98]  --> For Sign Help, Frame 1
+[x1 y1, x2 y2, x3, y3, x4, y4, x5, y5 ... x98, y98]  --> For Sign Help, Frame 2
+...
+[x1 y1, x2 y2, x3, y3, x4, y4, x5, y5 ... x98, y98]  --> For Sign Help, Frame 75
 ```
 * Y Data (output class labels)
 ```
-1 --> Indicates that series of 75 arrays represented the sign "help"
+3 --> Indicates that series of 75 arrays represents the sign "pain"
+1 --> Indicates that series of next 75 arrays represents the sign "help"
 ```
 
 
