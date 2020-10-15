@@ -30,7 +30,7 @@
   2. The mutli-stage CNN model contains two different branches.
     * Top branch (Fig a): extracts the confidence maps for body part detection such as where eyes, elbows and others are on image.
     * Bottom branch (Fig b): predicts the affinity fields - representing a degree of association between different body parts.
-  3. After this, it uses bipartite matching (a greedy parsing algorithm) to then make associations between body part candidates.
+  3. After this, it uses bipartite matching and a greedy parsing algorithm to then make associations between body part candidates.
   4. To ultimately, form the assembled full pose output.
 
 #### How we used OpenPose
