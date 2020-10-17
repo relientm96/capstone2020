@@ -1,8 +1,8 @@
-# Australian Sign Language Recognition using Human Pose Estimation
+# Gesture Recognition using Machine Learning
 
 ![demo](docs/images/SystemApplication/Demo_Gif.gif)
 
-Repository for the Australian Sign Language Recognition using Human Pose Estimation project. For project documentation please visit the following link https://relientm96.github.io/capstone2020/
+Repository for the Gesture Recognition using Machine Learning. For project documentation please visit the following link https://relientm96.github.io/capstone2020/
 
 Team Members:
 
@@ -19,6 +19,7 @@ Team Members:
 |       +--- desktop   - Desktop version of our application using OpenCV Python.
 |       +--- openpose-python - OpenPose compiled binaries for Python
 |       +--- scrapper  - Python web scrapper for video data collection
+|       +--- old-application - Old Web Application design
 |
 +--- documents - Folder containing project documents
 |       
@@ -35,10 +36,7 @@ Team Members:
 ![poster](docs/images/Electrical_Matthew_Yong_Poster.png)
 
 #### Project Presentation
-[![oral_presentation](http://img.youtube.com/vi/AMlnNzqC3Bs/0.jpg)](http://www.youtube.com/watch?v=AMlnNzqC3Bs "Endeavour Presentation - Australian Sign Language Recognition")
-
-#### Our Project Journey
-[![road_to_endeavour](http://img.youtube.com/vi/zT6ssMtPTGA/0.jpg)](http://www.youtube.com/watch?v=zT6ssMtPTGA "Road to Endeavour")
+[![oral_presentation](http://img.youtube.com/vi/AMlnNzqC3Bs/0.jpg)](http://www.youtube.com/watch?v=AMlnNzqC3Bs "Endeavour Presentation - Gesture Recognition usign Machine Learning")
 
 ## Info On Workflow
 Guides to follow when making changes to repository.

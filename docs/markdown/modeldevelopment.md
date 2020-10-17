@@ -24,7 +24,7 @@
 
 <div class="center-align">
   <img width=500px height=auto src="https://www.tutorialspoint.com/tensorflow/images/single_layer_perceptron.jpg">
-  <p> Figure : Sample diagram of how a single layer perceptron works. </p>
+  <p> Figure : Sample diagram of a single layer perceptron. </p>
 </div>
 
 * The Feed forward neural network (also known as the Multi-Layer Perceptron) is just a densely connected network, consisting of interconnections between neurons that are single-layer perceptrons.
@@ -34,28 +34,52 @@
   <p> Figure : Sample diagram of a feed-forward neural network - consisting of a network of single-layer perceptrons</p>
 </div>
 
-* To train the model, it uses labelled input and output data:
-  * All weights in each layer are initialized randomly. 
-  * Input is passed into the Multi Layer Perceptron
+* [At a high level] - To train the model, 
+  * It requires training data - having inputs and outputs labelled.
+  * All weights in each layer are initialized randomly before training begins.
+  * Input is passed into the first layer of the neural network.
   * The results are then "forward propagated" meaning that outputs from each layer are propagated to the next where each neuron performs operations described in the single-layer perceptron model.
-  * At the output, it computes the error of it's guess with respect to the labelled output using a loss function.
+  * At the output, it computes the error of it's initial guess with respect to correctly labelled output using a loss function.
   * The error is then "back propogated" allowing the model to re-adjust each layer's weights - called Gradient Descent.
-  * The training stops when error from loss function is minmized.
+  * Processes repeats until error from loss function is minimised.
   * The trained model is then the resulting tuned layer's weights after training.
 
 #### Recurrent Neural Networks
-* The problem with Feed Forward networks, is that it is hard to train using data for sequence/time series classification.
-* We as humans as well, rely on sequences to interpret meaning:
-  * Example: Given an incomplete sentence, predict what the next word is in the sentence.
-  * Here, we make connections in our brain connecting past words as "context" to make a guess.
-* Similarly, the **Recurrent Neural Networks (RNN)** is a different neural network architecture 
-* Good at persisting data from previous information given a sequence using a loop.
-* We would not go through details of it's working bu highly advice you to look into the explanations of how RNNs work here in [this well written article](https://colah.github.io/posts/2015-08-Understanding-LSTMs/).
-  
+* We as humans, rely on sequences to interpret meaning:
+  * Example: Given the sentence "I am ".
+  * Here, we make connections in our brain connecting past words as "context" to make a guess for that empty word - "English".
+* We see that in order to understand sequences - the key elements in doing so would be to:
+  * Track long-term dependencies between data points in a sequence.
+  * Maintain information about data order in a sequence.
+  * Having a 'shared' mechanism where new data can learn using both current and old data.
+* As we've seen previously, the typical feed-forward neural network is limited in handling all of these problems.
+* Alternatively, the **Recurrent Neural Networks (RNN)** is a different neural network architecture - descendent of the typical feed foward neural network.
+* At a high level, RNNs have:
+  * Input data as a sequence of data points - each point having a time variable to indicate it's position in the sequence.
+  * At each time point:
+    * x_t = input at time t,
+    * h_t =  
+    * y_t = output of model 
 <div class="center-align">
     <img width="500px;", height="auto" src="https://colah.github.io/posts/2015-08-Understanding-LSTMs/img/RNN-unrolled.png">
-    <p> Figure: RNN model structure, rolled on the left and unrolled on the right (Understanding LSTM Networks, 2015) </p>
+    <p> Figure: High level view of Recurrent Neural Networks (Understanding LSTM Networks, 2015) </p>
 </div>
+
+<br>
+
+<div class="center-align">
+    <img width="650px;", height="auto" src="images/Model/rnn_types.jpg">
+    <p> Figure: Variations of Recurrent Neural Network types (Stanford Recurrent Neural Networks, 2017) </p>
+</div>
+
+* A one-to-one correspondence refers to how a typical feed-forward neural network would function, having an input (red) passing into the model (green) to produce an output (blue).
+* For RNNs, there exist four different types:
+  * One-to-many : Given a single input - generate an output sequence (eg: Generate an image caption given a single image)
+  * Many-to-one : Given an input sequence - generate a single output (eg: Sentiment Classification, Time Series Classification)
+  * Many-to-many: Given an input sequence - generate an output sequence (eg: Machine Translation - translating Chinese to English)
+* As you can see, our problem relates to the "Many-to-one" scenario where:
+  * Given 75 keypoint arrays as a sequence.
+  * Generate a resulting "classification" of what that sign is.
 
 ##### Main Problem with Generic RNNs
 * RNNs are great at understanding time dependencies for sequential data.

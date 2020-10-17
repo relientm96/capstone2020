@@ -1,6 +1,5 @@
 ### Features
-
-* Developed a proof-of-concept system.
+* Developed a proof-of-concept system as botha desktop and a web application.
 * To show the potential of using Human Pose Estimation in Sign Language Recognition. 
 * Our system currently detects the following four Auslan signs:
 

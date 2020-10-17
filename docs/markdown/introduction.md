@@ -2,7 +2,7 @@
 
 **NOTE**: This is still a work in progress document, and will be finished before the start of Endeavour 2020. 
 
-This is the technical documentation of the project "Australian Sign Language Recognition". The documentation will cover the following aspects of our project:
+This is the technical documentation of the project "Gesture Recognition using Machine Learning". The documentation will cover the following aspects of our project:
 
 * Overview:
   * Quick overview on the context of our project.
