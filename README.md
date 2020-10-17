@@ -23,8 +23,6 @@ Team Members:
 |
 +--- documents - Folder containing project documents
 |       
-+--- meeting-logs - Folder containing all meeting logs
-|
 +--- yick - Yick's additional tools folder
 |
 +--- Archive - Old Code not in use 
