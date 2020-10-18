@@ -9,10 +9,15 @@ import time
 import numpy as np
 import pprint as pp
 
-# paths;
-modelpath = "C:\\CAPSTONE\\capstone2020\\src\\training\\training-files\\frame-75\\iter-01\\fmodel.h5"
-
-modelpath = "C:\\CAPSTONE\\capstone2020\\src\\training\\training-files\\frame-35\\iter-01\\fmodel.h5"
+MODEL_35 = True
+modelpath = None
+if MODEL_35:
+	# Note numb joints here means both x,y values, (eg: if BODY_25 we have 25*2 numb joints)
+	numbJoints   = 98
+	window_Width = 35
+	modelpath = "../training/training-files/frame-75/iter-01/fmodel.h5"
+else:
+	modelpath = "../training/training-files/frame-35/iter-01/fmodel.h5"
 
 ############### INITIALIZATIONS ##################
 
@@ -40,10 +45,6 @@ from tensorflow.keras.models import load_model
 Rolling Window Data Structure
 '''
 import RollingWindow as RW
-# Note numb joints here means both x,y values, (eg: if BODY_25 we have 25*2 numb joints)
-numbJoints   = 98
-#window_Width = 75
-window_Width = 35
 
 # Instantiate the rolling window for use later
 print("Creating Rolling Window")
@@ -54,13 +55,12 @@ print("Finished Created Rolling Window, Window Width = {} & NumbJoints = {}".for
 
 # Signs that define output
 dictOfSigns = {
-	0:"ambulance", 
+	0:"ambulance",
 	1:"help", 
-	2:"hospital", 
-	3:"pain"
+	2:"pain", 
+	3:"hospital", 
+	4:"thumbs"
 }
-
-dictOfSigns = {0:"ambulance",1:"help", 3:"hospital", 2:"pain", 4:"thumbs"}
 
 # Reference object for LSTM Model
 lstm = None
@@ -79,7 +79,6 @@ def initOpenPoseLoad():
 			sys.path.append(dir_path + '/../openpose-python/Release')
 			os.environ['PATH']  = os.environ['PATH']  + ';' +  dir_path + "/../openpose-python" + ';' + dir_path + "/../openpose-python/bin" 
 			import pyopenpose as op
-
 	except ImportError as e:
 		print('Error: OpenPose library could not be found. Did you enable `BUILD_PYTHON` in CMake and have this Python script in the right folder?')
 		raise e
@@ -96,7 +95,6 @@ def loadModel():
 		print("Error In Loading Model", e)
 		raise e
 
-
 def offset_translation(array, reference):
 	'''
 		purpose: for translational invariance;
@@ -110,7 +108,6 @@ def offset_translation(array, reference):
 	#print("original: ", array)
 	#print("shifted: ", shifted)
 	#sys.exit('debug')
-	
 	return shifted
 
 def removeConfidenceNumpy(datum):
@@ -140,13 +137,11 @@ def removeConfidenceNumpy(datum):
 
 # Translation Module
 def translate(datum):
-
-	# Output String Variable of Translated word (sentence in future)
-	word = "Init"
-
 	'''
 	Converting Input Keypoints as numpy array in Yick's GitHub dataset format
 	'''
+	# Output String Variable of Translated word (sentence in future)
+	word = "Init"
 	try:
 		test = len(datum.poseKeypoints[0])
 	except Exception as e:
@@ -154,31 +149,25 @@ def translate(datum):
 		# Notify user that no one is seen
 		word = "Nobody Here!"
 		return word
-		
 	# Continue to process if we can detect  
 	kp = removeConfidenceNumpy(datum)
-	
 	# Add to rolling window
 	if r.addPoint(kp) == False:
 		# Unable to append to keypoints as issue with data shape
 		return 'Error'
-
 	# Reshape for model to read
 	reshaped_keypoints = r.getPoints().reshape((1, window_Width, numbJoints))
-
 	# Load Keras Model
 	global lstm 
 	try:
 		predictions = lstm.predict([reshaped_keypoints])
 		if abs( (np.max(predictions) - np.min(predictions)) ) < 0.9 :
 			r.resetWindow()
-		
 		guess = np.argmax(predictions)
 		word = dictOfSigns[guess] + "-" + str(round(float(np.max(predictions)),2))
 	except Exception as e:
 		print("Error in prediction", e)
 		word = 'Error'
-	
 	return word
 
 # test driver;

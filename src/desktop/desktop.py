@@ -18,7 +18,6 @@ import gestureRecognition as gr
 params = dict()
 
 params["disable_blending"]     = False
-
 params["net_resolution"]       = "128x128"
 params["hand_net_resolution"]  = "256x256"
 
