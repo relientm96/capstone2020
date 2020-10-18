@@ -42,8 +42,6 @@ socket.on("keypoints", function(keypoints){
     if (rw.isInit == false){
         document.getElementById("loadingWidget").style = "display:none";
     }
-    
-    console.log(keypoints)
 
     // Receives openpose keypoints after rendering from backend
     var kp_arr = JSON.parse(keypoints)
@@ -93,6 +91,13 @@ socket.on("keypoints", function(keypoints){
         }
     }
 });
+
+/*
+socket.on("alert_elbows", (value) => {
+    console.log(value)
+    sign.innerHTML = "Please Keep Elbows in frame!"
+});
+*/
 
 async function main(){
     // Start WebRTC Client Connection

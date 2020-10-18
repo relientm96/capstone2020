@@ -36,7 +36,7 @@ def removeConfidenceAndShapeAsNumpy(datum):
             datum.handKeypoints[1], shoulder_center)
 
         # We want to keep only first two columns for all keypoints (ignore confidence levels)
-        # Slice to only take keypoints 1-7 removing confidence
+        # Slice to only take keypoints 1-8 removing confidence
         posePoints = body_keypoints[0][1:8, 0:2]
         # Get all hand points removing confidence
         lefthand = lefthand_keypoints[0][:, 0:2]

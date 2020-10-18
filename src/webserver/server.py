@@ -33,10 +33,6 @@ op = None
 opWrapper = None
 keypoints = None
 
-# Counter
-counter = 0
-n = 2
-
 class VideoTransformTrack(MediaStreamTrack):
     """
     A video stream track that transforms frames from an another track.
@@ -59,14 +55,15 @@ class VideoTransformTrack(MediaStreamTrack):
             datum.cvInputData = img
             opWrapper.emplaceAndPop([datum])
             image = datum.cvOutputData
+            
+            '''
+            # If confidence level of elbow < threshold, alert client
+            if datum.poseKeypoints[0][3][2] < 0.2:
+                await sio.emit('alert_elbows', 'left')
+            if datum.poseKeypoints[0][6][2] < 0.2:
+                await sio.emit('alert_elbows', 'right')
+            '''
 
-            '''
-            if counter % n == 0:
-                # Get keypoints using numpy slicing
-                keypoints = removeConfidenceAndShapeAsNumpy(datum)
-                # Send keypoints using socketion once frame processed
-                await sio.emit('keypoints', str(keypoints.tolist()))
-            '''
             # Get keypoints using numpy slicing
             keypoints = removeConfidenceAndShapeAsNumpy(datum)
             # Send keypoints using socketion once frame processed
@@ -116,9 +113,17 @@ async def load_model_shard(request):
     content = open(os.path.join(ROOT, "model_35_frames/group1-shard1of1.bin"), "rb").read()
     return web.Response(content_type="application/octet-stream", body=content)
 
-async def load_gifs(request):
-    print(request.query)
-    #return web.FileResponse('res/')
+async def load_ambulance_gif(request):
+    return web.FileResponse('res/ambulance_sign.gif')
+
+async def load_pain_gif(request):
+    return web.FileResponse('res/pain_input.gif')
+
+async def load_help_gif(request):
+    return web.FileResponse('res/help_sign.gif')
+
+async def load_hospital_gif(request):
+    return web.FileResponse('res/hospital.gif')
 
 async def offer(request):
     params = await request.json()
@@ -215,10 +220,10 @@ if __name__ == "__main__":
     app.router.add_get("/model.json", load_model_json)
     app.router.add_get("/group1-shard1of1.bin", load_model_shard)
     app.router.add_get("/main.js", main_js_load)
-    app.router.add_get("/res/ambulance.gif", load_gifs)
-    app.router.add_get("/res/hospital.gif", load_gifs)
-    app.router.add_get("/res/help.gif", load_gifs)
-    app.router.add_get("/res/pain.gif", load_gifs)
+    app.router.add_get("/res/ambulance_sign.gif", load_ambulance_gif)
+    app.router.add_get("/res/hospital.gif", load_hospital_gif)
+    app.router.add_get("/res/help_sign.gif", load_help_gif)
+    app.router.add_get("/res/pain_input.gif", load_pain_gif)
     app.router.add_post("/offer", offer)
     
     sio.attach(app)
