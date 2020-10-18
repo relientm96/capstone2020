@@ -171,8 +171,8 @@ def offline_predict(PREFIX, write_vname, write_OP_name, json_path, signtime = 3,
 	# Tensorflow, Keras imports
 	import tensorflow as tf
 	from tensorflow import keras
-	from keras.models import load_model
-	from keras.layers import Dense, Dropout, LSTM
+	from tensorflow.keras.models import load_model
+	from tensorflow.keras.layers import Dense, Dropout, LSTM
 	#saved_model = 'saved_model.h5'
 	model = keras.models.load_model(saved_model, compile=True)
 	model.summary()
@@ -282,16 +282,16 @@ if __name__ == '__main__':
 	write_vname = 'cudnnlstm_vid.avi'
 	
 	# how long do you want to capture the actual sign;
-	signtime = 4
+	signtime = 6
 	# import the pretrained model;
 
 	#saved_model = './training-files/cudnnlstm_saved_model_01.h5'
 	saved_model = "FUCK.h5"
-	saved_model = "C:\\CAPSTONE\\capstone2020\\src\\training\\training-files\\frame-75\\fmodel.h5"
-	saved_model = "C:\\CAPSTONE\\capstone2020\\src\\training\\training-files\\frame-35\\fmodel.h5"
+	saved_model = "C:\\CAPSTONE\\capstone2020\\src\\training\\training-files\\frame-75\\iter-01\\fmodel.h5"
+	#saved_model = "C:\\CAPSTONE\\capstone2020\\src\\training\\training-files\\frame-35\\fmodel.h5"
 	
 	#cudnnlstm_saved_model.h5
-	window_Width = 35
+	window_Width = 75
 	FUTURE_LIST = offline_predict(PREFIX, write_vname, write_OP_name, json_path, signtime, saved_model, window_Width)
 	
 	# a wrap around;
