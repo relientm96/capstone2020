@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-=======
 # created by matthew; nebula-m78 team;
 
->>>>>>> 835dcfa99f19e243661b80e6413b1e4e3d561bd5
 # From Python
 # It requires OpenCV installed for Python
 import sys
