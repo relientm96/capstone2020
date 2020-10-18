@@ -57,12 +57,15 @@
 * At a high level, RNNs have:
   * Input data as a sequence of data points - each point having a time variable to indicate it's position in the sequence.
   * At each time point:
-    * x_t = input at time t,
-    * h_t =  
-    * y_t = output of model 
+    * x^t = input at time t,
+    * h^t = state of the hidden layer at time t
+    * o^t = output of the model at time t
+    * y^t = target output at time t
+    * L^t = Loss at time t
+
 <div class="center-align">
-    <img width="500px;", height="auto" src="https://colah.github.io/posts/2015-08-Understanding-LSTMs/img/RNN-unrolled.png">
-    <p> Figure: High level view of Recurrent Neural Networks (Understanding LSTM Networks, 2015) </p>
+    <img width="500px;", height="auto" src="images/Model/rnn_unfold.png">
+    <p> Figure: High level view of Recurrent Neural Networks (Goodfellow et al, 2016) </p>
 </div>
 
 <br>
