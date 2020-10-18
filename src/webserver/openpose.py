@@ -7,10 +7,10 @@ import sys
 
 # Hold parameters for OpenPose as a dictionary
 params = dict()
-params["net_resolution"]       = "144x144"
 params["hand"]                 = True
-params["hand_net_resolution"]  = "272x272"
-params['keypoint_scale']       = 3
+params["net_resolution"]       = "128x128"
+params["hand_net_resolution"]  = "256x256"
+params['keypoint_scale']       = 4
 params["number_people_max"]    = 1
 
 def initializeOpenPose():

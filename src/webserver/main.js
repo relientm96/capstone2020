@@ -7,19 +7,19 @@ import {RollingWindow, zeros} from './rollingwindow.js'
 
 // Rolling window variables
 const numbJoints  = 98; 
-const windowWidth = 75;
+const windowWidth = 35;
 // Rolling Window
 var rw;
 // Model reference object
 var model;
 // Enumerated Signs that define output
 const dictOfSigns = {
-    0: "ambulance",
-    1: "help",
-    2: "hospital",
-    3: "pain",
-    4: "ThumbsUp"
-};
+	0:"ambulance",
+	1:"help", 
+	2:"pain", 
+	3:"hospital", 
+	4:"thumbs"
+}
 // Socketio obj
 const socket = io();
 // Probability and sign variable
@@ -41,8 +41,9 @@ socket.on("keypoints", function(keypoints){
 
     if (rw.isInit == false){
         document.getElementById("loadingWidget").style = "display:none";
-
     }
+    
+    console.log(keypoints)
 
     // Receives openpose keypoints after rendering from backend
     var kp_arr = JSON.parse(keypoints)
@@ -60,7 +61,7 @@ socket.on("keypoints", function(keypoints){
                     prob.innerHTML = probVal.toFixed(2).toString();
                     var range   = probVal - Math.min.apply(Math, result);
                     // Check if we need to do a reset for the next round if prob difference too high
-                    if (range < 0.95) {
+                    if (range < 0.9) {
                         // Initiate a reset to the window by copying over frames for whole window
                         rw.isInit = true;
                     }
@@ -69,7 +70,6 @@ socket.on("keypoints", function(keypoints){
                     }
                 }
             )
-            
             
            /*
            // Synchronous prediction

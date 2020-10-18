@@ -109,12 +109,16 @@ async def client_load(request):
     return web.Response(content_type="application/javascript", text=content)
 
 async def load_model_json(request):
-    content = open(os.path.join(ROOT, "modeljs/model.json"), "r").read()
+    content = open(os.path.join(ROOT, "model_35_frames/model.json"), "r").read()
     return web.Response(content_type="application/json", text=content)
 
 async def load_model_shard(request):
-    content = open(os.path.join(ROOT, "modeljs/group1-shard1of1.bin"), "rb").read()
+    content = open(os.path.join(ROOT, "model_35_frames/group1-shard1of1.bin"), "rb").read()
     return web.Response(content_type="application/octet-stream", body=content)
+
+async def load_gifs(request):
+    print(request.query)
+    #return web.FileResponse('res/')
 
 async def offer(request):
     params = await request.json()
@@ -211,6 +215,10 @@ if __name__ == "__main__":
     app.router.add_get("/model.json", load_model_json)
     app.router.add_get("/group1-shard1of1.bin", load_model_shard)
     app.router.add_get("/main.js", main_js_load)
+    app.router.add_get("/res/ambulance.gif", load_gifs)
+    app.router.add_get("/res/hospital.gif", load_gifs)
+    app.router.add_get("/res/help.gif", load_gifs)
+    app.router.add_get("/res/pain.gif", load_gifs)
     app.router.add_post("/offer", offer)
     
     sio.attach(app)
