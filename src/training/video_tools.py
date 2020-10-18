@@ -480,7 +480,7 @@ def zoom_video(input, output, ratio = 1.0):
 	args:
 		- input; the filename (path) of the input video;
 		- output; where to save?
-		- shear angle;
+		- ratio;
 	return:
 		- none;
 	'''
