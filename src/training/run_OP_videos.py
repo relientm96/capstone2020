@@ -7,7 +7,7 @@ import video_tools as VID
 # global var(s);
 #SPEED = [1, 0.6, 0.8, 1.2, 1.4]
 
-SPEED = [1]
+SPEED = [1.3]
 #DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
 
 
