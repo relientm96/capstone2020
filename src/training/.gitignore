@@ -1,0 +1,10 @@
+# Ignoring large files
+training-files/frame-35/*.npy
+training-files/frame-75/*.npy
+
+# Ignore videos
+*.mp4
+auslan-videos/
+
+# Ignore random text files
+FUCK.txt
