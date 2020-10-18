@@ -5,16 +5,20 @@
 # tf/ keras
 import tensorflow as tf
 from tensorflow import keras
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import math
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense, Dropout,LSTM
-import tensorflow as tf
+
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
+#print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
+
 # known issue: keras version mismatch;
 # solution src - https://stackoverflow.com/questions/53183865/unknown-initializer-glorotuniform-when-loading-keras-model
 #from keras.models import load_model
 from tensorflow.keras.models import load_model
-from keras.callbacks import History 
+from tensorflow.keras.callbacks import History 
 from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 
 # sklearn tool kits
@@ -66,7 +70,7 @@ txt_directory = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train"
 #n_hidden = 30 # hidden layer number of features;
 n_hidden = 32 # hidden layer number of features;
 n_classes = 5  # number of sign classes;
-batch_size = 100
+batch_size = 64
 
 #----------------------------------------------------------------------
 # LOADING THE DATA:
@@ -105,11 +109,13 @@ if gpus:
 		for gpu in gpus:
 			tf.config.experimental.set_memory_growth(gpu, True)
 		logical_gpus = tf.config.experimental.list_logical_devices('GPU')
-		print("hello")
 		print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
 	except RuntimeError as e:
 		# Memory growth must be set before GPUs have been initialized
 		print(e)
+
+
+#sys.exit('debug')
 
 print('------ LSTM Model ---------')
 
@@ -127,7 +133,7 @@ model = Sequential()
 history = History()
 
 # with cudnn
-model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), return_sequences=True))
+model.add(LSTM(n_hidden, input_shape=(x_train.shape[1], x_train.shape[2]), unit_forget_bias=True, return_sequences=True))
 model.add(Dropout(0.2))
 model.add(LSTM(n_hidden))
 model.add(Dropout(0.2))
@@ -159,16 +165,19 @@ if (RETRAIN):
 	
 	# early stopping, checkpoints, reduce-learning-rate;
 	# src - https://stackoverflow.com/questions/48285129/saving-best-model-in-keras/48286003
-	earlyStopping = EarlyStopping(monitor='val_acc', patience=10, verbose=0, mode='max')
+	#earlyStopping = EarlyStopping(monitor='val_acc', patience=10, verbose=0, mode='max')
 
 	# syntax - https://faroit.com/keras-docs/1.2.2/callbacks/#modelcheckpoint
-	checkpoint = ModelCheckpoint(checkpoints_path , verbose=1, monitor='acc',save_best_only=True, mode='max', period = 10)  
-	reduce_lr_loss = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=10, verbose=1, min_delta=1e-4, mode='min')
+	#checkpoint = ModelCheckpoint(checkpoints_path , verbose=1, monitor='acc',save_best_only=True, mode='max', save_freq= 10)  
+	#reduce_lr_loss = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=10, verbose=1, min_delta=1e-4, mode='min')
 
-	callbacks_list = [earlyStopping, checkpoint, reduce_lr_loss]
+	#callbacks_list = [earlyStopping, checkpoint, reduce_lr_loss]
+	#callbacks_list = [checkpoint]
 
 	# 5. Training the model
-	history = model.fit(x_train, y_train, epochs=200, batch_size = batch_size, verbose = 2, callbacks = callbacks_list, validation_data = (x_val, y_val))
+	#history = model.fit(x_train, y_train, epochs=200, batch_size = batch_size, verbose = 2, callbacks = callbacks_list, validation_data = (x_val, y_val))
+	history = model.fit(x_train, y_train, epochs=200, batch_size = batch_size, verbose = 2,  validation_data = (x_val, y_val))
+	
 	#history = model.fit(x_train, y_train, epochs=70, batch_size = batch_size, verbose = 2, callbacks = callbacks_list)
 
 	# Save the final model with a more fitting name
