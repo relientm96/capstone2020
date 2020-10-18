@@ -23,10 +23,28 @@ has at least ~100k characters. ~1M is better.
 """
 from tensorflow import keras
 from tensorflow.keras import layers
+import tensorflow as tf
 
 import numpy as np
 import random
 import io
+
+#----------------------------------------------------------------------
+# check for gpu access;
+#----------------------------------------------------------------------
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if(len(gpus) ==0):
+	sys.exit("NO GPU is found!")
+if gpus:
+	try:
+		# Currently, memory growth needs to be the same across GPUs
+		for gpu in gpus:
+			tf.config.experimental.set_memory_growth(gpu, True)
+		logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+		print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+	except RuntimeError as e:
+		# Memory growth must be set before GPUs have been initialized
+		print(e)
 
 """
 ## Prepare the data

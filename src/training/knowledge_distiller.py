@@ -28,7 +28,7 @@ print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
 # solution src - https://stackoverflow.com/questions/53183865/unknown-initializer-glorotuniform-when-loading-keras-model
 #from keras.models import load_model
 from tensorflow.keras.models import load_model
-from keras.callbacks import History 
+from tensorflow.keras.callbacks import History 
 from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 
 # sklearn tool kits
