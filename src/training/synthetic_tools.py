@@ -207,6 +207,9 @@ def synthesize_block(input, speed_seed, main_X, main_Y, func, DEGREE):
 			ftools.check_newfile(output_speed_path)
 		
 			VID.video_speed(input, output_speed_path, speed_seed)
+            # need to zoom out?
+            #if(zoom):
+
 		
 			# now, pass through:
 			# transformation 1: only rotate;
