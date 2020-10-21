@@ -115,7 +115,7 @@ def cross_validate(x_raw, y_raw, kfold, LSTM_func):
 
 		# set up the lstm ;
 		#model = LSTM_setup(x_train, y_train)
-        model = LSTM_func(x_train, y_train)
+		model = LSTM_func(x_train, y_train)
 		
 		# Optimizer
 		opt = tf.keras.optimizers.Adam(lr=1e-4, decay=1e-5)

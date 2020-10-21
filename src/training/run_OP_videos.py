@@ -11,7 +11,7 @@ SPEED = [1.3]
 #DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
 
 
-def process_one_video(input, path_X, path_Y, func, DEGREE):
+def process_one_video(input, path_X, path_Y, func, DEGREE, SPEED):
 	for i in range(len(SPEED)):
 		speed_seed = SPEED[i]
 		syntools.synthesize_block(input, speed_seed, path_X, path_Y, func, DEGREE)

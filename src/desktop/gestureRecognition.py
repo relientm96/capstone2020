@@ -102,7 +102,7 @@ def offset_translation(array, reference):
 		purpose: for translational invariance;
 		arg:
 			array; must be in the  shape of (1, number_of_joints, 3);
-			refrence: the refrence to be subtracted from; presumable the shoulder;
+			refrence: the refrence to be subtracted from; presumably the shoulder;
 	'''
 	#print('shape: ', array.shape)
 	broadcast = np.array([reference, 0, 0], dtype=np.float32)

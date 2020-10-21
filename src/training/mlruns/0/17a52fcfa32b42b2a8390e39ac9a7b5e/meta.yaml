@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/CAPSTONE/capstone2020/src/training/mlruns/0/17a52fcfa32b42b2a8390e39ac9a7b5e/artifacts
+end_time: 1601406809225
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+name: ''
+run_id: 17a52fcfa32b42b2a8390e39ac9a7b5e
+run_uuid: 17a52fcfa32b42b2a8390e39ac9a7b5e
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1601406770020
+status: 3
+tags: []
+user_id: yongw4

@@ -198,18 +198,25 @@ def down_sampling(arr, meet_size = HALF):
 			return(reshape(tmp, [tmp]))
 
 # process one txt file;
-def process_one(filepath):
+def process_one(filepath, format):
+	print("entering process_one function")
 
 	# initialize an empty np;
 	output = np.empty((0, HALF, FEATURE), dtype = np.float32)
 
-	# load the training X files;
-	X_load = lstm.load_X(filepath)
-	nsample = X_load.shape[0]
-	#print('number of samples: ', nsample)
+	# txt or numpy?
+	if(format == "txt"):
+		# load the training X files;
+		X_load = lstm.load_X(filepath)
+	elif(format == "npy"):
+		X_load = np.load(filepath)
 
+	nsample = X_load.shape[0]
+	print('number of samples: ', nsample)
+		
 	# run through all the samples;
 	i = 0
+	print("to do down-sampling")
 	while(i < nsample):
 		# down sample the current 75-chunk;
 		processed = down_sampling(X_load[i])
@@ -219,6 +226,7 @@ def process_one(filepath):
 		i = i+1
 	# end?
 	#print(output.shape)
+	print("done processing")
 	return output
 
 def gen_XY(rootpath):
@@ -235,7 +243,7 @@ def gen_XY(rootpath):
 		low = fname.lower()
 		# training X file;
 		if (low == "x"):
-			outputX = process_one(txt)
+			outputX = process_one(txt, "txt")
 			nsample = outputX.shape[0]
 			savename = os.path.join(rootpath, tmpname+"_down.npy")
 			np.save(savename, outputX)
@@ -257,7 +265,8 @@ def gen_XY(rootpath):
 def process_block(directory_path):
 	ls = []
 	for root, dirs, files in os.walk(directory_path, topdown=False):
-		print(root)
+		print('entering')
+		print("root: ", root)
 		#loc = os.path.join(root, "*.txt")
 		ls.append(root)
 		print(ls)
@@ -276,27 +285,28 @@ def process_block(directory_path):
 
 # test driver;
 if __name__ == '__main__':
-	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\75-frames"
-	
+	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\text-dataset\\rotate"
+	process_block(prefix)
+	'''
 	# get the 75-frame training data;
 	X_75 = np.load(prefix+"\\X_combine.npy")
 	Y_75 = np.load(prefix+"\\Y_combine.npy")
 
 	# reduce the samples;
-	X_35 = down_sampling(X_75)
-	Y_35 = down_sampling(Y_75)
-
+	X_35 = process_one(prefix+"\\X_combine.npy", "npy")
+	Y_35 = process_one(prefix+"\\Y_combine.npy", "npy")
+	
 	# sanity check;
 	print("x_75 shape: ", X_75)
-	print("y_75 shape: ", y_75)
+	print("y_75 shape: ", Y_75)
 
 	print("x_35 shape: ", X_35)
-	print("y_35 shape: ", y_35)
-
+	print("y_35 shape: ", Y_35)
+	'''
 	# save them;
-	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy"
-	np.save(prefix+"\\X_train_35.npy", X_35)
-	np.save(prefix+"\\Y_train_35.npy", Y_35)
+	#prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy"
+	#np.save(prefix+"\\X_train_35.npy", X_35)
+	#np.save(prefix+"\\Y_train_35.npy", Y_35)
 	
 	#directory_path = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train"
 	#TEST_PATH = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train.txt"

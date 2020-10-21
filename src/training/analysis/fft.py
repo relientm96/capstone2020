@@ -5,10 +5,11 @@
 import matplotlib as ml
 import matplotlib.pyplot as plt
 import numpy as np
-import Image
-file_path = "data"
-image = np.asarray(Image.open(file_path).convert('L'))
-freq = np.fft.fft2(image)
+from PIL import Image
+file_path = "data.txt"
+#image = np.asarray(Image.open(file_path).convert('L'))
+a = np.mgrid[:5, :5][0]
+freq = np.fft.fft2(a)
 freq = np.abs(freq)
 
 fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(14, 6))

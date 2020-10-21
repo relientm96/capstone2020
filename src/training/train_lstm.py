@@ -90,12 +90,8 @@ else:
 	file_tools.npy_write(X_monstar, np_X)
 	file_tools.npy_write(Y_monstar, np_Y)
 
-#sys.exit("DEBUGG")
 # load the np arrays and split them into val and train sets;
 x_train, x_val, y_train, y_val =  train_test_split(X_monstar, Y_monstar, test_size=0.2, random_state=42, shuffle = True, stratify = Y_monstar)
-
-#x_train = X_monstar
-#y_train = Y_monstar
 
 #----------------------------------------------------------------------
 # check for gpu access;

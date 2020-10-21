@@ -219,7 +219,7 @@ teacher.add(LSTM(128, input_shape=(x_train.shape[1], x_train.shape[2]), unit_for
 teacher.add(Dropout(0.5))
 teacher.add(LSTM(128))
 teacher.add(Dropout(0.5))
-teacher.add(Dense(n_classes, activation ='softmax'))
+#teacher.add(Dense(n_classes, activation ='softmax'))
 
 	
 # Create the student
@@ -227,7 +227,7 @@ student = tf.keras.Sequential()
 # with cudnn
 student.add(LSTM(64, input_shape=(x_train.shape[1], x_train.shape[2]), unit_forget_bias=True, return_sequences=False)),
 student.add(Dropout(0.5)),
-student.add(Dense(n_classes, activation ='softmax')),
+#student.add(Dense(n_classes, activation ='softmax')),
 
 # Clone student for later comparison
 student_scratch = keras.models.clone_model(student)
@@ -235,6 +235,11 @@ student_scratch = keras.models.clone_model(student)
 
 #=====================================================================
 # training setup;
+
+# note on "from_logits = true";
+# src - https://datascience.stackexchange.com/questions/73093/what-does-from-logits-true-do-in-sparsecategoricalcrossentropy-loss-function
+# src - https://stackoverflow.com/questions/52125924/why-does-sigmoid-crossentropy-of-keras-tensorflow-have-low-precision/52126567#52126567
+# src - https://stackoverflow.com/questions/61233425/what-should-i-use-as-target-vector-when-i-use-binarycrossentropyfrom-logits-tru/61237426#61237426
 #=====================================================================
 
 # Train teacher as usual

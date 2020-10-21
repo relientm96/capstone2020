@@ -80,7 +80,8 @@ best_hyperparameters
 
 # We can distribute tuning across our Spark cluster
 # by calling `fmin` with a `SparkTrials` instance.
-spark_trials = SparkTrials(parallelism=24)
+# we only have 8 cores in the cpu;
+spark_trials = SparkTrials(parallelism=8)
 best_hyperparameters = fmin(
   fn=train,
   space=search_space,

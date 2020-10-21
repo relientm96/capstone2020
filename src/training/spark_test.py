@@ -10,9 +10,11 @@ import findspark
 findspark.init()
 import pyspark
 from pyspark.sql import SparkSession
+spark = SparkSession.builder.getOrCreate()
+df = spark.sql("select 'spark' as hello ")
+df.show()
 
 import sys
-
 # to solve java heap memory space;
 # src - https://stackoverflow.com/questions/32336915/pyspark-java-lang-outofmemoryerror-java-heap-space
 spark = SparkSession.builder \
@@ -23,9 +25,6 @@ spark = SparkSession.builder \
 
 df = spark.sql("select 'spark' as hello ")
 df.show()
-
-
-
 
 # ml tracking
 #import mlflow
