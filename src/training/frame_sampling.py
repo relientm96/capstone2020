@@ -73,7 +73,7 @@ def split_half(arr, meet_size = HALF):
 		sub-sample the array at odd and even;
 	'''
 
-	# split them
+	# split themm
 	out1 = arr[0::2]
 	out2 = arr[1::2]
 	return(out1, out2)
