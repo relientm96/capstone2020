@@ -276,9 +276,31 @@ def process_block(directory_path):
 
 # test driver;
 if __name__ == '__main__':
-	directory_path = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train"
-	TEST_PATH = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train.txt"
-	process_block(directory_path)
+	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\75-frames"
+	
+	# get the 75-frame training data;
+	X_75 = np.load(prefix+"\\X_combine.npy")
+	Y_75 = np.load(prefix+"\\Y_combine.npy")
+
+	# reduce the samples;
+	X_35 = down_sampling(X_75)
+	Y_35 = down_sampling(Y_75)
+
+	# sanity check;
+	print("x_75 shape: ", X_75)
+	print("y_75 shape: ", y_75)
+
+	print("x_35 shape: ", X_35)
+	print("y_35 shape: ", y_35)
+
+	# save them;
+	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy"
+	np.save(prefix+"\\X_train_35.npy", X_35)
+	np.save(prefix+"\\Y_train_35.npy", Y_35)
+	
+	#directory_path = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train"
+	#TEST_PATH = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train.txt"
+	#process_block(directory_path)
 	#filepath = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train\\speed_08\\AMBULANCE\\Y_AMBULANCE_train_down.npy"
 	#y = np.load(filepath)
 	#print(y.shape)
