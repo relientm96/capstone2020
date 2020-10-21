@@ -77,33 +77,6 @@ def load_Y(y_path):
 	return y_ - 1
 
 #---------------------------------------------------------------------------------------------
-# set up for the neural network;
-# 1. define the hyperparameters: "super_params"
-# 2. set up the model architecture: "LSTM_setup"
-#---------------------------------------------------------------------------------------------
-# (hyper)parameters set up for the (lstm) model;
-def super_params(n_hidden = n_hidden, n_classes = n_classes, dropout = 0.2, epoch = 80, batch_size = batch_size):
-	params = dict()
-	params['n_hidden'] = n_hidden
-	params['n_classes'] = n_classes
-	params['dropout'] = dropout
-	params['epoch'] = epoch
-	params["batch_size"] = batch_size
-	return params
-
-def LSTM_setup(x_train, y_train):
-	# get the params;
-	par = super_params()
-	# Define Model
-	model = Sequential()
-	model.add(LSTM(par["n_hidden"], input_shape=(x_train.shape[1], x_train.shape[2]), activation='relu', return_sequences=True))
-	model.add(Dropout(par["dropout"]))
-	model.add(LSTM(n_hidden, activation='relu'))
-	model.add(Dropout(par["dropout"]))
-	model.add(Dense(par["n_classes"], activation='softmax'))
-	return model
-
-#---------------------------------------------------------------------------------------------
 # (stratified) k-fold cross-validation (CV);
 # 1. we use stratified version of CV as we have imbalanced dataset; (i.e. not all classes are uniform);
 # 2. k-fold = 10, by standard practice of applied machine learning;
@@ -113,7 +86,7 @@ def LSTM_setup(x_train, y_train):
 # src - https://scikit-learn.org/stable/auto_examples/model_selection/plot_nested_cross_validation_iris.html#:~:text=Nested%20cross%2Dvalidation%20(CV),its%20(hyper)parameter%20search.&text=Information%20may%20thus%20%E2%80%9Cleak%E2%80%9D%20into,model%20and%20overfit%20the%20data.
 #---------------------------------------------------------------------------------------------
 
-def cross_validate(x_raw, y_raw, kfold):
+def cross_validate(x_raw, y_raw, kfold, LSTM_func):
 
 	# trace the memory usage;
 	tracemalloc.start()
@@ -141,7 +114,8 @@ def cross_validate(x_raw, y_raw, kfold):
 		snapshot = tracemalloc.take_snapshot()
 
 		# set up the lstm ;
-		model = LSTM_setup(x_train, y_train)
+		#model = LSTM_setup(x_train, y_train)
+        model = LSTM_func(x_train, y_train)
 		
 		# Optimizer
 		opt = tf.keras.optimizers.Adam(lr=1e-4, decay=1e-5)
