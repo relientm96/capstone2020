@@ -202,9 +202,43 @@ def balance_data_sample(dataset, sample_size):
 	down_arr = dataset[ls,:,:]
 	return down_arr
 
+def patch_nparrays(npy_directory):
+	''' 
+	function:
+		combine all the npy files into one; 
+	'''
+	x_file = []
+	y_file = []
+	for root, dirs, files in os.walk(npy_directory, topdown=False):
+		for name in files:
+			loc = os.path.join(root, name)
+			#print('loc: ', loc)
+			# X or Y?
+			tmp = loc.split("\\")[-1]
+			tmp = tmp.split("_")[0].lower()
+			if(tmp == 'x'):
+				data = np.load(loc)
+				print('x data shape: ', data.shape)
+				x_file.append(data)
+			else:
+				data = np.load(loc)
+				print('y data shape: ', data.shape)
+				y_file.append(data)
 
-# combine all the np arrays;
-def patch_nparrays(txt_directory, search_term):
+	# concatenate all the arrays into one;
+	X_combine = np.concatenate(tuple(x_file), axis = 0)
+	Y_combine = np.concatenate(tuple(y_file), axis = 0)
+
+	# sanity check on the size;
+	print("x combine size: ", X_combine.shape)
+	print("y combine size: ", Y_combine.shape)
+
+	return (X_combine, Y_combine)
+
+
+
+# convert all text files into npy files then combine them;
+def convert_and_patch_nparrays(txt_directory, search_term):
 	'''
 		task:
 			load all the generated txt files as np arrays and combine into one;
@@ -307,20 +341,30 @@ if __name__ == '__main__':
 	
 	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train"
 
-	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train\\rotate"
+	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train\\shear"
+	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy"
 
+	(x_combine, y_combine) = patch_nparrays(prefix)
+	np.save(prefix+"\\X_combine.npy", x_combine)
+	np.save(prefix+"\\Y_combine.npy", y_combine)
+	
 	#sign_dir = prefix+"\\4-hospital-txt\\X_train.txt"
 	#(x_mon, y_mon)= patch_nparrays(prefix, "txt")
 	#print(x_mon.shape, y_mon.shape)
 
-	(x_mon, y_mon)= patch_nparrays(prefix, "txt")
+	'''
+	(x_mon, y_mon)= convert_and_patch_nparrays(prefix, "txt")
 	print(x_mon.shape, y_mon.shape)
 
 	filenameX = prefix+"\\X_rotate_main.npy"
 	filenameY = prefix+"\\Y_rotate_main.npy"
 
+	filenameX = prefix+"\\X_shear_main.npy"
+	filenameY = prefix+"\\Y_shear_main.npy"
+
 	np.save(filenameX, x_mon)
 	np.save(filenameY, y_mon)
+	'''
 
 
 
