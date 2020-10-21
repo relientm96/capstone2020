@@ -146,8 +146,8 @@ def get_class_dict_info(filedirectory, search_term):
 	dict = {}
 	# how many set it has?
 	ncombine = subdir_count(filedirectory)
-	print("ncombine: ", ncombine)
-	sys.exit('DEBUG')
+	print("get_class_fict_info; ncombine: ", ncombine)
+	#sys.exit('DEBUG')
 	if not(os.path.isdir(filedirectory)):
 		sys.exit("the directory is not valid;")
 	print('directory: ', filedirectory)
@@ -176,7 +176,7 @@ def get_class_dict_info(filedirectory, search_term):
 					print('there is an error: %s, so ... do it differently', e)
 					dict[classname] = nparray.shape[0]
 				
-	print(dict)
+	print("get_class_dict_info: ", dict)
 	# get the min;
 	minimum = min(dict.items(), key=operator.itemgetter(1))
 	print('class with the lowest samples: ', minimum)
@@ -196,6 +196,7 @@ def balance_data_sample(dataset, sample_size):
 			- to downsample the class samples to sample_size;
 	'''
 	nrows = np.size(dataset, 0)
+	print("balance_data_sample; sample_size: ", sample_size)
 	# get a list of unique random int within the sample size;
 	ls = random.sample(range(0, nrows), sample_size)
 	down_arr = dataset[ls,:,:]
@@ -228,6 +229,9 @@ def patch_nparrays(txt_directory, search_term):
 			tmp = tmp.split("_")[0].lower()
 			
 			proportion = int(sample_size/ncombine)
+			print("sample_size: ", sample_size)
+			print("ncombine: ", ncombine)
+			print("proportion: ", proportion)
 			#proportion = int(sample_size/2)
 			# txt or npy? process them differently;
 			if(search_term == "txt"):
@@ -237,6 +241,7 @@ def patch_nparrays(txt_directory, search_term):
 					INDEX = 0
 					# load it;
 					dataset = lstm.load_X(search_file)
+					print("search_file: ", search_file)
 					print('prior size: ', dataset.shape)
 					# handle imbalanced distribution, if any;
 					dataset = balance_data_sample(dataset, proportion)
@@ -292,8 +297,8 @@ def write2text(array, filepath):
 	np2file = open(filepath, 'a+')
 	for row in array:
 		print(row)
-		sys.exit("debug")
-		#np.savetxt(np2file, row)
+		#sys.exit("debug")
+		np.savetxt(np2file, row)
 	np2file.close()
 
 
@@ -301,15 +306,18 @@ def write2text(array, filepath):
 if __name__ == '__main__':
 	
 	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train"
+
+	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train\\rotate"
+
 	#sign_dir = prefix+"\\4-hospital-txt\\X_train.txt"
 	#(x_mon, y_mon)= patch_nparrays(prefix, "txt")
 	#print(x_mon.shape, y_mon.shape)
 
-	(x_mon, y_mon)= patch_nparrays(prefix, "npy")
+	(x_mon, y_mon)= patch_nparrays(prefix, "txt")
 	print(x_mon.shape, y_mon.shape)
 
-	filenameX = prefix+"\\X_main.npy"
-	filenameY = prefix+"\\Y_main.npy"
+	filenameX = prefix+"\\X_rotate_main.npy"
+	filenameY = prefix+"\\Y_rotate_main.npy"
 
 	np.save(filenameX, x_mon)
 	np.save(filenameY, y_mon)
