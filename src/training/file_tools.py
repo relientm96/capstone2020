@@ -202,6 +202,8 @@ def balance_data_sample(dataset, sample_size):
 	down_arr = dataset[ls,:,:]
 	return down_arr
 
+
+# a quick fix;
 def patch_nparrays(npy_directory):
 	''' 
 	function:
