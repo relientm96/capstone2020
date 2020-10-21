@@ -1,4 +1,3 @@
-# reorganizing all the models into one place;
 
 # (hyper)parameters set up for the (lstm) model;
 def super_params(n_hidden = 128, n_classes = 4, dropout = 0.5, epoch = 80, batch_size = 64, activation_function="tanh"):
