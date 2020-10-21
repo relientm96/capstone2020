@@ -81,11 +81,12 @@ def load_Y(y_path):
 # 1. we use stratified version of CV as we have imbalanced dataset; (i.e. not all classes are uniform);
 # 2. k-fold = 10, by standard practice of applied machine learning;
 # src - https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html
-# src - https://machinelearningmastery.com/evaluate-performance-deep-learning-models-keras/#:~:text=Keras%20can%20separate%20a%20portion,size%20of%20your%20training%20dataset.
-# src - https://scikit-learn.org/stable/modules/cross_validation.html
-# src - https://scikit-learn.org/stable/auto_examples/model_selection/plot_nested_cross_validation_iris.html#:~:text=Nested%20cross%2Dvalidation%20(CV),its%20(hyper)parameter%20search.&text=Information%20may%20thus%20%E2%80%9Cleak%E2%80%9D%20into,model%20and%20overfit%20the%20data.
+#  - https://machinelearningmastery.com/evaluate-performance-deep-learning-models-keras/#:~:text=Keras%20can%20separate%20a%20portion,size%20of%20your%20training%20dataset.
+#  - https://scikit-learn.org/stable/modules/cross_validation.html
+#  - https://scikit-learn.org/stable/auto_examples/model_selection/plot_nested_cross_validation_iris.html#:~:text=Nested%20cross%2Dvalidation%20(CV),its%20(hyper)parameter%20search.&text=Information%20may%20thus%20%E2%80%9Cleak%E2%80%9D%20into,model%20and%20overfit%20the%20data.
 #---------------------------------------------------------------------------------------------
 
+# added an extra argument to use different models;
 def cross_validate(x_raw, y_raw, kfold, LSTM_func):
 
 	# trace the memory usage;
