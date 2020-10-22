@@ -8,3 +8,6 @@ auslan-videos/
 
 # Ignore random text files
 FUCK.txt
+
+# ignore pickle files;
+*.p
