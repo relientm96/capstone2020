@@ -345,11 +345,21 @@ if __name__ == '__main__':
 
 	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train\\shear"
 	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy"
+	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames\\ambulance"
+	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames\\help"
 
-	(x_combine, y_combine) = patch_nparrays(prefix)
-	np.save(prefix+"\\X_combine.npy", x_combine)
-	np.save(prefix+"\\Y_combine.npy", y_combine)
+	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames\\hospital"
+	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames\\pain"
 	
+	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames\\combine"
+
+	get_class_dict_info(prefix, "npy")
+
+	'''
+	(x_combine, y_combine) = patch_nparrays(prefix)
+	np.save(prefix+"\\X_pain_combine.npy", x_combine)
+	np.save(prefix+"\\Y_pain_combine.npy", y_combine)
+	'''
 	#sign_dir = prefix+"\\4-hospital-txt\\X_train.txt"
 	#(x_mon, y_mon)= patch_nparrays(prefix, "txt")
 	#print(x_mon.shape, y_mon.shape)

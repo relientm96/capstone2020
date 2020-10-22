@@ -285,7 +285,7 @@ def process_block(directory_path):
 
 # test driver;
 if __name__ == '__main__':
-	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\text-dataset\\rotate"
+	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\text-dataset\\shear"
 	process_block(prefix)
 	'''
 	# get the 75-frame training data;

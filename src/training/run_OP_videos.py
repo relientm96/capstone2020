@@ -7,7 +7,7 @@ import video_tools as VID
 # global var(s);
 #SPEED = [1, 0.6, 0.8, 1.2, 1.4]
 
-SPEED = [1.3]
+SPEED = [1.0]
 #DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
 
 
@@ -39,9 +39,11 @@ def process_one_class(signvideodirectory):
 
 
 	# which transformatoon? rotation or shear?
-	func = VID.shear_video
+	#func = VID.shear_video
+	func = VID.video_rotate
 	# transformation parameters; angles?
-	DEGREE = [-10, -5, 5, 10]
+	#DEGREE = [-10, -5, 5, 10]
+	DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
 
 	for root, dirs, files in os.walk(signvideodirectory, topdown=False):
 		for name in files:
@@ -54,7 +56,7 @@ def process_one_class(signvideodirectory):
 			print("currently processing: ", src_path)
 			# current video has not been processed; 
 			if not (ftools.checksubstring(src_path, "checked")):
-				process_one_video(src_path, path_X, path_Y, func, DEGREE)
+				process_one_video(src_path, path_X, path_Y, func, DEGREE, SPEED)
 				# done processing? sign off;
 				# so that the processed video will not be processed again;
 				print('the current video has been processed: ', src_path)
@@ -69,7 +71,9 @@ def process_one_class(signvideodirectory):
 	
 
 if __name__ == '__main__':
-	path = "C:\\Users\\yongw4\\Desktop\\test"
+	path = "C:\\Users\\yongw4\\Desktop\\test\\HOSPITAL\\yick"
+	process_one_class(path)
+	'''
 	for root, dirs, files in os.walk(path):
 		for i in range(len(dirs)):
 			classvideo = os.path.join(root, dirs[i])
@@ -77,3 +81,4 @@ if __name__ == '__main__':
 			process_one_class(classvideo)
 		# stop here;
 		break
+	'''
