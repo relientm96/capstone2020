@@ -16,6 +16,23 @@ from tensorflow.keras.layers import Dense, Dropout, LSTM
 from tensorflow.keras import backend as keras_backend
 import tensorflow as tf
 
+#----------------------------------------------------------------------
+# check for gpu access;
+#----------------------------------------------------------------------
+def check_gpu():
+	gpus = tf.config.experimental.list_physical_devices('GPU')
+	if(len(gpus) ==0):
+		sys.exit("NO GPU is found!")
+	if gpus:
+		try:
+			# Currently, memory growth needs to be the same across GPUs
+			for gpu in gpus:
+				tf.config.experimental.set_memory_growth(gpu, True)
+			logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+			print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+		except RuntimeError as e:
+			# Memory growth must be set before GPUs have been initialized
+			print(e)
 
 
 #---------------------------------------------------------------------------------------------
@@ -146,28 +163,6 @@ def cross_validate(x_raw, y_raw, kfold, LSTM_func):
 	print("statistics on the memory usage (top 5);")
 	for stat in top_stats[:5]:
 			print(stat)
-
-#---------------------------------------------------------------------------------------------
-# extract the best model in terms of accuracy for deployment;
-# note:
-#   1. since the model is of stochastic nature, so for a fixed set of hyperparameters and architecture,
-#       we will different model every time we train and fit it;
-#   2. as such, we ought to run for multiple times, and get the best for deployment;
-# remark;
-#   1. this stage is after we have optimize/tuning the hyperparameters;
-#   2. i.e. once we have done: validation, tuning, validation (again), and testing; 
-#---------------------------------------------------------------------------------------------
-
-def get_deployable_model(x_raw, y_raw):
-	# load the raw data;
-	x_train = load_X(x_raw)
-	y_train = load_Y(y_raw)
-	# set up the model;  
-	par = super_params()
-	model = LSTM_setup(x_train, y_train)
-	# iterating ....
-
-	# define checkpoints to get the best model locally during training;
 
 
 # test driver;

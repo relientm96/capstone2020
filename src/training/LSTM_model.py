@@ -1,4 +1,37 @@
-# reoragnize all the models;
+#/usr/bin/env/python
+# created by matthew; nebulaM78 team; capstone 2020;
+# to train the (cudnn) lstm model 
+
+# tf/ keras
+import tensorflow as tf
+from tensorflow import keras
+#import matplotlib.pyplot as plt
+import math
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Dense, Dropout,LSTM
+
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
+#print('Default GPU Device: {}'.format(tf.test.gpu_device_name()))
+
+# known issue: keras version mismatch;
+# solution src - https://stackoverflow.com/questions/53183865/unknown-initializer-glorotuniform-when-loading-keras-model
+#from keras.models import load_model
+from tensorflow.keras.models import load_model
+from tensorflow.keras.callbacks import History 
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
+
+# sklearn tool kits
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+
+# opthers;
+import numpy as np
+import os
+import sys
+import json
+
 
 # (hyper)parameters set up for the (lstm) model;
 def super_params(n_hidden = 128, n_classes = 4, dropout = 0.5, epoch = 80, batch_size = 64, activation_function="tanh"):
@@ -10,7 +43,6 @@ def super_params(n_hidden = 128, n_classes = 4, dropout = 0.5, epoch = 80, batch
 	params["batch_size"] = batch_size
 	params['activation'] = activation_function
 	return params
-
 
 #----------------------------------
 # LSTM models (75 or 35 frames):
