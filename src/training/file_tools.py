@@ -139,7 +139,7 @@ def get_class_dict_info(filedirectory, search_term):
 			filedirectory; where are the text files?
 			search_term; txt format or npy format;
 		return:
-			the class info with the lowest number of samples;
+			the class info with the lowest number of sampleso;
 		function:
 			to find out which class has the lowest number of samples;
 	'''
@@ -201,30 +201,50 @@ def balance_data_sample(dataset, sample_size):
 	ls = random.sample(range(0, nrows), sample_size)
 	down_arr = dataset[ls,:,:]
 	return down_arr
-
-
+	
 # a quick fix;
-def patch_nparrays(npy_directory):
+def patch_nparrays(npy_directory, balance = 0):
 	''' 
 	function:
-		combine all the npy files into one; 
+		combine all the npy files into one; and balance out the distribution if flagged;
 	'''
+	# ge the overall class distribution;
+	(ncombine, minimum) = get_class_dict_info(npy_directory, "npy")
+	if(ncombine == 0):
+		ncombine = 1
+	sample_size = minimum[1]
+	# assuming ncombine > 0
+	proportion = int(sample_size/ncombine)
+	print("proportion: ", proportion)
 	x_file = []
 	y_file = []
 	for root, dirs, files in os.walk(npy_directory, topdown=False):
 		for name in files:
 			loc = os.path.join(root, name)
-			#print('loc: ', loc)
+			print('loc: ', loc)
+			#sys.exit('DEBUG')
+
 			# X or Y?
 			tmp = loc.split("\\")[-1]
 			tmp = tmp.split("_")[0].lower()
 			if(tmp == 'x'):
 				data = np.load(loc)
-				print('x data shape: ', data.shape)
+				
+				# need to balance the class distribution?
+				if(balance):
+					print('x prior size: ', data.shape)
+					# handle imbalanced distribution, if any;
+					data = balance_data_sample(data, proportion)
+					print("after size: ", data.shape)
 				x_file.append(data)
 			else:
 				data = np.load(loc)
-				print('y data shape: ', data.shape)
+				print('y prior shape: ', data.shape)
+				# handle imbalanced dist?
+				if(balance):
+					print("prior size: ", data.shape)
+					data = data[0:proportion,:]
+					print("after size: ", data.shape)
 				y_file.append(data)
 
 	# concatenate all the arrays into one;
@@ -263,7 +283,8 @@ def convert_and_patch_nparrays(txt_directory, search_term):
 			# X or Y?
 			tmp = search_file.split("\\")[-1]
 			tmp = tmp.split("_")[0].lower()
-			
+
+			# assuming ncombine > 0
 			proportion = int(sample_size/ncombine)
 			print("sample_size: ", sample_size)
 			print("ncombine: ", ncombine)
@@ -352,14 +373,15 @@ if __name__ == '__main__':
 	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames\\pain"
 	
 	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames\\combine"
+	prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020\\train-npy\\35-frames\\combine"
+	#patch_nparrays(prefix)
+	#get_class_dict_info(prefix, "npy")
 
-	get_class_dict_info(prefix, "npy")
+	(x_combine, y_combine) = patch_nparrays(prefix, balance = 1)
+	prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020\\train-npy\\35-frames"
+	np.save(prefix+"\\X_MAIN.npy", x_combine)
+	np.save(prefix+"\\Y_MAIN.npy", y_combine)
 
-	'''
-	(x_combine, y_combine) = patch_nparrays(prefix)
-	np.save(prefix+"\\X_pain_combine.npy", x_combine)
-	np.save(prefix+"\\Y_pain_combine.npy", y_combine)
-	'''
 	#sign_dir = prefix+"\\4-hospital-txt\\X_train.txt"
 	#(x_mon, y_mon)= patch_nparrays(prefix, "txt")
 	#print(x_mon.shape, y_mon.shape)
