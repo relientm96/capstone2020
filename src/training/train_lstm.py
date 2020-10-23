@@ -106,9 +106,9 @@ model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['a
 
 # the following only works for tanh_two_layers()
 #checkpoint = ModelCheckpoint(checkpoints_path , verbose=1, monitor='acc',save_best_only=True, mode='max')  
-checkpoint = ModelCheckpoint(checkpoints_path , verbose=1, monitor='acc',save_best_only=True, mode='max')  
+checkpoint = ModelCheckpoint(checkpoints_path , verbose=1, monitor='acc',save_best_only=False, mode='max', save_freq='epoch')  
 reduce_lr_loss = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=10, verbose=1, min_delta=1e-4, mode='min')
-earlyStopping = EarlyStopping(monitor='val_acc',patience=10,verbose=1,mode='max')
+earlyStopping = EarlyStopping(monitor='val_acc',patience=100,verbose=1,mode='max')
 callbacks_list = [earlyStopping ,checkpoint, reduce_lr_loss]
 history = model.fit(x_train, y_train, epochs=200, batch_size = batch_size, verbose = 2, callbacks = callbacks_list, validation_data = (x_val, y_val))
 model.summary()
