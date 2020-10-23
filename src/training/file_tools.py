@@ -185,6 +185,11 @@ def get_class_dict_info(filedirectory, search_term):
 	#ls = [(key, value) for key,value in dict.items() if key != classmin]
 	return (ncombine, minimum)
 
+
+# get the complement of a list by using set theory!;
+def Diff(li1, li2):
+	return (list(list(set(li1)-set(li2)) + list(set(li2)-set(li1))))
+ 
 def balance_data_sample(dataset, sample_size):
 	'''
 		args:
@@ -200,7 +205,12 @@ def balance_data_sample(dataset, sample_size):
 	# get a list of unique random int within the sample size;
 	ls = random.sample(range(0, nrows), sample_size)
 	down_arr = dataset[ls,:,:]
-	return down_arr
+
+	# salvage the data that will not be used for training;
+	main_ls = [i for i in range(0, nrows)]
+	comp_ls = Diff(main_ls, ls)
+	scrap_arr = dataset[comp_ls,:,:]
+	return (down_arr, scrap_arr)
 	
 # a quick fix;
 def patch_nparrays(npy_directory, balance = 0):
@@ -234,7 +244,7 @@ def patch_nparrays(npy_directory, balance = 0):
 				if(balance):
 					print('x prior size: ', data.shape)
 					# handle imbalanced distribution, if any;
-					data = balance_data_sample(data, proportion)
+					data,scrap = balance_data_sample(data, proportion)
 					print("after size: ", data.shape)
 				x_file.append(data)
 			else:
@@ -306,7 +316,7 @@ def convert_and_patch_nparrays(txt_directory, search_term, balance):
 					print('prior size: ', dataset.shape)
 					if(balance):
 						# handle imbalanced distribution, if any;
-						dataset = balance_data_sample(dataset, proportion)
+						dataset,_ = balance_data_sample(dataset, proportion)
 						print("after size: ", dataset.shape)
 				# the label file, Y;
 				else:
@@ -325,7 +335,7 @@ def convert_and_patch_nparrays(txt_directory, search_term, balance):
 					print('prior size: ', dataset.shape)
 					if(balance):
 						# handle imbalanced distribution, if any;
-						dataset = balance_data_sample(dataset, proportion)
+						dataset,scrap = balance_data_sample(dataset, proportion)
 						print("after size: ", dataset.shape)
 				else:
 					INDEX = 1

@@ -102,15 +102,17 @@ def drive_test_pipeline(test_path):
 
 	# transformation set to synthesize the test data;
 	henshin = [VID.warp_phi_video, VID.warp_theta_video, VID.zoom_video]
+	
 	# its corresponding parameters;
-	params = [[-40,-20,0,20,40], [-40,-20,0,20,40], [1, 1.2, 1.4, 1.6, 1.8]]
-
+	params = [[-40,-20,0,20,40], [-40,-20,20,40], [1.4, 1.8]]
+	
+	# write paths;
 	path_X = os.path.join(test_path, "X_" + tmpname + "_test.txt")
 	path_Y = os.path.join(test_path, "Y_" + tmpname + "_test.txt")
 
 	for i in range(0, len(henshin)):
 		#process_one_block(test_path, path_X, path_Y, func = henshin[i], PARAMS[i])
-		process_one_block(test_path, path_X, path_Y, henshin[i], params[i], speed = [0.8, 1, 1.2])
+		process_one_block(test_path, path_X, path_Y, henshin[i], params[i], speed = [1])
 		# removing the "checked-off" tag by resetting the directory;
 		reset_direc_filename(test_path)
    
