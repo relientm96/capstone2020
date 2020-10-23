@@ -21,6 +21,7 @@ try:
 except ImportError:  # python 3.x
 	import pickle
 
+import image_tools as IMG
 #------------------------------------------------------------------------------------------
 # OVERVIEW: 
 # it has two set of modules:
@@ -432,7 +433,7 @@ def video_speed(input, output, speed):
 		fast_video(input, output, speed)	
 
 
-def shear_video(input, output, shear=-10):
+def warp_video(input, output, ang = -50):
 	# ref - https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/image/apply_affine_transform
 	'''
 	function:
@@ -457,19 +458,22 @@ def shear_video(input, output, shear=-10):
 	# apply the transformation:
 	for i in range(0, len(input_list)):
 		frame = input_list[i]
-		henshin = tf.keras.preprocessing.image.apply_affine_transform(frame, theta=0, tx=0, ty=0, shear=shear, zx=1.1, zy=1.1,
-																		row_axis=0, col_axis=0, channel_axis=2, fill_mode='nearest', cval=0.0, order=1)
 		
-		#plt.imshow(henshin)
-        #plt.show()
-        #henshin = cv2.cvtColor(henshin, cv2.COLOR_RGB2BGR)
-		outls.append(henshin)
+		with tempfile.TemporaryDirectory() as dummy_path:
+			img_path = dummy_path + "\\dummy.jpg"
+			cv2.imwrite(img_path, frame)
+			warper = IMG.ImageTransformer(img_path, None)
+			rotated_img = warper.rotate_along_axis(phi = ang, dx = 0)
+			#plt.imshow(henshin)
+			#plt.show()
+			#henshin = cv2.cvtColor(henshin, cv2.COLOR_RGB2BGR)
+			outls.append(rotated_img)
 		
 	# done? write it;
 	frames2video(outls, output, size)
 	
 	#video_rotate(output, "viola.mp4", -10)
-	print("the sheared-video has been saved to: ", output)
+	print("the warped-video has been saved to: ", output)
 
 
 def zoom_video(input, output, ratio = 1.2):
@@ -501,8 +505,8 @@ def zoom_video(input, output, ratio = 1.2):
 																		row_axis=0, col_axis=0, channel_axis=2, fill_mode='constant', cval=0.0, order=1)
 		
 		#plt.imshow(henshin)
-        #plt.show()
-        #henshin = cv2.cvtColor(henshin, cv2.COLOR_RGB2BGR)
+		#plt.show()
+		#henshin = cv2.cvtColor(henshin, cv2.COLOR_RGB2BGR)
 		outls.append(henshin)
 		
 	# done? write it;
@@ -511,7 +515,7 @@ def zoom_video(input, output, ratio = 1.2):
 	#video_rotate(output, "viola.mp4", -10)
 	print("the zoomed-out-video has been saved to: ", output)
 
-def warp_video(input, output, shear=-10):
+def shear_video(input, output, shear=-10):
 	# ref - https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/image/apply_affine_transform
 	'''
 	function:
@@ -536,12 +540,15 @@ def warp_video(input, output, shear=-10):
 	# apply the transformation:
 	for i in range(0, len(input_list)):
 		frame = input_list[i]
+		
+		# to invoke external tools, we need to save it as tmp jpg;
+
 		henshin = tf.keras.preprocessing.image.apply_affine_transform(frame, theta=0, tx=0, ty=0, shear=shear, zx=1.1, zy=1.1,
 																		row_axis=0, col_axis=0, channel_axis=2, fill_mode='nearest', cval=0.0, order=1)
 		
 		#plt.imshow(henshin)
-        #plt.show()
-        #henshin = cv2.cvtColor(henshin, cv2.COLOR_RGB2BGR)
+		#plt.show()
+		#henshin = cv2.cvtColor(henshin, cv2.COLOR_RGB2BGR)
 		outls.append(henshin)
 		
 	# done? write it;
@@ -558,8 +565,12 @@ if __name__ == '__main__':
 	output = "C:\\CAPSTONE\\capstone2020\\src\\training\\test-videos\\auslan\\shear_ambulance.mp4"
 	videopath = "C:\\Users\\yongw4\\Desktop\\dummy_video.mp4"
 	output = "C:\\Users\\yongw4\\Desktop\\henshin_video.mp4"
-	zoom_video(videopath, output, 1.5)
+	#zoom_video(videopath, output, 1.5)
 
+
+	videopath = "C:\\Users\\yongw4\\Desktop\\test-set\\test-set\\organized\\set-1\\ambulance_1.mp4"
+	output = "C:\\Users\\yongw4\\Desktop\\test-set\\test-set\\organized\\set-1\\DUMMY.mp4"
+	warp_video(videopath, output)
 	#video_speed(videopath, output, 0.6)
 	# test - 01
 	'''
