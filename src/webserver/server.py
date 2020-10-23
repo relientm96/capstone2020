@@ -1,3 +1,6 @@
+from utils import removeConfidenceAndShapeAsNumpy
+from openpose import initializeOpenPose
+import socketio
 import argparse
 import asyncio
 import json
@@ -6,6 +9,7 @@ import os
 import ssl
 import uuid
 
+import pprint as pp
 import numpy as np
 import sys
 
@@ -15,23 +19,23 @@ from av import VideoFrame
 
 from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
 
+import tensorflow as tf
+
 ROOT = os.path.dirname(__file__)
 
 logger = logging.getLogger("pc")
 pcs = set()
 
 # Socket io
-import socketio
 sio = socketio.AsyncServer(async_mode='aiohttp')
 
 # Custom Imports
-from openpose import initializeOpenPose
-from utils import removeConfidenceAndShapeAsNumpy
 
 # Global References for OpenPose object
 op = None
 opWrapper = None
 keypoints = None
+
 
 class VideoTransformTrack(MediaStreamTrack):
     """
@@ -49,13 +53,18 @@ class VideoTransformTrack(MediaStreamTrack):
         frame = await self.track.recv()
 
         if "openpose" in self.transform:
-            img = frame.to_ndarray(format="bgr24")
-
+            x = frame.to_ndarray(format="bgr24")
+            # We apply affline transform to extrapolate edges for openpose
+            img = tf.keras.preprocessing.image.apply_affine_transform(
+                x, theta=0, tx=0, ty=0, shear=0, zx=1.2, zy=1.2, row_axis=0, col_axis=0,
+                channel_axis=2, fill_mode='nearest', cval=0.0, order=1
+            )
+            
             datum = op.Datum()
             datum.cvInputData = img
             opWrapper.emplaceAndPop([datum])
             image = datum.cvOutputData
-            
+
             '''
             # If confidence level of elbow < threshold, alert client
             if datum.poseKeypoints[0][3][2] < 0.2:
@@ -77,7 +86,7 @@ class VideoTransformTrack(MediaStreamTrack):
         else:
             return frame
 
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # Defined App Routes
 
 # index               : index home page rendering
@@ -88,42 +97,56 @@ class VideoTransformTrack(MediaStreamTrack):
 # load_model_shard    : loads shards of model.json
 # main_js_load        : loads main js file
 # on_shutdown         : clean up before app closes
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
+
+
 async def index(request):
     content = open(os.path.join(ROOT, "index.html"), "r").read()
     return web.Response(content_type="text/html", text=content)
+
 
 async def main_js_load(request):
     content = open(os.path.join(ROOT, "main.js"), "r").read()
     return web.Response(content_type="application/javascript", text=content)
 
+
 async def rolling_window_load(request):
     content = open(os.path.join(ROOT, "rollingwindow.js"), "r").read()
     return web.Response(content_type="application/javascript", text=content)
+
 
 async def client_load(request):
     content = open(os.path.join(ROOT, "client.js"), "r").read()
     return web.Response(content_type="application/javascript", text=content)
 
+
 async def load_model_json(request):
-    content = open(os.path.join(ROOT, "model_35_frames/model.json"), "r").read()
+    content = open(os.path.join(
+        ROOT, "model_35_frames/model.json"), "r").read()
     return web.Response(content_type="application/json", text=content)
 
+
 async def load_model_shard(request):
-    content = open(os.path.join(ROOT, "model_35_frames/group1-shard1of1.bin"), "rb").read()
+    content = open(os.path.join(
+        ROOT, "model_35_frames/group1-shard1of1.bin"), "rb").read()
     return web.Response(content_type="application/octet-stream", body=content)
+
 
 async def load_ambulance_gif(request):
     return web.FileResponse('res/ambulance_sign.gif')
 
+
 async def load_pain_gif(request):
     return web.FileResponse('res/pain_input.gif')
+
 
 async def load_help_gif(request):
     return web.FileResponse('res/help_sign.gif')
 
+
 async def load_hospital_gif(request):
     return web.FileResponse('res/hospital.gif')
+
 
 async def offer(request):
     params = await request.json()
@@ -173,6 +196,7 @@ async def offer(request):
         ),
     )
 
+
 async def on_shutdown(app):
     # close peer connections
     coros = [pc.close() for pc in pcs]
@@ -210,7 +234,7 @@ if __name__ == "__main__":
         ssl_context.load_cert_chain(args.cert_file, args.key_file)
     else:
         ssl_context = None
-    
+
     dir_path = os.path.dirname(os.path.realpath(__file__))
     app = web.Application()
     app.on_shutdown.append(on_shutdown)
@@ -225,9 +249,9 @@ if __name__ == "__main__":
     app.router.add_get("/res/help_sign.gif", load_help_gif)
     app.router.add_get("/res/pain_input.gif", load_pain_gif)
     app.router.add_post("/offer", offer)
-    
+
     sio.attach(app)
-    
+
     web.run_app(
         app, access_log=None, host=args.host, port=args.port, ssl_context=ssl_context
     )
