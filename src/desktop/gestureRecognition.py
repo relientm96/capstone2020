@@ -11,14 +11,14 @@ import pprint as pp
 
 MODEL_35 = True
 modelpath = None
+numbJoints   = 98
 if MODEL_35:
 	# Note numb joints here means both x,y values, (eg: if BODY_25 we have 25*2 numb joints)
-	numbJoints   = 98
 	window_Width = 35
-	modelpath = "../training/training-files/frame-75/iter-01/fmodel.h5"
-else:
 	modelpath = "../training/training-files/frame-35/iter-01/fmodel.h5"
-
+else:
+	modelpath = "../training/training-files/frame-75/iter-01/fmodel.h5"
+	window_Width = 75
 ############### INITIALIZATIONS ##################
 
 #### Tensorflow Imports ####
