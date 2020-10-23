@@ -1,7 +1,7 @@
 # 3D effect on a 2d image;
 # src - https://github.com/eborboihuc/rotate_3d?fbclid=IwAR1UiDQYXyFgOY5HuwaUNTsL256UaUwWqIjcJL0CsLOATrM3F4mIdRu_8RI
 
-
+import tensorflow as tf
 from math import pi
 import cv2
 
@@ -144,19 +144,40 @@ class ImageTransformer(object):
 		return np.dot(A2, np.dot(T, np.dot(R, A1)))
 
 
+def zoom_image(img_path, shear):
+	img = load_image(img_path, shape=None)
+	henshin = tf.keras.preprocessing.image.apply_affine_transform(img, theta=0, tx=0, ty=0, shear=0, zx=ratio, zy=ratio,
+																		row_axis=0, col_axis=0, channel_axis=2, fill_mode='constant', cval=0.0, order=1)
+	return henshin
+
+def shear_image(img_path, ratio):
+	img = load_image(img_path, shape=None)
+	henshin = tf.keras.preprocessing.image.apply_affine_transform(img, theta=0, tx=0, ty=0, shear=ratio, zx=1.1, zy=1.1,
+																		row_axis=0, col_axis=0, channel_axis=2, fill_mode='constant', cval=0.0, order=1)
+	return henshin
+
+def rotate_image(img_path, ratio):
+	img = load_image(img_path, shape=None)
+	henshin = tf.keras.preprocessing.image.apply_affine_transform(img, theta=ratio, tx=0, ty=0, shear=0, zx=1, zy=1,
+																		row_axis=0, col_axis=0, channel_axis=2, fill_mode='constant', cval=0.0, order=1)
+	return henshin
 
 # test driver;
 
 if __name__ == '__main__':
 	img_path ="C:\\CAPSTONE\\capstone2020\\src\\training\\test-images\\test1.jpg"
-	img_path = "C:\\Users\\yongw4\\Desktop\\test-set\\dummy_image.jpg"
+	img_path = "C:\\Users\\yongw4\\Desktop\\dummy_image.jpg"
 
 	# Instantiate the class
 	it = ImageTransformer(img_path, None)
 	ang = 50
 	""" Example of rotating an image along y-axis from 0 to 360 degree 
 		with a 5 pixel shift in +X direction """
-	rotated_img = it.rotate_along_axis(phi = ang, dx = 30)
+	#rotated_img = it.rotate_along_axis(phi = ang, dx = 0 )
+	rotated_img = it.rotate_along_axis(theta = ang, dx = 0)
 	print("type: ",type(rotated_img))
 	#save_image('test-images\\{}.jpg'.format(str(ang).zfill(3)), rotated_img)
-	save_image("C:\\Users\\yongw4\\Desktop\\test-set\\henshin_image.jpg", rotated_img)
+	save_image("C:\\Users\\yongw4\\Desktop\\henshin_image.jpg", rotated_img)
+
+	img = rotate_image(img_path, -10)
+	save_image("C:\\Users\\yongw4\\Desktop\\henshin_image.jpg", img)
