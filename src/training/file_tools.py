@@ -214,7 +214,8 @@ def patch_nparrays(npy_directory):
 	for root, dirs, files in os.walk(npy_directory, topdown=False):
 		for name in files:
 			loc = os.path.join(root, name)
-			#print('loc: ', loc)
+			print('loc: ', loc)
+			#sys.exit("DEBUG")
 			# X or Y?
 			tmp = loc.split("\\")[-1]
 			tmp = tmp.split("_")[0].lower()
