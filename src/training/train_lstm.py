@@ -89,7 +89,7 @@ x_train, x_val, y_train, y_val =  train_test_split(X_monstar, Y_monstar, test_si
 #----------------------------------------------------------------------
 print('------ LSTM Model ---------')
 print("building the model")
-model = MODEL.lstm_tanh_two(x_train, y_train)
+model = MODEL.lstm_relu_two(x_train, y_train)
 
 #----------------------------------------------------------------------
 # start the training;
@@ -100,20 +100,17 @@ model = MODEL.lstm_tanh_two(x_train, y_train)
 # 3. potential solution to keyerrors; https://medium.com/@kegui/fixing-the-fixing-the-keyerror-acc-and-keyerror-val-acc-errors-in-keras-f14c6df5baf6
 #----------------------------------------------------------------------
 opt = tf.keras.optimizers.Adam(lr=1e-3, decay=1e-5)
+# the following only works for tanh_two_layers()
+#model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['acc'])
 model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['acc'])
 
-#checkpoint = ModelCheckpoint(checkpoints_path , verbose=1, monitor='acc',save_best_only=True, mode='max', save_freq= 10)  
+# the following only works for tanh_two_layers()
+#checkpoint = ModelCheckpoint(checkpoints_path , verbose=1, monitor='acc',save_best_only=True, mode='max')  
 checkpoint = ModelCheckpoint(checkpoints_path , verbose=1, monitor='acc',save_best_only=True, mode='max')  
-
 reduce_lr_loss = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=10, verbose=1, min_delta=1e-4, mode='min')
-earlyStopping = EarlyStopping(monitor='val_loss',patience=10,verbose=1,mode='min')
+earlyStopping = EarlyStopping(monitor='val_acc',patience=10,verbose=1,mode='max')
 callbacks_list = [earlyStopping ,checkpoint, reduce_lr_loss]
-#callbacks_list = [checkpoint]
-#history = model.fit(x_train, y_train, epochs=200, batch_size = batch_size, verbose = 2, callbacks = callbacks_list, validation_data = (x_val, y_val))
-history = model.fit(x_train, y_train, epochs=200, batch_size = batch_size, verbose = 2, validation_data = (x_val, y_val))
- 
-
-
+history = model.fit(x_train, y_train, epochs=200, batch_size = batch_size, verbose = 2, callbacks = callbacks_list, validation_data = (x_val, y_val))
 model.summary()
 
 # save the results;
