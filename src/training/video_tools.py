@@ -433,11 +433,11 @@ def video_speed(input, output, speed):
 		fast_video(input, output, speed)	
 
 
-def warp_video(input, output, ang = -50):
+def warp_theta_video(input, output, theta = 0):
 	# ref - https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/image/apply_affine_transform
 	'''
 	function:
-		- to shear  video;
+		- to warp video by rotating around the x-axis;
 	args:
 		- input; the filename (path) of the input video;
 		- output; where to save?
@@ -463,7 +463,7 @@ def warp_video(input, output, ang = -50):
 			img_path = dummy_path + "\\dummy.jpg"
 			cv2.imwrite(img_path, frame)
 			warper = IMG.ImageTransformer(img_path, None)
-			rotated_img = warper.rotate_along_axis(phi = ang, dx = 0)
+			rotated_img = warper.rotate_along_axis(theta=theta, dx = 0)
 			#plt.imshow(henshin)
 			#plt.show()
 			#henshin = cv2.cvtColor(henshin, cv2.COLOR_RGB2BGR)
@@ -473,7 +473,50 @@ def warp_video(input, output, ang = -50):
 	frames2video(outls, output, size)
 	
 	#video_rotate(output, "viola.mp4", -10)
-	print("the warped-video has been saved to: ", output)
+	print("the theta-warped-video has been saved to: ", output)
+
+def warp_phi_video(input, output, phi = 0):
+	# ref - https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/image/apply_affine_transform
+	'''
+	function:
+		- to warp video by rotating around the y-axis;
+	args:
+		- input; the filename (path) of the input video;
+		- output; where to save?
+		- shear angle;
+	return:
+		- none;
+	'''
+	# get size;
+	clip = mp.VideoFileClip(input) 
+	size = tuple(clip.size)
+	del clip.reader
+	del clip
+	
+	input_list = grab_frames(input)
+	# assert we meet the lstm window width minimum;
+	input_list = lstm_window_check(input_list)
+	outls = []
+	# apply the transformation:
+	for i in range(0, len(input_list)):
+		frame = input_list[i]
+		
+		with tempfile.TemporaryDirectory() as dummy_path:
+			img_path = dummy_path + "\\dummy.jpg"
+			cv2.imwrite(img_path, frame)
+			warper = IMG.ImageTransformer(img_path, None)
+			rotated_img = warper.rotate_along_axis(phi=phi, dx = 0)
+			#plt.imshow(henshin)
+			#plt.show()
+			#henshin = cv2.cvtColor(henshin, cv2.COLOR_RGB2BGR)
+			outls.append(rotated_img)
+		
+	# done? write it;
+	frames2video(outls, output, size)
+	
+	#video_rotate(output, "viola.mp4", -10)
+	print("the phi-warped-video has been saved to: ", output)
+
 
 
 def zoom_video(input, output, ratio = 1.2):
@@ -570,7 +613,8 @@ if __name__ == '__main__':
 
 	videopath = "C:\\Users\\yongw4\\Desktop\\test-set\\test-set\\organized\\set-1\\ambulance_1.mp4"
 	output = "C:\\Users\\yongw4\\Desktop\\test-set\\test-set\\organized\\set-1\\DUMMY.mp4"
-	warp_video(videopath, output)
+	warp_video(videopath, output, ang = 60)
+	#zoom_video(videopath, output, 1.8)
 	#video_speed(videopath, output, 0.6)
 	# test - 01
 	'''

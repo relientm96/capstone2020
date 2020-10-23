@@ -3,6 +3,7 @@ import os
 import file_tools as ftools
 import sys
 import video_tools as VID
+import frame_sampling as FRAME
 
 # global var(s);
 #SPEED = [1, 0.6, 0.8, 1.2, 1.4]
@@ -17,7 +18,7 @@ def process_one_video(input, path_X, path_Y, func, DEGREE, SPEED):
 		syntools.synthesize_block(input, speed_seed, path_X, path_Y, func, DEGREE)
 		#syntools.synthesize_block(input, speed_seed, path_X, path_Y)
 
-def process_one_block(signvideodirectory, path_X, path_Y, func = VID.video_rotate, parameters=[1]):
+def process_one_block(signvideodirectory, path_X, path_Y, func, parameters=[0], speed = SPEED):
 	
 	# safeguard;
 	# create them if the files do not exist;
@@ -50,7 +51,7 @@ def process_one_block(signvideodirectory, path_X, path_Y, func = VID.video_rotat
 			#sys.exit('DEBUG')
 			# current video has not been processed; 
 			if not (ftools.checksubstring(src_path, "checked")):
-				process_one_video(src_path, path_X, path_Y, func, parameters, SPEED)
+				process_one_video(src_path, path_X, path_Y, func, parameters, speed)
 				# done processing? sign off;
 				# so that the processed video will not be processed again;
 				print('the current video has been processed: ', src_path)
@@ -99,19 +100,30 @@ def drive_test_pipeline(test_path):
 	# get the class name to name the txt files accordingly;
 	tmpname = test_path.split("\\")[-1]
 
+	# transformation set to synthesize the test data;
+	henshin = [VID.warp_phi_video, VID.warp_theta_video, VID.zoom_video]
+	# its corresponding parameters;
+	params = [[-40,-20,0,20,40], [-40,-20,0,20,40], [1, 1.2, 1.4, 1.6, 1.8]]
+
 	path_X = os.path.join(test_path, "X_" + tmpname + "_test.txt")
 	path_Y = os.path.join(test_path, "Y_" + tmpname + "_test.txt")
 
-	process_one_block(test_path, path_X, path_Y, func = VID.zoom_video, parameters=[1.2, 1.5, 1.8, 2.0])
-
-
+	for i in range(0, len(henshin)):
+		#process_one_block(test_path, path_X, path_Y, func = henshin[i], PARAMS[i])
+		process_one_block(test_path, path_X, path_Y, henshin[i], params[i], speed = [0.8, 1, 1.2])
+		# removing the "checked-off" tag by resetting the directory;
+		reset_direc_filename(test_path)
+   
+	# convert the generated txt files into 35 - type and save it;
+	FRAME.gen_XY(test_path)
+	
 
 		
 if __name__ == '__main__':
 	path = "C:\\Users\\yongw4\\Desktop\\test\\HOSPITAL\\yick"
 	path = "C:\\Users\\yongw4\\Desktop\\test-set\\test-set\\organized"
 	#path = "C:\\Users\\yongw4\\Desktop\\test\\HOSPITAL\\yick"
-	reset_direc_filename(path)
+	drive_test_pipeline(path)
 	#drive_test_pipeline(path)
 	#process_one_block(path)
 	'''

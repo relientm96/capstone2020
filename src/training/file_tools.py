@@ -260,7 +260,7 @@ def patch_nparrays(npy_directory, balance = 0):
 
 
 # convert all text files into npy files then combine them;
-def convert_and_patch_nparrays(txt_directory, search_term):
+def convert_and_patch_nparrays(txt_directory, search_term, balance):
 	'''
 		task:
 			load all the generated txt files as np arrays and combine into one;
