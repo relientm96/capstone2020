@@ -270,10 +270,20 @@ def convert_and_patch_nparrays(txt_directory, search_term):
 		returns:
 			a tuple of (X, Y)
 	'''
-	# get all the classes distribution info;
-	# and return the one with the lowest samples;
-	(ncombine, minimum) = get_class_dict_info(txt_directory, search_term)
-	sample_size = minimum[1]
+	# need to balance the class distribution?
+	if(balance):
+		# get all the classes distribution info;
+		# and return the one with the lowest samples;
+		(ncombine, minimum) = get_class_dict_info(txt_directory, search_term)
+		# since we will divide using ncombine;
+		if(ncombine == 0):
+			ncombine = 1
+		sample_size = minimum[1]
+		# assuming ncombine > 0
+		proportion = int(sample_size/ncombine)
+		print("sample_size: ", sample_size)
+		print("ncombine: ", ncombine)
+		print("proportion: ", proportion)
 
 	# now, patch all the samples across the classes;
 	PATCH = [[],[]]
@@ -284,12 +294,6 @@ def convert_and_patch_nparrays(txt_directory, search_term):
 			tmp = search_file.split("\\")[-1]
 			tmp = tmp.split("_")[0].lower()
 
-			# assuming ncombine > 0
-			proportion = int(sample_size/ncombine)
-			print("sample_size: ", sample_size)
-			print("ncombine: ", ncombine)
-			print("proportion: ", proportion)
-			#proportion = int(sample_size/2)
 			# txt or npy? process them differently;
 			if(search_term == "txt"):
 				# the training file, x
@@ -300,33 +304,37 @@ def convert_and_patch_nparrays(txt_directory, search_term):
 					dataset = lstm.load_X(search_file)
 					print("search_file: ", search_file)
 					print('prior size: ', dataset.shape)
-					# handle imbalanced distribution, if any;
-					dataset = balance_data_sample(dataset, proportion)
-					print("after size: ", dataset.shape)
+					if(balance):
+						# handle imbalanced distribution, if any;
+						dataset = balance_data_sample(dataset, proportion)
+						print("after size: ", dataset.shape)
 				# the label file, Y;
 				else:
 					INDEX = 1
 					# handle imbalanced dist, if any
 					dataset = lstm.load_Y(search_file)
 					print("prior size: ", dataset.shape)
-					dataset = dataset[0:proportion,:]
-					print("after size: ", dataset.shape)
+					if(balance):
+						dataset = dataset[0:proportion,:]
+						print("after size: ", dataset.shape)
 			# npy files;
 			else:
 				if(tmp == "x"):
 					INDEX = 0
 					dataset = np.load(search_file)
 					print('prior size: ', dataset.shape)
-					# handle imbalanced distribution, if any;
-					dataset = balance_data_sample(dataset, proportion)
-					print("after size: ", dataset.shape)
+					if(balance):
+						# handle imbalanced distribution, if any;
+						dataset = balance_data_sample(dataset, proportion)
+						print("after size: ", dataset.shape)
 				else:
 					INDEX = 1
 					dataset = np.load(search_file)
 					print('prior size: ', dataset.shape)
-					# handle imbalanced distribution, if any;
-					dataset = dataset[0:proportion,:]
-					print("after size: ", dataset.shape)
+					if(balance):
+						# handle imbalanced distribution, if any;
+						dataset = dataset[0:proportion,:]
+						print("after size: ", dataset.shape)
 			# done?
 			PATCH[INDEX].append(dataset)
 	# concatenate all the arrays into one;
@@ -377,10 +385,10 @@ if __name__ == '__main__':
 	#patch_nparrays(prefix)
 	#get_class_dict_info(prefix, "npy")
 
-	(x_combine, y_combine) = patch_nparrays(prefix, balance = 1)
-	prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020\\train-npy\\35-frames"
-	np.save(prefix+"\\X_MAIN.npy", x_combine)
-	np.save(prefix+"\\Y_MAIN.npy", y_combine)
+	(x_combine, y_combine) = patch_nparrays(prefix, balance = 0)
+	prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020\\train-npy\\35-frames\\combine"
+	np.save(prefix+"\\X_MAIN_imbalance.npy", x_combine)
+	np.save(prefix+"\\Y_MAIN_imbalance.npy", y_combine)
 
 	#sign_dir = prefix+"\\4-hospital-txt\\X_train.txt"
 	#(x_mon, y_mon)= patch_nparrays(prefix, "txt")

@@ -472,7 +472,7 @@ def shear_video(input, output, shear=-10):
 	print("the sheared-video has been saved to: ", output)
 
 
-def zoom_video(input, output, ratio = 1.0):
+def zoom_video(input, output, ratio = 1.2):
 	# ref - https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/image/apply_affine_transform
 	'''
 	function:
@@ -518,7 +518,9 @@ if __name__ == '__main__':
 	# shearing;
 	videopath = "C:\\CAPSTONE\\capstone2020\\src\\training\\test-videos\\auslan\\ambulance.mp4"
 	output = "C:\\CAPSTONE\\capstone2020\\src\\training\\test-videos\\auslan\\shear_ambulance.mp4"
-	shear_video(videopath, output)
+	videopath = "C:\\Users\\yongw4\\Desktop\\dummy_video.mp4"
+	output = "C:\\Users\\yongw4\\Desktop\\henshin_video.mp4"
+	zoom_video(videopath, output, 1.5)
 
 	#video_speed(videopath, output, 0.6)
 	# test - 01

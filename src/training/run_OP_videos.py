@@ -17,14 +17,7 @@ def process_one_video(input, path_X, path_Y, func, DEGREE, SPEED):
 		syntools.synthesize_block(input, speed_seed, path_X, path_Y, func, DEGREE)
 		#syntools.synthesize_block(input, speed_seed, path_X, path_Y)
 
-def process_one_class(signvideodirectory):
-	#signvideodirectory = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\PAIN"
-	
-	# get the class name to name the txt files accordingly;
-	tmpname = signvideodirectory.split("\\")[-1]
-
-	path_X = os.path.join(signvideodirectory, "X_" + tmpname + "_train.txt")
-	path_Y = os.path.join(signvideodirectory, "Y_" + tmpname + "_train.txt")
+def process_one_block(signvideodirectory, path_X, path_Y, func = VID.video_rotate, parameters=[1]):
 	
 	# safeguard;
 	# create them if the files do not exist;
@@ -43,7 +36,7 @@ def process_one_class(signvideodirectory):
 	func = VID.video_rotate
 	# transformation parameters; angles?
 	#DEGREE = [-10, -5, 5, 10]
-	DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
+	#DEGREE = [0, 3, 5, 7, 9, -3, -5, -7, -9]
 
 	for root, dirs, files in os.walk(signvideodirectory, topdown=False):
 		for name in files:
@@ -54,9 +47,10 @@ def process_one_class(signvideodirectory):
 			# OK, it's mp4; process it;
 			src_path = os.path.join(root, name)
 			print("currently processing: ", src_path)
+			#sys.exit('DEBUG')
 			# current video has not been processed; 
 			if not (ftools.checksubstring(src_path, "checked")):
-				process_one_video(src_path, path_X, path_Y, func, DEGREE, SPEED)
+				process_one_video(src_path, path_X, path_Y, func, parameters, SPEED)
 				# done processing? sign off;
 				# so that the processed video will not be processed again;
 				print('the current video has been processed: ', src_path)
@@ -70,9 +64,32 @@ def process_one_class(signvideodirectory):
 			#sys.exit("stop at one-video to check;")
 	
 
+	
+
+def drive_test_pipeline(test_path):
+	'''
+	1. apply completely new video transformations to synthesize more test data;
+	2. generate ONE txt file;
+	3. convert the txt into np (75-frames)
+	4. down-sampling it into 35-frames by including random shuffling;
+	5. output the final np array and save it;
+	'''
+	# get the class name to name the txt files accordingly;
+	tmpname = test_path.split("\\")[-1]
+
+	path_X = os.path.join(test_path, "X_" + tmpname + "_test.txt")
+	path_Y = os.path.join(test_path, "Y_" + tmpname + "_test.txt")
+
+	process_one_block(test_path, path_X, path_Y, func = VID.zoom_video, parameters=[1.2, 1.5, 1.8, 2.0])
+
+
+
+	
 if __name__ == '__main__':
 	path = "C:\\Users\\yongw4\\Desktop\\test\\HOSPITAL\\yick"
-	process_one_class(path)
+	path = "C:\\Users\\yongw4\\Desktop\\test-set\\organized"
+	drive_test_pipeline(path)
+	#process_one_block(path)
 	'''
 	for root, dirs, files in os.walk(path):
 		for i in range(len(dirs)):
