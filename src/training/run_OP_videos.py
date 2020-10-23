@@ -63,8 +63,30 @@ def process_one_block(signvideodirectory, path_X, path_Y, func = VID.video_rotat
 			# debugging ...
 			#sys.exit("stop at one-video to check;")
 	
+def reset_direc_filename(path):
+	'''
+	 a quick fix to reset the "checked-off" files in a directory
+	'''
+	for root, dirs, files in os.walk(path, topdown=False):
+		for name in files:
+			# make sure the current file is MP4;
+			ext = name.split('.')[-1]
+			if (ext != "mp4"):
+				continue
+			
+			# OK, it's mp4; process it;
+			src_path = os.path.join(root, name)
+			#print("currently processing: ", src_path)
 
-	
+			# remove the checkoff tag;
+			if(("checked" in name)):
+				tmp = name.split("_")
+				classname = tmp[0]
+				iter = tmp[1]
+				reset =  classname + "_" + iter + ".mp4"
+				tmppath =  os.path.join(root, reset)
+				os.rename(src_path, tmppath)
+			
 
 def drive_test_pipeline(test_path):
 	'''
@@ -84,11 +106,13 @@ def drive_test_pipeline(test_path):
 
 
 
-	
+		
 if __name__ == '__main__':
 	path = "C:\\Users\\yongw4\\Desktop\\test\\HOSPITAL\\yick"
-	path = "C:\\Users\\yongw4\\Desktop\\test-set\\organized"
-	drive_test_pipeline(path)
+	path = "C:\\Users\\yongw4\\Desktop\\test-set\\test-set\\organized"
+	#path = "C:\\Users\\yongw4\\Desktop\\test\\HOSPITAL\\yick"
+	reset_direc_filename(path)
+	#drive_test_pipeline(path)
 	#process_one_block(path)
 	'''
 	for root, dirs, files in os.walk(path):
