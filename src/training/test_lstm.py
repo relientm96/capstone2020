@@ -86,7 +86,7 @@ np_Y = tmpname+  "\\Y_MAIN.npy"
 #---------------------------------------------------------------------------------------------
 
 # added an extra argument to use different models;
-def cross_validate(x_raw, y_raw, kfold, LSTM_func, log_path):
+def cross_validate(x_raw, y_raw, kfold, LSTM_func,  par, log_path):
 
 	# trace the memory usage;
 	tracemalloc.start()
@@ -115,14 +115,14 @@ def cross_validate(x_raw, y_raw, kfold, LSTM_func, log_path):
 
 		# set up the lstm ;
 		#model = LSTM_setup(x_train, y_train)
-		model = LSTM_func(x_train, y_train)
+		model = LSTM_func(x_train, y_train, par)
 		
 		# Optimizer
 		opt = tf.keras.optimizers.Adam(lr=1e-4, decay=1e-5)
 		model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['acc'])
 
 		# fit the model using the training set;
-		model.fit(x_train[train_index], y_train[train_index], epochs=10, batch_size = 64, verbose = 1)
+		model.fit(x_train[train_index], y_train[train_index], epochs=1, batch_size = 64, verbose = 1)
 		
 		# evaluate the model using the validation set and store each metric;
 		scores = model.evaluate(x_train[test_index], y_train[test_index], verbose=0)
@@ -203,6 +203,16 @@ if __name__ == '__main__':
 	X_train = prefix+"\\X_MAIN_balance_up.npy"
 	Y_train = prefix+"\\Y_MAIN_balance_up.npy"
 	log_path = prefix + "\\log_cross_validate.txt"
-	kfold = 10
-	cross_validate(X_train, Y_train, kfold, MODEL.lstm_tanh_one, log_path)
+	kfold = 2
+	
+	MODELS = [MODEL.lstm_tanh_one, MODEL.lstm_tanh_one,  MODEL.lstm_tanh_two, MODEL.lstm_tanh_two, MODEL.lstm_tanh_two]
+	par1 = MODEL.super_params(n_hidden=32)
+	par2 = MODEL.super_params(n_hidden=64)
+	par3 = MODEL.super_params(n_hidden=32)
+	par4 = MODEL.super_params(n_hidden=64)
+	par5 = MODEL.super_params(n_hidden=128)
+	PARAMS = [par1, par2, par3, par4, par5]
+
+	for i in range(0, len(MODELS)):
+		cross_validate(X_train, Y_train, kfold, MODELS[i], PARAMS[i], log_path)
 

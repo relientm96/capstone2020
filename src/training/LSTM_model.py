@@ -57,9 +57,9 @@ def super_params(n_hidden = 128, n_classes = 4, dropout = 0.5, epoch = 80, batch
 # 2) dropout = 0.5
 #-----------------------------------
 
-def lstm_tanh_two(x_train, y_train):
+def lstm_tanh_two(x_train, y_train, par):
 	# get the params;
-	par = super_params()
+	#par = super_params()
 	# Define Model
 	model = Sequential()
 	model.add(LSTM(par["n_hidden"], input_shape=(x_train.shape[1], x_train.shape[2]), activation=par['activation'], unit_forget_bias=True, return_sequences=True))
@@ -69,9 +69,9 @@ def lstm_tanh_two(x_train, y_train):
 	model.add(Dense(par["n_classes"], activation='softmax'))
 	return model
 
-def lstm_tanh_one(x_train, y_train):
+def lstm_tanh_one(x_train, y_train, par):
 	# get the params;
-	par = super_params()
+	#par = super_params()
 	# Define Model
 	model = Sequential()
 	model.add(LSTM(par["n_hidden"], input_shape=(x_train.shape[1], x_train.shape[2]), activation=par['activation'],unit_forget_bias=True, return_sequences=False))
