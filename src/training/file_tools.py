@@ -188,6 +188,64 @@ def get_class_dict_info(filedirectory, search_term):
 	return (ncombine, minimum, maximum)
 
 
+def balance_up_data_sample(dataset, sample_size):
+	'''
+		args:
+			- dataset; the numpy array; it could X-type or Y-type;
+			- sample_size;
+		return:
+			- the "upsampled" array;
+		function:
+			- to upsample the class samples to sample_size;
+	'''
+	# determine the type of the files: X data or Y label?
+	typeX  = 0
+	if(len(dataset.shape) == 3):
+		# len 3 indicates it is not the label;
+		typeX = 1
+
+	nrows = np.size(dataset, 0)
+
+	assert(nrows <= sample_size)
+
+	# since we want to increase class with lower samples
+	# to match with the highest one, no point doing it with the highest one;
+	if(nrows == sample_size):
+		return dataset
+	elif((sample_size/nrows) < 2):
+		diff = sample_size-nrows
+		# get a list of unique random int within the sample size;
+		ls = random.sample(range(0, nrows), diff)
+		if(typeX):
+			add_arr = dataset[ls,:,:]
+			return np.concatenate(tuple([dataset, add_arr]), axis = 0)
+		else:
+			add_arr = dataset[ls,:]
+			return np.concatenate(tuple([dataset, add_arr]), axis = 0)
+	else:
+		# the maximum sample size is more than twice of the dataset size;
+		check = int(sample_size/nrows)
+		store = []
+		for i in range(0, check):
+			store.append(dataset)
+		tmpfilled = np.concatenate(tuple(store), axis = 0)
+
+		# now fill up the rest to make up to the sample size;
+		diff = sample_size-np.size(tmpfilled,0)
+		# get a list of unique random int within the sample size;
+		ls = random.sample(range(0, nrows), diff)
+
+		if(typeX):
+			add_arr = dataset[ls,:,:]
+			return np.concatenate(tuple([tmpfilled, add_arr]), axis = 0)
+		else:
+			add_arr = dataset[ls,:]
+			return np.concatenate(tuple([tmpfilled, add_arr]), axis = 0)
+
+		
+
+	
+
 # get the complement of a list by using set theory!;
 def Diff(li1, li2):
 	return (list(list(set(li1)-set(li2)) + list(set(li2)-set(li1))))
@@ -203,7 +261,7 @@ def balance_down_data_sample(dataset, sample_size):
 			- to downsample the class samples to sample_size;
 	'''
 	nrows = np.size(dataset, 0)
-	print("balance_down_data_sample; sample_size: ", sample_size)
+	print("balance_down_data_sample_size: ", sample_size)
 	# get a list of unique random int within the sample size;
 	ls = random.sample(range(0, nrows), sample_size)
 	down_arr = dataset[ls,:,:]
@@ -224,14 +282,14 @@ def patch_nparrays(npy_directory, balance = 0):
 	(ncombine, minimum, maximum) = get_class_dict_info(npy_directory, "npy")
 	if(ncombine == 0):
 		ncombine = 1
-	sample_size = minimum[1]
+	#sample_size = minimum[1]
+	sample_size = maximum[1]
+
 	# assuming ncombine > 0
 	proportion = int(sample_size/ncombine)
 	print("proportion: ", proportion)
 	x_file = []
 	y_file = []
-	xscrap_file  =[]
-	yscrap_file = []
 	for root, dirs, files in os.walk(npy_directory, topdown=False):
 		for name in files:
 			loc = os.path.join(root, name)
@@ -248,26 +306,17 @@ def patch_nparrays(npy_directory, balance = 0):
 				if(balance):
 					print('x prior size: ', data.shape)
 					# handle imbalanced distribution, if any;
-					data,scrap = balance_down_data_sample(data, proportion)
+					data = balance_up_data_sample(data, proportion)
 					print("x after size: ", data.shape)
-					print("x scrap after size: ", scrap.shape)
-					# keep the remaining one which will not be used for training;
-					xscrap_file.append(scrap)
-
+					
 				x_file.append(data)
 			else:
 				data = np.load(loc)
 				print('y prior shape: ', data.shape)
 				# handle imbalanced dist?
 				if(balance):
-					print("y prior size: ", data.shape)
-					data = data[0:proportion,:]
+					data = balance_up_data_sample(data, proportion)
 					print("y after size: ", data.shape)
-					diff = ((data.shape)[0] - proportion)
-					scrap = data[0:diff,:]
-					print("y scrap after size: ", scrap.shape)
-					yscrap_file.append(scrap)
-
 				y_file.append(data)
 
 	# concatenate all the training arrays into one;
@@ -277,18 +326,7 @@ def patch_nparrays(npy_directory, balance = 0):
 	print("x combine size: ", X_combine.shape)
 	print("y combine size: ", Y_combine.shape)
 
-	# create a dummy;
-	X_remain = np.zeros(1)
-	Y_remain = np.zeros(1)
-
-	if(balance):
-		# concatenate all the remaining arrays into one;
-		X_remain = np.concatenate(tuple(xscrap_file), axis = 0)
-		Y_remain = np.concatenate(tuple(yscrap_file), axis = 0)
-		print("x remain size: ", X_remain.shape)
-		print("y remain size: ", Y_remain.shape)
-
-	return (X_combine, Y_combine, X_remain, Y_remain)
+	return (X_combine, Y_combine)
 
 
 
@@ -415,18 +453,20 @@ if __name__ == '__main__':
 	
 	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames\\combine"
 	prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020\\train-npy\\35-frames\\combine"
-
+	
+	(x_combine, y_combine) = patch_nparrays(prefix, balance = 1)
+	np.save(prefix+"\\X_MAIN_balance_up.npy", x_combine)
+	np.save(prefix+"\\Y_MAIN_balance_up.npy", y_combine)
+	
 	#patch_nparrays(prefix)
 	#get_class_dict_info(prefix, "npy")
-	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames\\combine-raw"
+	#prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames\\combine-raw"
 	
-	(x_combine, y_combine, x_unused, y_unused) = patch_nparrays(prefix, balance = 1)
+	#(x_combine, y_combine, x_unused, y_unused) = patch_nparrays(prefix, balance = 1)
 	#prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020\\train-npy\\35-frames\\combine"
-	np.save(prefix+"\\X_MAIN_balance.npy", x_combine)
-	np.save(prefix+"\\Y_MAIN_balance.npy", y_combine)
-	np.save(prefix+"\\X_UNUSED.npy", x_unused)
-	np.save(prefix+"\\Y_UNUSED.npy", y_unused)
-
+	#np.save(prefix+"\\X_MAIN_balance.npy", x_combine)
+	#np.save(prefix+"\\Y_MAIN_balance.npy", y_combine)
+	
 	#sign_dir = prefix+"\\4-hospital-txt\\X_train.txt"
 	#(x_mon, y_mon)= patch_nparrays(prefix, "txt")
 	#print(x_mon.shape, y_mon.shape)
