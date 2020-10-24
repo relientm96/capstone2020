@@ -31,6 +31,7 @@ from sklearn.model_selection import StratifiedKFold
 import numpy as np
 from datetime import datetime
 import tracemalloc
+from contextlib import redirect_stdout
 import os
 import sys
 import json
@@ -140,6 +141,14 @@ def cross_validate(x_raw, y_raw, kfold, LSTM_func, log_path):
 			print(stat)
 
 	# logging the model stats;
+	with open(log_path, 'a+') as f:
+		with redirect_stdout(f):
+			model.summary()
+
+	with open(log_path, 'a+') as f:
+		line1 = "compensate imbalance class distribution method: up-sampling"
+		f.write("\n{}\n".format(line1))
+
 	with open(log_path, "a+") as f:
 		line1 = datetime.now().strftime("%Y-%m-%d %H:%M")
 		line2 = str(x_train.shape)
@@ -147,7 +156,9 @@ def cross_validate(x_raw, y_raw, kfold, LSTM_func, log_path):
 		line4 = str(csv_scores)
 		line5 = np.mean(csv_scores)
 		line6 = np.std(csv_scores)
-		f.write("{}\n data size: {}\n kfold: {}\n scores: {}\n mean: {}\n std: {}%\n".format(line1, line2, line3, line4, line5, line6))
+		f.write("\n{}\n data size: {}\n kfold: {}\n scores: {}\n mean: {}\n std: {}%\n".format(line1, line2, line3, line4, line5, line6))
+
+
 
 
 # ----------------------------------------------------------------------------
