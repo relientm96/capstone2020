@@ -25,10 +25,12 @@ from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLRO
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedKFold
 
 # opthers;
 import numpy as np
 from datetime import datetime
+import tracemalloc
 import os
 import sys
 import json
@@ -83,7 +85,7 @@ np_Y = tmpname+  "\\Y_MAIN.npy"
 #---------------------------------------------------------------------------------------------
 
 # added an extra argument to use different models;
-def cross_validate(x_raw, y_raw, kfold=10, LSTM_func, log_path):
+def cross_validate(x_raw, y_raw, kfold, LSTM_func, log_path):
 
 	# trace the memory usage;
 	tracemalloc.start()
@@ -93,7 +95,7 @@ def cross_validate(x_raw, y_raw, kfold=10, LSTM_func, log_path):
 	y_train = np.load(y_raw)
 	
 	# load the relevant hyperparameters;
-	par = super_params()
+	#par = MODEL.super_params()
 	
 	#---------------------------------------------------------------
 	# define a stratified kfold cross validation test harness;
@@ -119,7 +121,7 @@ def cross_validate(x_raw, y_raw, kfold=10, LSTM_func, log_path):
 		model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['acc'])
 
 		# fit the model using the training set;
-		model.fit(x_train[train_index], y_train[train_index], epochs=par['epoch'], batch_size = par['batch_size'], verbose = 0)
+		model.fit(x_train[train_index], y_train[train_index], epochs=80, batch_size = 64, verbose = 0)
 		
 		# resetting the state after every model evaluation;
 		# otherwise, the global state maintained by tensorflow might overload;
@@ -143,11 +145,12 @@ def cross_validate(x_raw, y_raw, kfold=10, LSTM_func, log_path):
 			print(stat)
 
 	# logging the model stats;
-    f = open(log_path, "a+")
-    f.write("{0} \n".format(datetime.now().strftime("%Y-%m-%d %H:%M"))
-	f.write("{0} : {1}\n".format("csv_score list", csv_scores))
-	f.write("averaging: %.2f%% (+/- %.2f%%)\n" % (np.mean(csv_scores), np.std(csv_scores)))
-    f.close()
+	with open(log_path, "a+") as f:
+		line1 = datetime.now().strftime("%Y-%m-%d %H:%M")
+		line2 = str(csv_scores)
+		line3 = np.mean(csv_scores)
+		line4 = np.std(csv_scores)
+		f.write("{}\n scores: {}\n mean: {}\n std: {}n".format(line1, line2, line3, line4))
 
 
 # ----------------------------------------------------------------------------
@@ -166,7 +169,7 @@ def summarize_results(scores):
 	print('Accuracy: %.3f%% (+/-%.3f)' % (m, s))
 	return m,s
 
-def exp_avg(repeats=10, text_x, test_y, model_path, log_path):
+def exp_avg(repeats, text_x, test_y, model_path, log_path):
 	# repeat experiment
 	scores = list()
 	for r in range(repeats):
@@ -177,8 +180,21 @@ def exp_avg(repeats=10, text_x, test_y, model_path, log_path):
 	# summarize results
 	mean_info ,std_info = summarize_results(scores)	
 	# logging the model stats;
-    f = open(log_path, "a+")
-    f.write("{0} \n".format(datetime.now().strftime("%Y-%m-%d %H:%M"))
-	f.write('Accuracy: %.3f%% (+/-%.3f)' % (mean_info, std_info))
-	f.close()
+	with open(log_path, "a+") as f:
+		line1 = datetime.now().strftime("%Y-%m-%d %H:%M")
+		line2 = mean_info
+		line3 = std_info
+		f.write("{}\n mean: {}\n std: {}n".format(line1, line2, line3))
+
+	
+
+
+# test driver;
+if __name__ == '__main__':
+	prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020\\train-npy\\35-frames"
+	X_train = prefix+"\\X_MAIN_balance_up.npy"
+	Y_train = prefix+"\\Y_MAIN_balance_up.npy"
+	log_path = prefix + "\\log_cross_validate.txt"
+	kfold = 10
+	cross_validate(X_train, Y_train, kfold, MODEL.lstm_tanh_one, log_path)
 
