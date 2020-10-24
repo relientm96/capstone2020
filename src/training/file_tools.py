@@ -177,20 +177,22 @@ def get_class_dict_info(filedirectory, search_term):
 					dict[classname] = nparray.shape[0]
 				
 	print("get_class_dict_info: ", dict)
-	# get the min;
+	# get the min and the max;
 	minimum = min(dict.items(), key=operator.itemgetter(1))
+	maximum = max(dict.items(), key=operator.itemgetter(1))
 	print('class with the lowest samples: ', minimum)
+	print('class with the highest samples: ', maximum)
 	#classmin = minimum[0]
 	#min_num = minimum[1]
 	#ls = [(key, value) for key,value in dict.items() if key != classmin]
-	return (ncombine, minimum)
+	return (ncombine, minimum, maximum)
 
 
 # get the complement of a list by using set theory!;
 def Diff(li1, li2):
 	return (list(list(set(li1)-set(li2)) + list(set(li2)-set(li1))))
  
-def balance_data_sample(dataset, sample_size):
+def balance_down_data_sample(dataset, sample_size):
 	'''
 		args:
 			- dataset; the numpy array;
@@ -201,7 +203,7 @@ def balance_data_sample(dataset, sample_size):
 			- to downsample the class samples to sample_size;
 	'''
 	nrows = np.size(dataset, 0)
-	print("balance_data_sample; sample_size: ", sample_size)
+	print("balance_down_data_sample; sample_size: ", sample_size)
 	# get a list of unique random int within the sample size;
 	ls = random.sample(range(0, nrows), sample_size)
 	down_arr = dataset[ls,:,:]
@@ -219,7 +221,7 @@ def patch_nparrays(npy_directory, balance = 0):
 		combine all the npy files into one; and balance out the distribution if flagged;
 	'''
 	# ge the overall class distribution;
-	(ncombine, minimum) = get_class_dict_info(npy_directory, "npy")
+	(ncombine, minimum, maximum) = get_class_dict_info(npy_directory, "npy")
 	if(ncombine == 0):
 		ncombine = 1
 	sample_size = minimum[1]
@@ -228,6 +230,8 @@ def patch_nparrays(npy_directory, balance = 0):
 	print("proportion: ", proportion)
 	x_file = []
 	y_file = []
+	xscrap_file  =[]
+	yscrap_file = []
 	for root, dirs, files in os.walk(npy_directory, topdown=False):
 		for name in files:
 			loc = os.path.join(root, name)
@@ -244,28 +248,47 @@ def patch_nparrays(npy_directory, balance = 0):
 				if(balance):
 					print('x prior size: ', data.shape)
 					# handle imbalanced distribution, if any;
-					data,scrap = balance_data_sample(data, proportion)
-					print("after size: ", data.shape)
+					data,scrap = balance_down_data_sample(data, proportion)
+					print("x after size: ", data.shape)
+					print("x scrap after size: ", scrap.shape)
+					# keep the remaining one which will not be used for training;
+					xscrap_file.append(scrap)
+
 				x_file.append(data)
 			else:
 				data = np.load(loc)
 				print('y prior shape: ', data.shape)
 				# handle imbalanced dist?
 				if(balance):
-					print("prior size: ", data.shape)
+					print("y prior size: ", data.shape)
 					data = data[0:proportion,:]
-					print("after size: ", data.shape)
+					print("y after size: ", data.shape)
+					diff = ((data.shape)[0] - proportion)
+					scrap = data[0:diff,:]
+					print("y scrap after size: ", scrap.shape)
+					yscrap_file.append(scrap)
+
 				y_file.append(data)
 
-	# concatenate all the arrays into one;
+	# concatenate all the training arrays into one;
 	X_combine = np.concatenate(tuple(x_file), axis = 0)
 	Y_combine = np.concatenate(tuple(y_file), axis = 0)
-
 	# sanity check on the size;
 	print("x combine size: ", X_combine.shape)
 	print("y combine size: ", Y_combine.shape)
 
-	return (X_combine, Y_combine)
+	# create a dummy;
+	X_remain = np.zeros(1)
+	Y_remain = np.zeros(1)
+
+	if(balance):
+		# concatenate all the remaining arrays into one;
+		X_remain = np.concatenate(tuple(xscrap_file), axis = 0)
+		Y_remain = np.concatenate(tuple(yscrap_file), axis = 0)
+		print("x remain size: ", X_remain.shape)
+		print("y remain size: ", Y_remain.shape)
+
+	return (X_combine, Y_combine, X_remain, Y_remain)
 
 
 
@@ -284,7 +307,7 @@ def convert_and_patch_nparrays(txt_directory, search_term, balance):
 	if(balance):
 		# get all the classes distribution info;
 		# and return the one with the lowest samples;
-		(ncombine, minimum) = get_class_dict_info(txt_directory, search_term)
+		(ncombine, minimum, maximum) = get_class_dict_info(txt_directory, search_term)
 		# since we will divide using ncombine;
 		if(ncombine == 0):
 			ncombine = 1
@@ -316,7 +339,7 @@ def convert_and_patch_nparrays(txt_directory, search_term, balance):
 					print('prior size: ', dataset.shape)
 					if(balance):
 						# handle imbalanced distribution, if any;
-						dataset,_ = balance_data_sample(dataset, proportion)
+						dataset,_ = balance_down_data_sample(dataset, proportion)
 						print("after size: ", dataset.shape)
 				# the label file, Y;
 				else:
@@ -335,7 +358,7 @@ def convert_and_patch_nparrays(txt_directory, search_term, balance):
 					print('prior size: ', dataset.shape)
 					if(balance):
 						# handle imbalanced distribution, if any;
-						dataset,scrap = balance_data_sample(dataset, proportion)
+						dataset,scrap = balance_down_data_sample(dataset, proportion)
 						print("after size: ", dataset.shape)
 				else:
 					INDEX = 1
@@ -392,13 +415,17 @@ if __name__ == '__main__':
 	
 	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames\\combine"
 	prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020\\train-npy\\35-frames\\combine"
+
 	#patch_nparrays(prefix)
 	#get_class_dict_info(prefix, "npy")
-
-	(x_combine, y_combine) = patch_nparrays(prefix, balance = 0)
-	prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020\\train-npy\\35-frames\\combine"
-	np.save(prefix+"\\X_MAIN_imbalance.npy", x_combine)
-	np.save(prefix+"\\Y_MAIN_imbalance.npy", y_combine)
+	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames\\combine-raw"
+	
+	(x_combine, y_combine, x_unused, y_unused) = patch_nparrays(prefix, balance = 1)
+	#prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020\\train-npy\\35-frames\\combine"
+	np.save(prefix+"\\X_MAIN_balance.npy", x_combine)
+	np.save(prefix+"\\Y_MAIN_balance.npy", y_combine)
+	np.save(prefix+"\\X_UNUSED.npy", x_unused)
+	np.save(prefix+"\\Y_UNUSED.npy", y_unused)
 
 	#sign_dir = prefix+"\\4-hospital-txt\\X_train.txt"
 	#(x_mon, y_mon)= patch_nparrays(prefix, "txt")
