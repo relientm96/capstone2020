@@ -1,16 +1,15 @@
 ### Application Deployment
 
-[Work in Progress]
+* A large part of our project was dedicated towards building and deploying our model as both a desktop and web application.
+* That enables users to use their live camera feed to use our model and have their gestures recognised.
 
-#### Desktop Application
-* We have created desktop version of our application, using python's OpenCV library.
-
+##### Desktop Application
 <div class="center-align">
     <img style="width:500px; height:auto;" src="images/SystemApplication/Demo_Gif.gif">
     <p> Figure: Demonstration as a desktop application. </p>
 </div>
 
-#### Workflow
+##### Workflow
 * The OpenCV program reads frame by frame from the computer's webcam using `cap.read`.
 * Datum object is a custom defined OpenPose data structure - that stores keypoints in `numpy arrays`.
 * Datum gets passed to our gesture recognition module, that receives an input keypoints.
@@ -18,7 +17,7 @@
 
 #### Web Application
 
-A huge part in our project was dedicated towards building an online real-time web application for users to experience real-time Auslan recognition using our model.
+A huge part in our project was dedicated towards building an online real-time web application for users to experience real-time gesture recognition using our model.
 
 ##### Version 1
 <br>

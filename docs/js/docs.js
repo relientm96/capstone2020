@@ -22,7 +22,8 @@ mdFilePaths = {
     "applicationdeployment" : "markdown/applicationdeployment.md",
     "acknowledgements"      : "markdown/acknowledgements.md",
     "introduction"          : "markdown/introduction.md",
-    "humanpose"             : "markdown/humanpose.md"
+    "humanpose"             : "markdown/humanpose.md",
+    "furtherimprovements"   : "markdown/furtherimprovements.md"
 }
 
 $(document).ready(function(){
@@ -45,4 +46,7 @@ $(document).ready(function(){
     console.log("Rendered finish, now load materialbox");
     $('.materialboxed').materialbox();
     console.log("Loaded Material Box");
+
+    MathJax.Hub.Typeset()
+    console.log("Re-typesetted math jax");
 });

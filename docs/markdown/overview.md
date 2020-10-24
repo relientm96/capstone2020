@@ -51,6 +51,11 @@ To extract sequential human features for gesture recognition, two common methods
 
 Using sensor based approaches, hardware devices such as glove sensors or accelerometers are attached to humans in order to record changes in data when performing a gesture. Then, output data from these devices create temporal representations which are then used for model gesture classification training.
 
+<div class="center-align">
+    <img style="width:350px;height:auto" src="images/Overview/Incredible_sign_language_gloves.gif">
+    <p> Figure: Student showing his invention of using gloves for sign language recognition (Incredible sign language gloves, 2016). </p> 
+</div>
+
 However, these devices need to be constantly strapped on for recognition, which makes the process of extracting human features when gesturing cumbersome. Moreover, sensor data may succumb to inaccuracies in recorded data from issues such as misplacement of sensors, hardware failure or signal attenuation. Furthermore, these devices require development costs to be produced - further making this approach neither cost efficient nor portable. Lastly, using this approach makes it difficult to extract spatial information of humans - which is important in human gesture recognition.
 
 An alternative is to perform a vision based approach where input data takes the form of only a video, broken down into a series of sequential frames. Computer vision based deep learning models then read these ordered frames to extract both spatial and temporal information from given pixel data. These models utilise Convolutional Neural Networks (CNN), which uses image filters with trained weights applied onto images to extract spatial features.

@@ -17,6 +17,8 @@ This is the technical documentation of the project **"Gesture Recognition using 
   * How we processed, stored and augmented our data for our deep learning model.
 * Model Development:
   * How we developed our model, a sign language recognition model.
+* Further Improvements:
+  * How we optimized and improved our model's performance. 
 * Application Deployment:
   * How we deployed our system as both a desktop and web application.
 
