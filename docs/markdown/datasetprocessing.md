@@ -41,35 +41,37 @@ In this section, we will cover how we collected and processed raw video data to 
   * where x_i represents the i'th joint's x-coordinate
   * y_i represents the i'th joint y-coordinate
   * c_i represents the confidence level (probability) of that joint's coordinats.
-* For a single frame, a json structure is returned like:
+* For a single frame, a json structure is returned as:
 ```json
 {
-    "people":[
-        {
-            "pose_keypoints_2d":[582.349,507.866,0.845918,746.975,631.307,0.587007,...],
-            "hand_left_keypoints_2d":[746.975,631.307,0.587007,615.659,617.567,0.377899,...],
-            "hand_right_keypoints_2d":[617.581,472.65,0.797508,0,0,0,723.431,462.783,0.88765,...]
-        }
+    "people":[{
+      "pose_keypoints_2d":[582.349,507.866,0.845918,746.975,631.307,0.587007,...],
+      "hand_left_keypoints_2d":[746.975,631.307,0.587007,615.659,617.567,0.377899,...],
+      "hand_right_keypoints_2d":[617.581,472.65,0.797508,0,0,0,723.431,462.783,0.88765,...]
+      }
     ]
 }
 ```
-* We then flatten and combined all 98 keypoints:
+* To re-iterate, we extract the following keypoints from OpenPose:
   * 8 from pose_keypoints
   * 21 from hand_left_keypoints_2d
   * 21 from hand_right_keypoints_2d
-* Removed all confidence level values (removing c_i's)
-* into a single array like [b]:
+* We then removed all confidence level values (removing ci's elements in array)
+* To speed up training time, we **normalised** our keypoints from -1 to 1 where:
+  * (-1,-1) represents top left corner of image
+  * (1, 1) represents the bottom right corner of image
+* Finally we a flattened all key-points into a single array as:
 ```
 [j0_x, j0_y, j1_x, j1_y , j2_x, j2_y, j3_x, j3_y, j4_x, j4_y, j5_x, j5_y, ...j98_x j98_y]
 ```
 
 ##### Keypoint Augmentation
-* [To Be Added]
-
+* To increase variability in our data, we have also explored the usage of augmenting output key-points coming out of OpenPose as additional training data for our model.
+* We perform perturbuation of key-points, by adding a gaussian random variable (mean = 0, std.dev = 0.0005) to each key-point coordinate (x,y respectively). 
 
 ##### Data Formatting 
 * Before training, we would need to label our input/output data correctly.
-* Let X be the input data to our model - a collection of 75 flattened arrays in [b]. 
+* Let X be the input data to our model - a collection of 75 flattened arrays. 
 * Let Y be an integer encoding of a respective class that these series of X frames represent using the following class map:
 ```javascript
 dictOfSigns = {
@@ -77,7 +79,6 @@ dictOfSigns = {
     1: "help",
     2: "hospital",
     3: "pain",
-    4: "ThumbsUp"
 };
 ```
 * We stored X,Y data in .txt files (and later numpy pickled files) in the following format:

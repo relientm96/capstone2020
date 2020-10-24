@@ -2,7 +2,7 @@
 
 #### OpenPose
 
-* We used [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose), an open source Real Time multi Human Pose Detection software.
+* We used [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose), an open source real time multi Human Pose Detection software.
 * Developed and maintained by a group of computer science researchers from Carnegie Mellon University.
 * Written in C++ and Caffe.
 
@@ -20,8 +20,8 @@
 
 <div class="center-align">
   <img src="images/PoseEstimation/OpenPosePipeLine.PNG" width='800px', height='auto'>
-  <p> Figure : High level view of OpenPose pipeline from Realtime Multi-Person 2D Pose
-  Estimation using Part Affinity Fields.
+  <p> Figure : High level view of OpenPose pipeline (Realtime Multi-Person 2D Pose
+  Estimation using Part Affinity Fields, 2018).
   </p>
 </div>
   
