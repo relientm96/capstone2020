@@ -81,13 +81,19 @@ def reset_direc_filename(path):
 
 			# remove the checkoff tag;
 			if(("checked" in name)):
-				tmp = name.split("_")
+				tmp01 = name.split(".")
+				tmp02 = tmp01[0]
+				tmp = tmp02.split("_")
 				classname = tmp[0]
 				iter = tmp[1]
+				print("iter: " , iter)
+				if(iter == "checked"):
+					iter = "random"
 				reset =  classname + "_" + iter + ".mp4"
 				tmppath =  os.path.join(root, reset)
+				print("tmp path: ", tmppath)
 				os.rename(src_path, tmppath)
-			
+				print("renamed src path: ", src_path)
 
 def drive_test_pipeline(test_path):
 	'''
@@ -104,7 +110,7 @@ def drive_test_pipeline(test_path):
 	henshin = [VID.warp_phi_video, VID.warp_theta_video, VID.zoom_video]
 	
 	# its corresponding parameters;
-	params = [[-40,-20,0,20,40], [-40,-20,20,40], [1.4, 1.8]]
+	params = [[-15,-10,30,50], [-20,-5,30], [1.2, 1.5]]
 	
 	# write paths;
 	path_X = os.path.join(test_path, "X_" + tmpname + "_test.txt")
@@ -112,7 +118,7 @@ def drive_test_pipeline(test_path):
 
 	for i in range(0, len(henshin)):
 		#process_one_block(test_path, path_X, path_Y, func = henshin[i], PARAMS[i])
-		process_one_block(test_path, path_X, path_Y, henshin[i], params[i], speed = [1])
+		process_one_block(test_path, path_X, path_Y, henshin[i], params[i], speed = [1, 1.3])
 		# removing the "checked-off" tag by resetting the directory;
 		reset_direc_filename(test_path)
    
@@ -124,7 +130,10 @@ def drive_test_pipeline(test_path):
 if __name__ == '__main__':
 	path = "C:\\Users\\yongw4\\Desktop\\test\\HOSPITAL\\yick"
 	path = "C:\\Users\\yongw4\\Desktop\\test-set\\test-set\\organized"
+	path = "C:\\Users\\yongw4\\Desktop\\test-set\\test-set\\organized"
+	
 	#path = "C:\\Users\\yongw4\\Desktop\\test\\HOSPITAL\\yick"
+	#reset_direc_filename(path)
 	drive_test_pipeline(path)
 	#drive_test_pipeline(path)
 	#process_one_block(path)
