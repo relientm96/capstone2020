@@ -438,7 +438,9 @@ def write2text(array, filepath):
 	np2file.close()
 
 
-# test driver;
+
+
+# test driver
 if __name__ == '__main__':
 	
 	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train"
