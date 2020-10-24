@@ -74,7 +74,7 @@ def lstm_tanh_one(x_train, y_train):
 	par = super_params()
 	# Define Model
 	model = Sequential()
-	model.add(LSTM(par["n_hidden"], input_shape=(x_train.shape[1], x_train.shape[2]), activation=par['activation'],unit_forget_bias=True, return_sequences=True))
+	model.add(LSTM(par["n_hidden"], input_shape=(x_train.shape[1], x_train.shape[2]), activation=par['activation'],unit_forget_bias=True, return_sequences=False))
 	model.add(Dropout(par["dropout"]))
 	model.add(Dense(par["n_classes"], activation='softmax'))
 	return model

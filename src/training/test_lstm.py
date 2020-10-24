@@ -121,12 +121,7 @@ def cross_validate(x_raw, y_raw, kfold, LSTM_func, log_path):
 		model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['acc'])
 
 		# fit the model using the training set;
-		model.fit(x_train[train_index], y_train[train_index], epochs=80, batch_size = 64, verbose = 0)
-		
-		# resetting the state after every model evaluation;
-		# otherwise, the global state maintained by tensorflow might overload;
-		# src - https://www.tensorflow.org/api_docs/python/tf/keras/backend/clear_session
-		keras_backend.clear_session()
+		model.fit(x_train[train_index], y_train[train_index], epochs=1, batch_size = 64, verbose = 1)
 		
 		# evaluate the model using the validation set and store each metric;
 		scores = model.evaluate(x_train[test_index], y_train[test_index], verbose=0)
@@ -195,6 +190,6 @@ if __name__ == '__main__':
 	X_train = prefix+"\\X_MAIN_balance_up.npy"
 	Y_train = prefix+"\\Y_MAIN_balance_up.npy"
 	log_path = prefix + "\\log_cross_validate.txt"
-	kfold = 10
+	kfold = 2
 	cross_validate(X_train, Y_train, kfold, MODEL.lstm_tanh_one, log_path)
 

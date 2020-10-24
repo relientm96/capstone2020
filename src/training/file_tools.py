@@ -442,7 +442,13 @@ def write2text(array, filepath):
 
 # test driver
 if __name__ == '__main__':
+	filepath =  "C:\\Users\\yongw4\\Desktop\\DEBUG.txt"
+	prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020\\train-npy\\35-frames\\X_MAIN_balance_up.npy"
+	npy = np.load(prefix)
+	print("shape: ", npy.shape)
+	#write2text(npy, filepath)
 	
+	'''
 	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train"
 
 	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train\\shear"
@@ -459,7 +465,7 @@ if __name__ == '__main__':
 	(x_combine, y_combine) = patch_nparrays(prefix, balance = 1)
 	np.save(prefix+"\\X_MAIN_balance_up.npy", x_combine)
 	np.save(prefix+"\\Y_MAIN_balance_up.npy", y_combine)
-	
+	'''
 	#patch_nparrays(prefix)
 	#get_class_dict_info(prefix, "npy")
 	#prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames\\combine-raw"

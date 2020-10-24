@@ -123,6 +123,14 @@ with open(stats_path, 'wb+') as fp:
 	pickle.dump(history_dict, fp, protocol=pickle.HIGHEST_PROTOCOL)
 	print("the dictionary of statistics has been saved;\n")
 
+try:
+	# get the dictionary;
+	with open(stats_path, 'rb') as fp:
+		stats = pickle.load(fp)
+		print(stats)
+except OSError as e:
+	print("error in loading the saved training results: ", e)
+	print("\n")
 
 
 # for testing and evaluation;
