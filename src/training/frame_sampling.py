@@ -197,12 +197,14 @@ def down_sampling(arr, meet_size = HALF):
 			tmp = make_up(arr)
 			return(reshape(tmp, [tmp]))
 
+# QUICK FIX!!
 # process one txt file;
 def process_one_XY(filepath):
 	print("entering process_one_X function")
 
 	# initialize an empty np;
 	output_x = np.empty((0, HALF, FEATURE), dtype = np.float32)
+	output_y = np.empty((0, 1), dtype = np.int32)
 
 	# load the training X files;
 	X_load = lstm.load_X(filepath)
@@ -216,30 +218,46 @@ def process_one_XY(filepath):
 	tmp = filename.split(".")[0]
 	tmp1 = tmp.split('_')
 	tmp1[0] = "Y"
-	y_filename = "_".join(tmp1) + ".txt"
-	tmp0[-1] = y_filename
+	y_filename = "_".join(tmp1) 
+	tmp0[-1] = y_filename + ".txt"
 	y_path = "\\".join(tmp0)
 
-    Y_load = lstm.load_Y(y_path)
+	Y_load = lstm.load_Y(y_path)
 	#print(y_path)
 	#print(filepath)
 	#print(y_filename)	
 	#sys.exit('debug')
 	
-    # run through all the samples;
+	# run through all the samples;
 	i = 0
 	print("to do down-sampling")
 	while(i < nsample):
+		# do for the x
+		
 		# down sample the current 75-chunk;
 		processed = down_sampling(X_load[i])
+		num_gen = processed.shape[0]
 		#print("sanity check\n the processed chunk has a dimension of: ", processed.shape)
+		#sys.exit('debug')
 		# insert it into output;
 		output_x = np.insert(output_x, 0 , processed, axis=0)
+		#print()
+		# do for the y;
+		classlabel = Y_load[i]
+		# hardcoding for now;
+		for i in range(0, num_gen):
+			output_y = np.insert(output_y, 0 , classlabel, axis=0)
+		#print(output_y)
+		#print(output_y.shape)
+		#sys.exit('debug')
 		i = i+1
 	# end?
 	#print(output.shape)
 	print("done processing")
-	return output_x
+	#print("x shape: ", output_x.shape)
+	#print("y shape: ", output_y.shape)
+
+	return output_x, output_y, y_filename
 
 
 
@@ -257,22 +275,17 @@ def gen_XY(rootpath):
 		low = fname.lower()
 		# training X file;
 		if (low == "x"):
-			outputX = process_one_X(txt, "txt")
-			nsample = outputX.shape[0]
+			outputX, outputY, y_filename = process_one_XY(txt)
 			savename = os.path.join(rootpath, tmpname+"_down.npy")
 			np.save(savename, outputX)
 			print("outputX size: ", outputX.shape)
-		# the label file;
-		elif (low == "y"):
-			gety = lstm.load_Y(txt)
-			classname = gety[0][0]
-			#print("classname: ", classname)
-			savename = os.path.join(rootpath, tmpname + "_down.npy")
-			# initialize new array for the Y;
-			outputY = np.empty((nsample, 1), dtype = np.int8)
-			outputY.fill(int(classname))
+			
+			savename = os.path.join(rootpath, y_filename+"_down.npy")
 			np.save(savename, outputY)
 			print("outputY size: ", outputY.shape)
+		# the label file;
+		elif (low == "y"):
+			continue
 		else:
 			return None
 
@@ -301,8 +314,12 @@ def process_block(directory_path):
 if __name__ == '__main__':
 	#prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\text-dataset\\shear"
 	prefix = "C:\\Users\\yongw4\\Desktop\\test-set\\test-set\\test-npy\\frame-75\\X_iter_01.txt"
-	
-	process_one_XY(prefix)
+	prefix = "C:\\Users\\yongw4\\Desktop\\test-set\\test-set\\test-npy\\frame-75-debug"
+	gen_XY(prefix)
+	#process_one_XY(prefix)
+	#ydummy = np.load(prefix)
+	#print(ydummy.shape)
+	#process_one_XY(prefix)
 	#process_block(prefix)
 	#process_block(directory_path)
 	'''
