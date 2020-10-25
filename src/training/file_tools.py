@@ -437,21 +437,73 @@ def write2text(array, filepath):
 	np2file.close()
 
 
+# quick way to extract the individual class from a combined npy;
+def extract_individual(rootpath, xname,  yname):
+
+	x_npy = np.load(rootpath + "\\" +  xname)
+	y_npy = np.load(rootpath + "\\" + yname)
+
+	print('entering extract_individual()')
+	for i in range(0, 4):
+		results = np.where(y_npy[:,0] == i)
+		find_index = list(results[0])
+		extract_y = y_npy[find_index, :]
+		extract_x = x_npy[find_index,:,:]
+		name_y = "\\Y_" + "classname_" + str(i) + ".npy"
+		name_x = "\\X_" + "classname_" + str(i) + ".npy"
+		np.save(rootpath + name_y, extract_y)
+		np.save(rootpath + name_x, extract_x)
 
 
+		
+
+	
 # test driver
 if __name__ == '__main__':
 	filepath =  "C:\\Users\\yongw4\\Desktop\\DEBUG.txt"
 	prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020\\train-npy\\35-frames\\Y_MAIN_balance_up.npy"
-	path = "C:\\Users\\yongw4\\Desktop\\test-set\\test-set\\test-npy\\frame-75"
+	path = "C:\\Users\\yongw4\\Desktop\\test-set\\test-set\\test-npy\\frame-35\\raw"
+	path = "C:\\Users\\yongw4\\Desktop\\test-set\\test-set\\test-npy\\frame-35\\processed"
+	
+	npy = np.load(path+"\\Y_classname_3.npy")
+	#write2text(npy, path+"\\dummy.txt")
+	#extract_individual(path, "X_combine.npy",  "Y_combine.npy")
+
+
+	'''
+	(x_combine, y_combine) = patch_nparrays(path, 0)
+	np.save(path+"\\X_combine.npy", x_combine)
+	np.save(path+"\\Y_combine.npy", y_combine)
+	'''
+	
+	'''
+	path = "C:\\Users\\yongw4\\Desktop\\test-set\\test-set\\test-npy\\frame-35\\raw"
+	ynpy=np.load(path+"\\Y_iter_01_down.npy")
+	results = np.where(ynpy[:,0] == 0)
+	print(len(list(results[0])))
+
+	results = np.where(ynpy[:,0] == 1)
+	print(len(list(results[0])))
+
+	#results = np.where(ynpy[:,0] == 2)
+	#print(results[0])
+
+	##results = np.where(ynpy[:,0] == 3)
+	#print(results[0])
+
+	print(ynpy.shape)
+	'''
+	#X_combine, Y_combine = patch_nparrays(path, 0)
+	#np.save(path+"\\X_combine.npy", X_combine)
+	#np.save(path+"\\Y_combine.npy", Y_combine)
 	
 	#X_combine, Y_combine = patch_nparrays(path, 0)
 	#xpath = path+"\\X_combine.npy"
 	#ypath = path+"\\Y_combine.npy"
 	#path = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames"
-	ynpy = np.load(path+ "\\Y_iter_02_down.npy")
-	print(ynpy.shape)
-	write2text(ynpy , path+"\\dummy.txt")
+	##ynpy = np.load(path+ "\\Y_iter_02_down.npy")
+	#print(ynpy.shape)
+	#write2text(ynpy , path+"\\dummy.txt")
 	#results = np.where(ynpy[:,0] == 1)
 	#print(results)
 	#print(results[1].shape)

@@ -245,7 +245,7 @@ def process_one_XY(filepath):
 		# do for the y;
 		classlabel = Y_load[i]
 		# hardcoding for now;
-		for i in range(0, num_gen):
+		for k in range(0, num_gen):
 			output_y = np.insert(output_y, 0 , classlabel, axis=0)
 		#print(output_y)
 		#print(output_y.shape)
@@ -258,7 +258,6 @@ def process_one_XY(filepath):
 	#print("y shape: ", output_y.shape)
 
 	return output_x, output_y, y_filename
-
 
 
 def gen_XY(rootpath):
