@@ -115,30 +115,32 @@ Here, we will briefly discuss details on how RNNs share states from the past whe
     <p> Figure: Cell State of an LSTM cell (Colah, 2015) </p>
   </div>
   * Unlike the RNN, the output of the LSTM is a function of three parameters: \\[h_{t} = f_{W}(h_{t-1}, x_{t}, c_{t}) \\]
+
 * To control specific updates in the cell, it uses these internal gates:
-  * Forget Gate
+
     <div class="center-align">
       <img width="300px", height="auto", src="images/Model/forget_gate_real.png">
       <p> Figure: Forget Gate section of the LSTM cell (Colah, 2015) </p>
     </div>
 
+  * Forget Gate
     * Goal: controls whether to forget/erase the current cell state.
       \\[f = sigmoid(W_{h}h_{t-1} + W_{x}x_{t}) \\]
     * Both past cell output \\(h_{t-1}\\) and current input \\(x_{t}\\) are stacked together and passed into a sigmoid function.
     * This outputs \\(f\\) a value between 0 to 1, acting as a "gate" to turn the cell state on or off for this cell (used later in the input gate stage). 
   
-  * Input Gate
     <div class="row center-align">
       <div class="col s12 m12 l6">
       <img width="300px", height="220px", src="images/Model/forget_gate.png">
-      <p> Figure: First half of operation, creating i, input gate value and C, a potential candidate to be added into current cell state (Colah, 2015) </p>
+      <p> Figure: First half of input gate operation, creating i, input gate value and C, a potential candidate to be added into current cell state (Colah, 2015) </p>
       </div>
       <div class="col s12 m12 l6">
       <img width="300px", height="220px", src="images/Model/input_gate.png">
-      <p> Figure: Second half of the operation, showing how cell state is updated using c,i and f (from forget gate) (Colah, 2015) </p>
+      <p> Figure: Second half of input gate operation, showing how cell state is updated using c,i and f (from forget gate) (Colah, 2015) </p>
       </div>
     </div>
 
+  * Input Gate
     * Goal: controls update of current cell state using current inputs and past cell state values.
       \\[input = sigmoid(W_{h}h_{t-1} + W_{x}x_{t}) \\]
       \\[candidate = tanh(W_{h}h_{t-1} + W_{x}x_{t}) \\]

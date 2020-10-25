@@ -13,6 +13,5 @@
 
 ##### Random Subframe Sampling
 * Sang-Ki Ko et.al (2019) suggested the use of sampling frames from video data randomly [in this paper](https://arxiv.org/pdf/1811.11436.pdf) to improve model's generalisation performance.
-* Frames from videos are sampled randomly **in order**.
-* We explored the usage of sampling frames at random from our dataset of videos. 
-* [Work in Progress]
+* We used random subframe sampling in generating variations in our test dataset when evaluating our model.
+* This simulates inconsistencies in webcam frames that may occur in online deployment (particularly for the web application).
