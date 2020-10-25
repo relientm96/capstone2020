@@ -6,7 +6,7 @@
   * Recall that a human gesture class is a combination of multiple sequential gestures.
   * Eg: The gesture Pain starts with two hands fanned out, moving from shoulder height to chest height and repeats.
   * We hypothesized that in doing these gestures, humans have a fundamental limit to the rate of doing these gestures.
-  * Approximately humans are only able to perform them at max 500 milliseconds per gesture.
+  * Thus, we hypothesized that we can have same recognition ability using half the number of frames (75 to 35 frames).
 * We decided to cut the number of frames from 75 to 35 when doing classification.
   * Using both splits to creates two separate "training data" for that gesture class. 
 * Reducing the number of frames, decreased our model's size and complexity - reducing our training time to about 40% and model recognition delay to about 1-2 seconds. 
@@ -16,8 +16,3 @@
 * Frames from videos are sampled randomly **in order**.
 * We explored the usage of sampling frames at random from our dataset of videos. 
 * [Work in Progress]
-
-##### Model Evaluation
-* To evaluate our model, we performed K-Fold Cross Validation to estimate the generalised performance of our model.
-* [Work in Progress]
-

@@ -23,7 +23,8 @@ mdFilePaths = {
     "acknowledgements"      : "markdown/acknowledgements.md",
     "introduction"          : "markdown/introduction.md",
     "humanpose"             : "markdown/humanpose.md",
-    "furtherimprovements"   : "markdown/furtherimprovements.md"
+    "furtherimprovements"   : "markdown/furtherimprovements.md",
+    "background"            : "markdown/background.md"
 }
 
 $(document).ready(function(){

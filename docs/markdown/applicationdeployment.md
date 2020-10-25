@@ -1,7 +1,6 @@
 ### Application Deployment
 
-* A large part of our project was dedicated towards building and deploying our model as both a desktop and web application.
-* That enables users to use their live camera feed to use our model and have their gestures recognised.
+* One main focus that we did as a group, was to 
 
 ##### Desktop Application
 <div class="center-align">

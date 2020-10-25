@@ -15,6 +15,8 @@ This is the technical documentation of the project **"Gesture Recognition using 
   * Performing Human Pose Estimation using OpenPose.
 * Dataset Processing:
   * How we processed, stored and augmented our data for our deep learning model.
+* Background:
+  * Introduction to Recurrent Neural Networks and Long Short Term Memory Networks.
 * Model Development:
   * How we developed our model, a sign language recognition model.
 * Further Improvements:
