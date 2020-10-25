@@ -198,23 +198,35 @@ def down_sampling(arr, meet_size = HALF):
 			return(reshape(tmp, [tmp]))
 
 # process one txt file;
-def process_one(filepath, format):
-	print("entering process_one function")
+def process_one_XY(filepath):
+	print("entering process_one_X function")
 
 	# initialize an empty np;
-	output = np.empty((0, HALF, FEATURE), dtype = np.float32)
+	output_x = np.empty((0, HALF, FEATURE), dtype = np.float32)
 
-	# txt or numpy?
-	if(format == "txt"):
-		# load the training X files;
-		X_load = lstm.load_X(filepath)
-	elif(format == "npy"):
-		X_load = np.load(filepath)
-
+	# load the training X files;
+	X_load = lstm.load_X(filepath)
+	
 	nsample = X_load.shape[0]
 	print('number of samples: ', nsample)
-		
-	# run through all the samples;
+
+	# now run its pair, the Y-label;
+	tmp0 = filepath.split("\\")
+	filename = tmp0[-1]
+	tmp = filename.split(".")[0]
+	tmp1 = tmp.split('_')
+	tmp1[0] = "Y"
+	y_filename = "_".join(tmp1) + ".txt"
+	tmp0[-1] = y_filename
+	y_path = "\\".join(tmp0)
+
+    Y_load = lstm.load_Y(y_path)
+	#print(y_path)
+	#print(filepath)
+	#print(y_filename)	
+	#sys.exit('debug')
+	
+    # run through all the samples;
 	i = 0
 	print("to do down-sampling")
 	while(i < nsample):
@@ -222,12 +234,14 @@ def process_one(filepath, format):
 		processed = down_sampling(X_load[i])
 		#print("sanity check\n the processed chunk has a dimension of: ", processed.shape)
 		# insert it into output;
-		output = np.insert(output, 0 , processed, axis=0)
+		output_x = np.insert(output_x, 0 , processed, axis=0)
 		i = i+1
 	# end?
 	#print(output.shape)
 	print("done processing")
-	return output
+	return output_x
+
+
 
 def gen_XY(rootpath):
 	print("entering gen_xy")
@@ -243,7 +257,7 @@ def gen_XY(rootpath):
 		low = fname.lower()
 		# training X file;
 		if (low == "x"):
-			outputX = process_one(txt, "txt")
+			outputX = process_one_X(txt, "txt")
 			nsample = outputX.shape[0]
 			savename = os.path.join(rootpath, tmpname+"_down.npy")
 			np.save(savename, outputX)
@@ -285,16 +299,20 @@ def process_block(directory_path):
 
 # test driver;
 if __name__ == '__main__':
-	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\text-dataset\\shear"
-	process_block(prefix)
+	#prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\text-dataset\\shear"
+	prefix = "C:\\Users\\yongw4\\Desktop\\test-set\\test-set\\test-npy\\frame-75\\X_iter_01.txt"
+	
+	process_one_XY(prefix)
+	#process_block(prefix)
+	#process_block(directory_path)
 	'''
 	# get the 75-frame training data;
 	X_75 = np.load(prefix+"\\X_combine.npy")
 	Y_75 = np.load(prefix+"\\Y_combine.npy")
 
 	# reduce the samples;
-	X_35 = process_one(prefix+"\\X_combine.npy", "npy")
-	Y_35 = process_one(prefix+"\\Y_combine.npy", "npy")
+	X_35 = process_one_X(prefix+"\\X_combine.npy", "npy")
+	Y_35 = process_one_X(prefix+"\\Y_combine.npy", "npy")
 	
 	# sanity check;
 	print("x_75 shape: ", X_75)
@@ -316,7 +334,7 @@ if __name__ == '__main__':
 	#print(y.shape)
 	
 	#TEST_PATH = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train.txt"
-	#process_one(TEST_PATH)
+	#process_one_X(TEST_PATH)
 	'''
 	# txt file with 69 rows;
 	TEST_PATH_03 = "C:\\Users\\yongw4\\Desktop\\down-sampling\\X_train_04.txt"

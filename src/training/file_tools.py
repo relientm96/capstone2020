@@ -301,10 +301,9 @@ def patch_nparrays(npy_directory, balance = 0):
 			tmp = tmp.split("_")[0].lower()
 			if(tmp == 'x'):
 				data = np.load(loc)
-				
+				print('x prior size: ', data.shape)
 				# need to balance the class distribution?
 				if(balance):
-					print('x prior size: ', data.shape)
 					# handle imbalanced distribution, if any;
 					data = balance_up_data_sample(data, proportion)
 					print("x after size: ", data.shape)
@@ -443,9 +442,24 @@ def write2text(array, filepath):
 # test driver
 if __name__ == '__main__':
 	filepath =  "C:\\Users\\yongw4\\Desktop\\DEBUG.txt"
-	prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020\\train-npy\\35-frames\\X_MAIN_balance_up.npy"
-	npy = np.load(prefix)
-	print("shape: ", npy.shape)
+	prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020\\train-npy\\35-frames\\Y_MAIN_balance_up.npy"
+	path = "C:\\Users\\yongw4\\Desktop\\test-set\\test-set\\test-npy\\frame-75"
+	
+	#X_combine, Y_combine = patch_nparrays(path, 0)
+	#xpath = path+"\\X_combine.npy"
+	#ypath = path+"\\Y_combine.npy"
+	#path = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames"
+	ynpy = np.load(path+ "\\Y_iter_02_down.npy")
+	print(ynpy.shape)
+	write2text(ynpy , path+"\\dummy.txt")
+	#results = np.where(ynpy[:,0] == 1)
+	#print(results)
+	#print(results[1].shape)
+	#print(X_combine.shape)
+	#print(Y_combine.shape)
+
+	#npy = np.load(prefix)
+	#print("shape: ", npy.shape)
 	#write2text(npy, filepath)
 	
 	'''
