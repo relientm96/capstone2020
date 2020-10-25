@@ -122,7 +122,7 @@ def cross_validate(x_raw, y_raw, kfold, LSTM_func,  par, log_path):
 		model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['acc'])
 
 		# fit the model using the training set;
-		model.fit(x_train[train_index], y_train[train_index], epochs=1, batch_size = 64, verbose = 1)
+		model.fit(x_train[train_index], y_train[train_index], epochs=30, batch_size = 64, verbose = 1)
 		
 		# evaluate the model using the validation set and store each metric;
 		scores = model.evaluate(x_train[test_index], y_train[test_index], verbose=0)
@@ -146,7 +146,7 @@ def cross_validate(x_raw, y_raw, kfold, LSTM_func,  par, log_path):
 			model.summary()
 
 	with open(log_path, 'a+') as f:
-		line1 = "compensate imbalance class distribution method: up-sampling"
+		line1 = "compensate imbalance class distribution method: stratification"
 		f.write("\n{}\n".format(line1))
 
 	with open(log_path, "a+") as f:
@@ -194,24 +194,23 @@ def exp_avg(repeats, text_x, test_y, model_path, log_path):
 		line3 = std_info
 		f.write("{}\n mean: {}\n std: {}n".format(line1, line2, line3))
 
-	
-
 
 # test driver;
 if __name__ == '__main__':
-	prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020\\train-npy\\35-frames"
-	X_train = prefix+"\\X_MAIN_balance_up.npy"
-	Y_train = prefix+"\\Y_MAIN_balance_up.npy"
+	prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020\\train-npy\\75-frames"
+	X_train = prefix+"\\X_combine.npy"
+	Y_train = prefix+"\\Y_combine.npy"
 	log_path = prefix + "\\log_cross_validate.txt"
-	kfold = 2
+	kfold = 10
 	
-	MODELS = [MODEL.lstm_tanh_one, MODEL.lstm_tanh_one,  MODEL.lstm_tanh_two, MODEL.lstm_tanh_two, MODEL.lstm_tanh_two]
+	MODELS = [MODEL.lstm_tanh_one, MODEL.lstm_tanh_one, MODEL.lstm_tanh_one,  MODEL.lstm_tanh_two, MODEL.lstm_tanh_two, MODEL.lstm_tanh_two]
 	par1 = MODEL.super_params(n_hidden=32)
 	par2 = MODEL.super_params(n_hidden=64)
-	par3 = MODEL.super_params(n_hidden=32)
-	par4 = MODEL.super_params(n_hidden=64)
-	par5 = MODEL.super_params(n_hidden=128)
-	PARAMS = [par1, par2, par3, par4, par5]
+	par3 = MODEL.super_params(n_hidden=128)
+	par4 = MODEL.super_params(n_hidden=32)
+	par5 = MODEL.super_params(n_hidden=64)
+	par6 = MODEL.super_params(n_hidden=128)
+	PARAMS = [par1, par2, par3, par4, par5, par6]
 
 	for i in range(0, len(MODELS)):
 		cross_validate(X_train, Y_train, kfold, MODELS[i], PARAMS[i], log_path)
