@@ -48,10 +48,8 @@ lstm_tools.check_gpu()
 #----------------------------------------------------------------------
 # path list;
 #----------------------------------------------------------------------
-prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020"
-noframes = "\\models\\35-frames"
-nframes = str(35)
-tmpname = prefix + noframes 
+prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames\\training-set-01"
+tmpname = prefix + "\\models" 
 # final saved model, if there's no early stopping;
 filepath = tmpname + "\\fmodel.h5"
 
@@ -74,22 +72,25 @@ batch_size = 64
 # - X.txt; the keypoints;
 # - Y.txt; the corresponding labels;
 #----------------------------------------------------------------------
-tmpname = prefix +  "\\train-npy\\35-frames"
-np_X = tmpname+  "\\X_MAIN.npy"
-np_Y = tmpname+  "\\Y_MAIN.npy"
+tmpname = prefix 
+np_X = tmpname+  "\\X_MAIN_balance_up.npy"
+np_Y = tmpname+  "\\Y_MAIN_balance_up.npy"
 
 X_monstar = np.load(np_X)
 Y_monstar = np.load(np_Y)
 
 # load the np arrays and split them into val and train sets;
-x_train, x_val, y_train, y_val =  train_test_split(X_monstar, Y_monstar, test_size=0.2, random_state=42, shuffle = True, stratify = Y_monstar)
+x_train, x_val, y_train, y_val =  train_test_split(X_monstar, Y_monstar, test_size=0.333, random_state=42, shuffle = True, stratify = Y_monstar)
 
 #----------------------------------------------------------------------
 # creating the model;
 #----------------------------------------------------------------------
 print('------ LSTM Model ---------')
 print("building the model")
-model = MODEL.lstm_relu_two(x_train, y_train)
+#model = MODEL.lstm_relu_two(x_train, y_train)
+
+par = MODEL.super_params(n_hidden=64)
+model = MODEL.lstm_tanh_one(x_train, y_train, par)
 
 #----------------------------------------------------------------------
 # start the training;
@@ -108,9 +109,10 @@ model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['a
 #checkpoint = ModelCheckpoint(checkpoints_path , verbose=1, monitor='acc',save_best_only=True, mode='max')  
 checkpoint = ModelCheckpoint(checkpoints_path , verbose=1, monitor='acc',save_best_only=False, mode='max', save_freq='epoch')  
 reduce_lr_loss = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=10, verbose=1, min_delta=1e-4, mode='min')
-earlyStopping = EarlyStopping(monitor='val_acc',patience=100,verbose=1,mode='max')
-callbacks_list = [earlyStopping ,checkpoint, reduce_lr_loss]
-history = model.fit(x_train, y_train, epochs=200, batch_size = batch_size, verbose = 2, callbacks = callbacks_list, validation_data = (x_val, y_val))
+#earlyStopping = EarlyStopping(monitor='val_acc',patience=100,verbose=1,mode='max')
+#callbacks_list = [earlyStopping ,checkpoint, reduce_lr_loss]
+callbacks_list = [checkpoint, reduce_lr_loss]
+history = model.fit(x_train, y_train, epochs=80, batch_size = batch_size, verbose = 2, callbacks = callbacks_list, validation_data = (x_val, y_val))
 model.summary()
 
 # save the results;
@@ -131,6 +133,26 @@ try:
 except OSError as e:
 	print("error in loading the saved training results: ", e)
 	print("\n")
+
+
+# list all data in history
+print(history.history.keys())
+# summarize history for accuracy
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
+# summarize history for loss
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
 
 
 # for testing and evaluation;

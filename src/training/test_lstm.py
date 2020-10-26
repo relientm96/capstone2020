@@ -122,7 +122,9 @@ def cross_validate(x_raw, y_raw, kfold, LSTM_func,  par, log_path):
 		model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['acc'])
 
 		# fit the model using the training set;
-		model.fit(x_train[train_index], y_train[train_index], epochs=30, batch_size = 64, verbose = 1)
+		earlyStopping = EarlyStopping(monitor='val_acc',patience=30,verbose=1,mode='max')
+		callbacks_list = [earlyStopping]
+		model.fit(x_train[train_index], y_train[train_index], epochs=500, batch_size = 64, verbose = 1, callbacks=callback_list)
 		
 		# evaluate the model using the validation set and store each metric;
 		scores = model.evaluate(x_train[test_index], y_train[test_index], verbose=0)
@@ -167,7 +169,7 @@ def cross_validate(x_raw, y_raw, kfold, LSTM_func,  par, log_path):
 # ----------------------------------------------------------------------------
 def evaluate_model(text_x, test_y, model_path):
 	model = load.model(model_path)
-	_, accuracy = model.evaluate(test_x, test_y, batch_size=64, verbose=0)
+	_, accuracy = model.evaluate(test_x, test_y, verbose=0)
 	return accuracy
 
 # summarize scores
@@ -177,7 +179,7 @@ def summarize_results(scores):
 	print('Accuracy: %.3f%% (+/-%.3f)' % (m, s))
 	return m,s
 
-def exp_avg(repeats, text_x, test_y, model_path, log_path):
+def exp_avg(repeats, text_x, test_y, model_path, log_path, classtype):
 	# repeat experiment
 	scores = list()
 	for r in range(repeats):
@@ -185,18 +187,65 @@ def exp_avg(repeats, text_x, test_y, model_path, log_path):
 		score = score * 100.0
 		print('>#%d: %.3f' % (r+1, score))
 		scores.append(score)
+	
 	# summarize results
 	mean_info ,std_info = summarize_results(scores)	
+
 	# logging the model stats;
 	with open(log_path, "a+") as f:
 		line1 = datetime.now().strftime("%Y-%m-%d %H:%M")
-		line2 = mean_info
-		line3 = std_info
-		f.write("{}\n mean: {}\n std: {}n".format(line1, line2, line3))
+		line2 = "classname: " + classtype
+		line3 = mean_info
+		line4 = std_info
+		f.write("\n{}\n {}\n mean: {}\n std: {}\n".format(line1, line2, line3, line4))
+
+
+def drive_exp_avg(prefix, model_path, log_path):
+	#prefix_test = "C:\\Users\\yongw4\\Desktop\\test-set\\test-set\\test-npy\\frame-35\\processed\\classes"
+
+	test_X = []
+	test_Y = []
+	curate_list = []
+	length = 0
+	for root, dirs, files in os.walk(prefix_test, topdown=False):
+		for name in files:
+			tmp0 = name.split("_")
+			tmp = tmp0[0].lower()
+			classnum = tmp0[-1].split(".")[-2]
+			if(length < 4):
+				curate_list.append(classnum)
+			length = length + 1
+			if(tmp == "x"):
+				loc = os.path.join(root,name)
+				test_X.append(loc)
+			elif(tmp == "y"):
+				loc = os.path.join(root,name)
+				test_Y.append(loc)
+			else:
+				continue
+
+	#---------------------------------------
+	# evaluating the test set;
+	#---------------------------------------
+	model = load.model(model_path)
+	# logging the model stats;
+	with open(log_path, 'a+') as f:
+		with redirect_stdout(f):
+			model.summary()
+
+	for i in range(0, len(test_X)):
+		exp_avg(30, text_X[i], test_Y[i], model_path, log_path, curate_list[i])
 
 
 # test driver;
 if __name__ == '__main__':
+    
+
+    '''
+	#---------------------------------------
+	# cross validation
+	#---------------------------------------
+	
 	prefix = "C:\\Users\\yongw4\\Desktop\\train-21-10-2020\\train-21-10-2020\\train-npy\\75-frames"
 	X_train = prefix+"\\X_combine.npy"
 	Y_train = prefix+"\\Y_combine.npy"
@@ -214,4 +263,10 @@ if __name__ == '__main__':
 
 	for i in range(0, len(MODELS)):
 		cross_validate(X_train, Y_train, kfold, MODELS[i], PARAMS[i], log_path)
+	'''
+
+
+
+
+
 
