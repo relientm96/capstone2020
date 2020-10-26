@@ -19,6 +19,7 @@ if MODEL_35:
 else:
 	modelpath = "../training/training-files/frame-75/iter-01/fmodel.h5"
 	window_Width = 75
+
 ############### INITIALIZATIONS ##################
 
 #### Tensorflow Imports ####
@@ -59,7 +60,7 @@ dictOfSigns = {
 	1:"help", 
 	2:"pain", 
 	3:"hospital", 
-	4:"thumbs"
+	4:"pain"
 }
 
 # Reference object for LSTM Model

@@ -18,7 +18,7 @@ const dictOfSigns = {
 	1:"help", 
 	2:"pain", 
 	3:"hospital", 
-	4:"thumbs"
+	4:"pain"
 }
 // Socketio obj
 const socket = io();

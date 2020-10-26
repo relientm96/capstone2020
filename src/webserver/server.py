@@ -54,14 +54,7 @@ class VideoTransformTrack(MediaStreamTrack):
 
         if "openpose" in self.transform:
             image = frame.to_ndarray(format="bgr24")
-            # We apply affline transform to extrapolate edges for openpose
-            '''
-            img = tf.keras.preprocessing.image.apply_affine_transform(
-                x, theta=0, tx=0, ty=0, shear=0, zx=1.2, zy=1.2, row_axis=0, col_axis=0,
-                channel_axis=2, fill_mode='nearest', cval=0.0, order=1
-            )
-            '''
-    
+
             datum = op.Datum()
             datum.cvInputData = image
             opWrapper.emplaceAndPop([datum])
