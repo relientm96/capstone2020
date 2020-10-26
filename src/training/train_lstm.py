@@ -7,6 +7,7 @@ import tensorflow as tf
 from tensorflow import keras
 #import matplotlib.pyplot as plt
 import math
+import matplotlib.pyplot as plt
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense, Dropout,LSTM
 
@@ -45,120 +46,131 @@ import LSTM_model as MODEL
 # check for gpu cuda access;
 lstm_tools.check_gpu()
 
-#----------------------------------------------------------------------
-# path list;
-#----------------------------------------------------------------------
-prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames\\training-set-01"
-tmpname = prefix + "\\models" 
-# final saved model, if there's no early stopping;
-filepath = tmpname + "\\fmodel.h5"
 
-# model checkpoints
-checkpoints_path = tmpname + '\\model-{epoch:03d}-{acc:03f}-{val_acc:03f}.h5'
+def beta_model(X_monstar, Y_monstar, stats_path, checkpoints_path, filepath, validate, epochs = 48):
+	
+	x_train = X_monstar
+	y_train = Y_monstar
+	if(validate):
+		# load the np arrays and split them into val and train sets;
+		x_train, x_val, y_train, y_val =  train_test_split(X_monstar, Y_monstar, test_size=0.333, random_state=42, shuffle = True, stratify = Y_monstar)
+	
+	#----------------------------------------------------------------------
+	# creating the model;
+	#----------------------------------------------------------------------
+	print('------ LSTM Model ---------')
+	print("building the model")
+	#model = MODEL.lstm_relu_two(x_train, y_train)
 
-# statistics path
-stats_path = tmpname + '\\cudnnlstm_saved_model_stats_01.p'
+	par = MODEL.super_params(n_hidden=64)
+	model = MODEL.lstm_tanh_one(x_train, y_train, par)
 
-#----------------------------------------------------------------------
-# constants; 
-# 1. the hyperparameters;
-#----------------------------------------------------------------------
-n_hidden = 128 # hidden layer number of features;
-n_classes = 4  # number of sign classes;
-batch_size = 64
+	#----------------------------------------------------------------------
+	# start the training;
+	# sources;
+	# 1. early stopping; https://stackoverflow.com/questions/48285129/saving-best-model-in-keras/48286003
+	# 1. https://stackoverflow.com/questions/43906048/which-parameters-should-be-used-for-early-stopping
+	# 2. model checkpoints; https://faroit.com/keras-docs/1.2.2/callbacks/#modelcheckpoint
+	# 3. potential solution to keyerrors; https://medium.com/@kegui/fixing-the-fixing-the-keyerror-acc-and-keyerror-val-acc-errors-in-keras-f14c6df5baf6
+	#----------------------------------------------------------------------
+	# the following only works for tanh_two_layers()
+	#model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['acc'])
+	
+	# the following only works for tanh_two_layers()
+	#checkpoint = ModelCheckpoint(checkpoints_path , verbose=1, monitor='acc',save_best_only=True, mode='max')  
+	
+	if(validate):
+		opt = tf.keras.optimizers.Adam(lr=1e-3, decay=1e-5)
+	
+		model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['acc'])
+		checkpoint = ModelCheckpoint(checkpoints_path , verbose=1, monitor='acc',save_best_only=False, mode='max', save_freq='epoch')  
 
-#----------------------------------------------------------------------
-# LOADING THE DATA:
-# - X.txt; the keypoints;
-# - Y.txt; the corresponding labels;
-#----------------------------------------------------------------------
-tmpname = prefix 
-np_X = tmpname+  "\\X_MAIN_balance_up.npy"
-np_Y = tmpname+  "\\Y_MAIN_balance_up.npy"
+		reduce_lr_loss = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=10, verbose=1, min_delta=1e-4, mode='min')
+		#earlyStopping = EarlyStopping(monitor='val_acc',patience=100,verbose=1,mode='max')
+		#callbacks_list = [earlyStopping ,checkpoint, reduce_lr_loss]
+		callbacks_list = [checkpoint, reduce_lr_loss]
+		history = model.fit(x_train, y_train, epochs=epochs, batch_size = 64, verbose = 2, callbacks = callbacks_list, validation_data = (x_val, y_val))
+		model.summary()
+	else:
+		print("HELLO")
+		opt = tf.keras.optimizers.Adam(lr=1e-3, decay=1e-5)
+		
+		model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['acc'])
+		reduce_lr_loss = ReduceLROnPlateau(monitor='loss', factor=0.1, patience=10, verbose=1, min_delta=1e-4, mode='min')
+		checkpoint = ModelCheckpoint(checkpoints_path , verbose=1, monitor='acc',save_best_only=False, mode='max', save_freq='epoch')  
+		callbacks_list = [checkpoint, reduce_lr_loss]
+		history = model.fit(x_train, y_train, epochs=epochs, batch_size = 64, verbose = 2, callbacks = callbacks_list)
+		model.summary()
 
-X_monstar = np.load(np_X)
-Y_monstar = np.load(np_Y)
+	# save the results;
+	model.save(filepath)
+	print("the final trained model has been saved as: ", filepath)
+	# Get the dictionary containing each metric and the loss for each epoch, and save it;
+	history_dict = history.history
+	# done everything? save it then;
+	with open(stats_path, 'wb+') as fp:
+		pickle.dump(history_dict, fp, protocol=pickle.HIGHEST_PROTOCOL)
+		print("the dictionary of statistics has been saved;\n")
+	try:
+		# get the dictionary;
+		with open(stats_path, 'rb') as fp:
+			stats = pickle.load(fp)
+			print(stats)
+	except OSError as e:
+		print("error in loading the saved training results: ", e)
+		print("\n")
 
-# load the np arrays and split them into val and train sets;
-x_train, x_val, y_train, y_val =  train_test_split(X_monstar, Y_monstar, test_size=0.333, random_state=42, shuffle = True, stratify = Y_monstar)
-
-#----------------------------------------------------------------------
-# creating the model;
-#----------------------------------------------------------------------
-print('------ LSTM Model ---------')
-print("building the model")
-#model = MODEL.lstm_relu_two(x_train, y_train)
-
-par = MODEL.super_params(n_hidden=64)
-model = MODEL.lstm_tanh_one(x_train, y_train, par)
-
-#----------------------------------------------------------------------
-# start the training;
-# sources;
-# 1. early stopping; https://stackoverflow.com/questions/48285129/saving-best-model-in-keras/48286003
-# 1. https://stackoverflow.com/questions/43906048/which-parameters-should-be-used-for-early-stopping
-# 2. model checkpoints; https://faroit.com/keras-docs/1.2.2/callbacks/#modelcheckpoint
-# 3. potential solution to keyerrors; https://medium.com/@kegui/fixing-the-fixing-the-keyerror-acc-and-keyerror-val-acc-errors-in-keras-f14c6df5baf6
-#----------------------------------------------------------------------
-opt = tf.keras.optimizers.Adam(lr=1e-3, decay=1e-5)
-# the following only works for tanh_two_layers()
-#model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['acc'])
-model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['acc'])
-
-# the following only works for tanh_two_layers()
-#checkpoint = ModelCheckpoint(checkpoints_path , verbose=1, monitor='acc',save_best_only=True, mode='max')  
-checkpoint = ModelCheckpoint(checkpoints_path , verbose=1, monitor='acc',save_best_only=False, mode='max', save_freq='epoch')  
-reduce_lr_loss = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=10, verbose=1, min_delta=1e-4, mode='min')
-#earlyStopping = EarlyStopping(monitor='val_acc',patience=100,verbose=1,mode='max')
-#callbacks_list = [earlyStopping ,checkpoint, reduce_lr_loss]
-callbacks_list = [checkpoint, reduce_lr_loss]
-history = model.fit(x_train, y_train, epochs=80, batch_size = batch_size, verbose = 2, callbacks = callbacks_list, validation_data = (x_val, y_val))
-model.summary()
-
-# save the results;
-model.save(filepath)
-print("the final trained model has been saved as: ", filepath)
-# Get the dictionary containing each metric and the loss for each epoch, and save it;
-history_dict = history.history
-# done everything? save it then;
-with open(stats_path, 'wb+') as fp:
-	pickle.dump(history_dict, fp, protocol=pickle.HIGHEST_PROTOCOL)
-	print("the dictionary of statistics has been saved;\n")
-
-try:
-	# get the dictionary;
-	with open(stats_path, 'rb') as fp:
-		stats = pickle.load(fp)
-		print(stats)
-except OSError as e:
-	print("error in loading the saved training results: ", e)
-	print("\n")
-
-
-# list all data in history
-print(history.history.keys())
-# summarize history for accuracy
-plt.plot(history.history['accuracy'])
-plt.plot(history.history['val_accuracy'])
-plt.title('model accuracy')
-plt.ylabel('accuracy')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper left')
-plt.show()
-# summarize history for loss
-plt.plot(history.history['loss'])
-plt.plot(history.history['val_loss'])
-plt.title('model loss')
-plt.ylabel('loss')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper left')
-plt.show()
+	if(validate):
+		# list all data in history
+		print(stats.keys())
+		# summarize history for accuracy
+		plt.plot(stats['acc'])
+		plt.plot(stats['val_acc'])
+		plt.title('Model Accuracy')
+		plt.ylabel('acc')
+		plt.xlabel('epoch')
+		plt.legend(['train', 'test'], loc='upper left')
+		plt.grid(True)
+		plt.show()
+		# summarize history for loss
+		plt.plot(stats['loss'])
+		plt.plot(stats['val_loss'])
+		plt.title('Model Loss')
+		plt.ylabel('loss')
+		plt.xlabel('epoch')
+		plt.legend(['train', 'test'], loc='upper left')
+		plt.grid(True)
+		plt.show()
 
 
-# for testing and evaluation;
+# test driver
+if __name__ == '__main__':
 
-'''
-# load the model
-	print("the model has been trained before, so reload it")
-	model = load_model(filepath)
-'''
+	prefix = "C:\\Users\\yongw4\\Desktop\\AUSLAN-DATABASE-YES\\train-21-10-2020\\train-npy\\35-frames\\training-set-01"
+
+	tmpname = prefix + "\\deploy-models" 
+
+	# final saved model, if there's no early stopping;
+	filepath = tmpname + "\\fmodel.h5"
+
+	# model checkpoints
+	checkpoints_path = tmpname + '\\model-{epoch:03d}-{acc:03f}-{val_acc:03f}.h5'
+
+	checkpoints_path = tmpname + '\\model-{epoch:03d}-{acc:03f}.h5'
+
+	# statistics path
+	stats_path = tmpname + '\\cudnnlstm_saved_model_stats_01.p'
+
+	tmpname = prefix 
+	np_X = tmpname+  "\\X_MAIN_balance_up.npy"
+	np_Y = tmpname+  "\\Y_MAIN_balance_up.npy"
+
+	X_monstar = np.load(np_X)
+	Y_monstar = np.load(np_Y)
+	print("x shape: ", X_monstar.shape)
+	print("y shape: ", Y_monstar.shape)
+
+	validate = 0
+	epochs = 43
+	beta_model(X_monstar, Y_monstar, stats_path, checkpoints_path, filepath, validate, epochs)
+	#beta_model(X_monstar, Y_monstar, stats_path, checkpoints_path, filepath)
