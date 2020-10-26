@@ -17,6 +17,12 @@
 * Thus to run our application, we decided to develop and deploy our system using two Virtual machines provided by the Melbourne School of Engineering (MSE) IT Department.
 
 ##### Rolling Window
+
+<div class="center-align">
+  <img width="800px", height="auto" src="images/SystemApplication/rollingwindow.png">
+  <p> Figure: Illustration of how the rolling window works - acting as a shift register of key-points </p>
+</div>
+
 * Unlike offline predictions, our application requires specialised data-structures that can store live key-points for online prediction.
 * Thus, we decided to use the **rolling window** data structure, which acts as a shift register of key-points.
 * This data structure is defined as as python class:
