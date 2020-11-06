@@ -26,8 +26,9 @@ else:
 
 # Here, we can import tensorflow + keras + Machine Learning Libraries to load models
 import tensorflow as tf
-
 gpus = tf.config.experimental.list_physical_devices('GPU')
+
+'''
 if gpus:
 	try:
 		# Currently, memory growth needs to be the same across GPUs
@@ -38,6 +39,25 @@ if gpus:
 	except RuntimeError as e:
 		# Memory growth must be set before GPUs have been initialized
 		print(e)
+'''
+
+memLimit = 256 #128, 256, 512, 1024 
+if gpus:
+	# Restrict TensorFlow to only allocate 1GB of memory on the first GPU
+	try:
+		tf.config.experimental.set_virtual_device_configuration(
+			gpus[0],
+			[tf.config.experimental.VirtualDeviceConfiguration(memory_limit=16)])
+		logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+		print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+	except RuntimeError as e:
+		# Virtual devices must be set before GPUs have been initialized
+		print("Error occured! {}".format(e))
+	except Exception as e:
+		print(str(e))
+else:
+	print("no gpus?")
+
 
 from tensorflow import keras
 from tensorflow.keras.models import load_model
@@ -103,12 +123,8 @@ def offset_translation(array, reference):
 			array; must be in the  shape of (1, number_of_joints, 3);
 			refrence: the refrence to be subtracted from; presumable the shoulder;
 	'''
-	#print('shape: ', array.shape)
 	broadcast = np.array([reference, 0, 0], dtype=np.float32)
 	shifted = array-broadcast
-	#print("original: ", array)
-	#print("shifted: ", shifted)
-	#sys.exit('debug')
 	return shifted
 
 def removeConfidenceNumpy(datum):
@@ -148,28 +164,40 @@ def translate(datum):
 	except Exception as e:
 		# Test will return an error if no one is seen as index[0] does not exists
 		# Notify user that no one is seen
-		word = "Nobody Here!"
-		return word
+		word = "No hands!"
+		return word, 0 
+
+	# Check if hands are detected
+	lefthandempty  = np.count_nonzero(datum.handKeypoints[0] == -1)
+	righthandempty = np.count_nonzero(datum.handKeypoints[1] == -1)
+	pp.pprint(datum.handKeypoints[0][:,0:2])
+	#pp.pprint(datum.handKeypoints[1])
+	print(lefthandempty, righthandempty)
+	if (lefthandempty > 21) or (righthandempty > 21): 
+		return "No hands!", -100
+
 	# Continue to process if we can detect  
 	kp = removeConfidenceNumpy(datum)
 	# Add to rolling window
 	if r.addPoint(kp) == False:
 		# Unable to append to keypoints as issue with data shape
-		return 'Error'
+		return 'No hands!', 0
 	# Reshape for model to read
 	reshaped_keypoints = r.getPoints().reshape((1, window_Width, numbJoints))
 	# Load Keras Model
 	global lstm 
 	try:
 		predictions = lstm.predict([reshaped_keypoints])
+		'''
 		if abs( (np.max(predictions) - np.min(predictions)) ) < 0.9 :
 			r.resetWindow()
+		'''
 		guess = np.argmax(predictions)
 		word = dictOfSigns[guess] + "-" + str(round(float(np.max(predictions)),2))
 	except Exception as e:
 		print("Error in prediction", e)
 		word = 'Error'
-	return word
+	return word, np.max(predictions)
 
 # test driver;
 if __name__ == '__main__':
